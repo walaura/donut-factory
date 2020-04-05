@@ -5,6 +5,14 @@
 	-webkit-user-drag: none;
 	margin: 0;
 	padding: 0;
+	-webkit-appearance: none;
+	border: none;
+	background: transparent;
+	box-sizing: border-box;
+}
+
+button {
+	cursor: pointer;
 }
 
 :root {
@@ -17,6 +25,9 @@
 	--radius: 0.66em;
 	--space-h: 0.66em;
 	--space-v: 0.33em;
+	--pressable: 2.5em;
+	--shadow-1: 0 0 0 1px rgba(255, 255, 255, 0.5),
+		0 0.25em 0.25em 0.25em rgba(0, 0, 0, 0.05);
 }
 
 #game {
@@ -129,22 +140,22 @@ x-window {
 	border-radius: var(--radius);
 	display: grid;
 	grid-template-rows: min-content 1fr;
-	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5),
-		0 0.25em 0.25em 0.25em rgba(0, 0, 0, 0.05);
+	box-shadow: var(--shadow-1);
 	overflow: hidden;
 	width: 20em;
 	max-height: 30em;
 
 	x-window-header {
-		--size: 3em;
 		font-weight: 600;
 		transform: lowercase;
 		background: var(--bg-light);
 		color: var(--bg-dark);
 		padding: var(--space-v) 0;
-		min-height: calc(var(--size) * 0.75);
+		min-height: var(--pressable);
 		display: grid;
-		grid-template-columns: var(--size) 1fr var(--size);
+		grid-template-columns: calc(var(--pressable) * 1.25) 1fr calc(
+				var(--pressable) * 1.25
+			);
 		align-items: center;
 		justify-content: center;
 		margin-top: -2px;
@@ -164,5 +175,62 @@ x-window {
 		background: var(--bg);
 		overflow: scroll;
 		padding: calc(var(--space-v) * 2) var(--space-h);
+	}
+}
+
+x-dock {
+	position: fixed;
+	top: calc(var(--space-h) * 2);
+	right: calc(var(--space-h) * 2);
+	display: grid;
+	grid-auto-flow: column;
+	grid-gap: calc(var(--space-h) * 2);
+	button {
+		&:hover {
+			filter: brightness(0.95);
+		}
+	}
+}
+
+x-dock-panel,
+[as='x-dock-panel'] {
+	background: var(--bg);
+	display: grid;
+	border-radius: 1000em;
+	height: var(--pressable);
+	grid-auto-flow: column;
+	grid-template-rows: 1fr;
+	align-items: stretch;
+	box-shadow: var(--shadow-1);
+	& > * + * {
+		border-left: 1px solid var(--bg-light);
+	}
+	& > *:first-child {
+		padding-left: calc(var(--pressable) / 3.5);
+		padding-right: calc(var(--pressable) / 5);
+	}
+	& > *:last-child {
+		padding-right: calc(var(--pressable) / 3.5);
+		padding-left: calc(var(--pressable) / 5);
+	}
+}
+
+xdp-text {
+	display: grid;
+	align-items: center;
+	justify-content: center;
+	padding: 0 var(--space-h);
+}
+
+xdp-emoji,
+[as='xdp-emoji'] {
+	min-width: calc(var(--pressable) * 1.25);
+	display: grid;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	vertical-align: middle;
+	> span {
+		transform: translateX(10%) translateY(-10%) scale(1.5);
 	}
 }

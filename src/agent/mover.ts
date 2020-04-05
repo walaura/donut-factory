@@ -1,7 +1,7 @@
 import { Agent, AgentStateType, MoverAgent } from '../defs';
 import { MsgActions, postFromSw } from '../helper/message';
 import { xy, xy2arr } from '../helper/xy';
-import { findAgent, mutateAgent } from '../loop/loop';
+import { findAgent, mutateAgent, pauseGame } from '../loop/loop';
 import { Handler, Road, UnitAgent, WithXY } from './../defs';
 const d3 = require('d3-polygon');
 
@@ -147,7 +147,7 @@ export const moverHandler: Handler<MoverAgent> = (tick, state, gameState) => {
 		if (state.held >= 10) {
 			state.path = [Object.values(gameState.roads)[0].end, moveTo];
 			console.log('pathing');
-			postFromSw({ action: MsgActions.PAUSE });
+			pauseGame();
 		}
 	}
 	if (atPos(state, moveTo)) {

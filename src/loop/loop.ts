@@ -23,12 +23,19 @@ export const mutateAgent = <S extends Agent = Agent>(
 	agentMutations.push({ agentId, mutation });
 };
 
-export const mutateGame = (mutation: GameMutation) => {
+const mutateGame = (mutation: GameMutation) => {
 	gameMutations.push(mutation);
 };
 
 export const findAgent = (id: ID, gameState: GameState): Agent => {
 	return gameState.agents[id];
+};
+
+export const pauseGame = () => {
+	mutateGame((state) => ({
+		...state,
+		paused: true,
+	}));
 };
 
 export const addAgent = (agent: Agent) => {

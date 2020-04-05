@@ -133,7 +133,6 @@ const MkWindow = (
 
 const Board = (state: GameState) =>
 	html`
-		${windows.map((w) => w(state))}
 		<svg
 			width=${state.width * 10}
 			height=${state.height * 10}
@@ -141,31 +140,71 @@ const Board = (state: GameState) =>
 		>
 			${Object.values(state.roads).map(MkRoad)}}
 		</svg>
-		<button
-			@click=${() => {
-				windows.push(MkWindow('🌸', 'All state', (state) => pretty(state)));
-			}}
-		>
-			show global state
-		</button>
 		${Object.values(state.agents).map((a) => MkAgent(a, state))}
+		${windows.map((w) => w(state))} ${Tools(state)}
 	`;
 
 let windows = [];
-windows.push(
-	MkWindow('📅', 'Date', (state: GameState) => {
-		let date = new Date(state.date);
-		const dtf = new Intl.DateTimeFormat('en', {
-			year: 'numeric',
-			month: 'short',
-			day: '2-digit',
-			hour: 'numeric',
-			minute: 'numeric',
-			second: 'numeric',
-		});
-		return dtf.format(date);
-	})
-);
+
+//const Button = () =>
+
+const Tools = (state: GameState) => {
+	let date = new Date(state.date);
+	const dtf = new Intl.DateTimeFormat('en', {
+		year: 'numeric',
+		month: 'short',
+		day: '2-digit',
+	});
+	const clock = new Intl.DateTimeFormat('en', {
+		hour: 'numeric',
+		minute: 'numeric',
+	});
+
+	return html`<x-dock>
+		<button
+			as="x-dock-panel"
+			@click=${() => {
+				windows.push(
+					MkWindow('📅', 'Date', (state: GameState) => {
+						let date = new Date(state.date);
+						const dtf = new Intl.DateTimeFormat('en', {
+							year: 'numeric',
+							month: 'short',
+							day: '2-digit',
+							hour: 'numeric',
+							minute: 'numeric',
+							second: 'numeric',
+						});
+						return dtf.format(date);
+					})
+				);
+			}}
+		>
+			<xdp-emoji><span>📆</span></xdp-emoji>
+			<xdp-text>${dtf.format(date)}</xdp-text>
+			<xdp-text>${clock.format(date)}</xdp-text>
+		</button>
+		<x-dock-panel>
+			<button
+				as="xdp-emoji"
+				@click=${() => {
+					console.log('not yet lol');
+				}}
+			>
+				<span>${state.paused ? '▶️' : '⏸'}</span>
+			</button>
+			<button
+				@click=${() => {
+					windows.push(MkWindow('🤓', 'All state', (state) => pretty(state)));
+				}}
+				title="Show global state"
+				as="xdp-emoji"
+			>
+				<span>🤓</span>
+			</button>
+		</x-dock-panel>
+	</x-dock>`;
+};
 
 const renderGame = (state: GameState) => {
 	render(Board(state), game);
