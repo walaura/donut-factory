@@ -1,18 +1,14 @@
-import {
-	GameState,
-	AgentState,
-	Agent as AgentT,
-	WithXY,
-	Road,
-	AgentType,
-} from './defs';
-import './game.css';
-
-import { html, svg, render, directive, TemplateResult } from 'lit-html';
+import { findAgent } from './loop/loop';
+import { html, render, svg, TemplateResult } from 'lit-html';
 //@ts-ignore
 import { styleMap } from 'lit-html/directives/style-map.js';
+import { Agent, AgentStateType, GameState, Road, WithXY, ID } from './defs';
+import './game.css';
+
 //@ts-ignore
 const { logger, game, statusbaar } = window;
+
+const pretty = (str) => html`<pre>${JSON.stringify(str, null, 2)}</pre>`;
 
 const icons = {
 	exports: '📤',
@@ -20,7 +16,7 @@ const icons = {
 	imports: '📥',
 };
 
-const Chip = (key: keyof typeof icons, state: AgentState) => {
+const Chip = (key: keyof typeof icons, state: Agent) => {
 	if (!state[key]) {
 		return null;
 	}
@@ -31,40 +27,39 @@ const Chip = (key: keyof typeof icons, state: AgentState) => {
 	</div>`;
 };
 
-const Info = (agent: AgentT) => {
-	if (agent.state.type !== AgentType.MOVER) {
+const Info = (agentId: ID, gameState: GameState) => {
+	const agent = findAgent(agentId, gameState);
+	if (agent.type !== AgentStateType.MOVER) {
 		return;
 	}
-	if (agent.state.path.length === 0) {
+	if (agent.path.length === 0) {
 		return html`stuck or loading/unloading`;
 	}
-	if (agent.state.held <= 0) {
-		return html`On their way to ${agent.state.from[0].state.emoji}`;
+	if (agent.held <= 0) {
+		return html`On their way to ${findAgent(agent.from[0], gameState).emoji}`;
 	} else {
-		return html`delivering ${agent.state.held} boxes to
-		${agent.state.to[0].state.emoji}`;
+		return html`delivering ${agent.held} boxes to
+		${findAgent(agent.from[1], gameState).emoji}`;
 	}
 };
 
-const Agent = (agent: AgentT, gameState: GameState) => {
-	const { state } = agent;
+const MkAgent = (agent: Agent, gameState: GameState) => {
 	const style = styleMap({
-		transform: `translate(${state.x * 10}px, ${
-			state.y * 10
+		transform: `translate(${agent.x * 10}px, ${
+			agent.y * 10
 		}px) translate(-50%, -50%)`,
 	});
 	const status = Object.keys(icons)
-		.map((key) => Chip(key as keyof typeof icons, state))
+		.map((key) => Chip(key as keyof typeof icons, agent))
 		.filter(Boolean);
 
-	const agentIndex = gameState.agents.indexOf(agent);
 	let controller = MkWindow(
-		state.emoji,
+		agent.emoji,
 		'Agent info',
 		(gameState) =>
-			html`${Info(gameState.agents[agentIndex])}
+			html`${Info(agent.id, gameState)}
 				<hr />
-				<pre>${JSON.stringify(gameState.agents[agentIndex], null, 2)}</pre>`
+				<pre>${agent}</pre>`
 	);
 	return html`<x-unit
 		@click=${() => {
@@ -72,17 +67,17 @@ const Agent = (agent: AgentT, gameState: GameState) => {
 		}}
 		style="${style}"
 	>
-		<x-moji>${state.emoji}</x-moji>
+		<x-moji>${agent.emoji}</x-moji>
 		${status && html`<x-status>${status}</x-status>`}
 	</x-unit>`;
 };
 
-const MkRoad = ({ state }: Road) =>
+const MkRoad = (road: Road) =>
 	svg`<line
-		x1="${state.start.x * 10}"
-		y1="${state.start.y * 10}"
-		x2="${state.end.x * 10}"
-		y2="${state.end.y * 10}"
+		x1="${road.start.x * 10}"
+		y1="${road.start.y * 10}"
+		x2="${road.end.x * 10}"
+		y2="${road.end.y * 10}"
 		stroke="black"
 	/>`;
 
@@ -144,9 +139,16 @@ const Board = (state: GameState) =>
 			height=${state.height * 10}
 			xmlns="http://www.w3.org/2000/svg"
 		>
-			${state.roads.map(MkRoad)}}
+			${Object.values(state.roads).map(MkRoad)}}
 		</svg>
-		${state.agents.map((a) => Agent(a, state))}
+		<button
+			@click=${() => {
+				windows.push(MkWindow('🌸', 'All state', (state) => pretty(state)));
+			}}
+		>
+			show global state
+		</button>
+		${Object.values(state.agents).map((a) => MkAgent(a, state))}
 	`;
 
 let windows = [];

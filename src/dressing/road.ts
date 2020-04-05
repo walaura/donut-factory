@@ -8,11 +8,10 @@ const MkRoad = (
 	end = { x: 0, y: 0 }
 ): Road => {
 	return {
-		state: {
-			name,
-			start,
-			end,
-		},
+		id: name + Date.now(),
+		name,
+		start,
+		end,
 	};
 };
 

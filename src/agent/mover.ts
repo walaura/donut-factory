@@ -1,13 +1,8 @@
-import { GameState, Road, WithXY } from './../defs';
-import {
-	Agent,
-	AgentState,
-	AgentType,
-	MoverState,
-	MoverStateType,
-} from '../defs';
-import { xy2arr, xy } from '../helper/xy';
-import { listen, MsgActions } from '../helper/message';
+import { Agent, AgentStateType, MoverAgent } from '../defs';
+import { MsgActions, postFromSw } from '../helper/message';
+import { xy, xy2arr } from '../helper/xy';
+import { findAgent, mutateAgent } from '../loop/loop';
+import { Handler, Road, UnitAgent, WithXY } from './../defs';
 const d3 = require('d3-polygon');
 
 type Movement = {
@@ -54,7 +49,7 @@ const correctForRoad = (obj: Movement) => {
 	) as Movement;
 };
 
-const getRoadMoverMinDistance = (road: Road['state'], { x, y }: WithXY) => {
+const getRoadMoverMinDistance = (road: Road, { x, y }: WithXY) => {
 	let roadHyp = Math.hypot(
 		road.start.x - road.end.x,
 		road.start.y - road.end.y
@@ -68,7 +63,7 @@ const getRoadMoverMinDistance = (road: Road['state'], { x, y }: WithXY) => {
 	);
 };
 
-const getRoadMoverTriangleArea = (road: Road['state'], mover: WithXY) => {
+const getRoadMoverTriangleArea = (road: Road, mover: WithXY) => {
 	return Math.abs(
 		d3.polygonArea([xy2arr(road.start), xy2arr(mover), xy2arr(road.end)])
 	);
@@ -78,29 +73,15 @@ const atPos = (from: WithXY, to: WithXY) => {
 	return Math.hypot(from.x - to.x, from.y - to.y) < 1;
 };
 
-const Mover = (from = [], to = []): Agent => {
-	let state: MoverState = {
-		emoji: '🚚',
-		x: 10,
-		y: 0,
-		held: 0,
-		type: AgentType.MOVER,
-		from,
-		to,
-		state: MoverStateType.Empty,
-		path: [],
-		//distanceHistory: [],
-	};
-
+export const moverHandler: Handler<MoverAgent> = (tick, state, gameState) => {
 	const move = (from: WithXY, to: WithXY, roads: Road[]) => {
 		let speed = 0.05;
 
 		let closestRoad = roads.sort(
 			(a, b) =>
-				getRoadMoverMinDistance(a.state, from) -
-				getRoadMoverMinDistance(b.state, from)
+				getRoadMoverMinDistance(a, from) - getRoadMoverMinDistance(b, from)
 		)[0];
-		let r = closestRoad.state;
+		let r = closestRoad;
 		const closestToRoad = (): Movement => {
 			const transforms = {
 				left: xy([from.x - speed, from.y]),
@@ -146,38 +127,61 @@ const Mover = (from = [], to = []): Agent => {
 
 	const isEmpty = () => state.held <= 0;
 
-	const loop = (tick, gameState: GameState) => {
-		let moveFrom = state.from[0];
-		let moveTo = state.to[0];
-		if (state.path.length > 0) {
-			let currentVisit = state.path[0];
-			if (!atPos(state, currentVisit)) {
-				move(state, currentVisit, gameState.roads);
-			} else {
-				state.path.shift();
-			}
+	let moveFrom = findAgent(state.from[0], gameState);
+	let moveTo = findAgent(state.to[0], gameState);
+	if (state.path.length > 0) {
+		let currentVisit = state.path[0];
+		if (!atPos(state, currentVisit)) {
+			move(state, currentVisit, Object.values(gameState.roads));
+		} else {
+			state.path.shift();
 		}
+	}
 
-		if (atPos(state, moveFrom.state)) {
-			state.held += 0.01;
-			moveFrom.state.exports -= 0.01;
-			if (state.held >= 1) {
-				state.path = [gameState.roads[0].state.end, moveTo.state];
-			}
+	if (atPos(state, moveFrom)) {
+		state.held += 0.1;
+		mutateAgent<UnitAgent>(moveFrom.id, (prev) => ({
+			...prev,
+			exports: prev.exports - 0.1,
+		}));
+		if (state.held >= 10) {
+			state.path = [Object.values(gameState.roads)[0].end, moveTo];
+			console.log('pathing');
+			postFromSw({ action: MsgActions.PAUSE });
 		}
-		if (atPos(state, moveTo.state)) {
-			state.held -= 0.01;
-			moveTo.state.imports += 0.01;
-			if (isEmpty()) {
-				state.path = [gameState.roads[0].state.end, moveFrom.state];
-			}
+	}
+	if (atPos(state, moveTo)) {
+		state.held -= 0.01;
+		mutateAgent<UnitAgent>(moveTo.id, (prev) => ({
+			...prev,
+			exports: prev.imports + 0.1,
+		}));
+		if (isEmpty()) {
+			state.path = [Object.values(gameState.roads)[0].end, moveFrom];
 		}
+	}
 
-		if (isEmpty() && state.path.length === 0) {
-			state.path.push(moveFrom.state);
-		}
-	};
-	return { state, loop };
+	if (isEmpty() && state.path.length === 0) {
+		state.path.push(moveFrom);
+	}
+
+	return state;
 };
 
-export { Mover };
+const MkMover = (from = [], to = []): Agent => {
+	return {
+		id: 'TEST_mover',
+		emoji: '🚚',
+		x: 10,
+		y: 0,
+		held: 0,
+		type: AgentStateType.MOVER,
+		from,
+		to,
+		path: [],
+		handler: 'moverHandler',
+		//distanceHistory: [],
+	};
+};
+
+export { MkMover };

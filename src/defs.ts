@@ -1,4 +1,14 @@
-export enum AgentType {
+import { handlers } from './loop/handlers';
+
+export type ID = string;
+
+export type Handler<T extends Agent = Agent> = (
+	tick: number,
+	ownState: T,
+	gameState: GameState
+) => T;
+
+export enum AgentStateType {
 	'UNIT',
 	'MOVER',
 }
@@ -8,48 +18,44 @@ export interface WithXY {
 	y: number;
 }
 
-export interface BaseState extends WithXY {
-	emoji: string;
-	type: AgentType;
+export interface WithID {
+	id: ID;
 }
 
-export type UnitState = BaseState & {
+export interface BaseAgent extends WithXY, WithID {
+	emoji: string;
+	type: AgentStateType;
+	handler?: keyof typeof handlers;
+}
+
+export interface UnitAgent extends BaseAgent {
 	exports: number;
 	imports: number;
-	type: AgentType.UNIT;
-};
-export enum MoverStateType {
-	'Loaded',
-	'Empty',
+	type: AgentStateType.UNIT;
 }
-export type MoverState = BaseState & {
+
+export interface MoverAgent extends BaseAgent {
 	held: number;
-	from: Agent<UnitState>[];
-	to: Agent<UnitState>[];
-	type: AgentType.MOVER;
-	state: MoverStateType;
+	from: ID[];
+	to: ID[];
+	type: AgentStateType.MOVER;
 	path: WithXY[];
-};
-
-export type AgentState = UnitState | MoverState;
-
-export interface Agent<S extends AgentState = AgentState> {
-	loop: (tick, GameState) => void;
-	state: S;
 }
 
-export interface Road {
-	state: {
-		name?: string;
-		start: WithXY;
-		end: WithXY;
-	};
+export type Agent = UnitAgent | MoverAgent;
+
+export interface Road extends WithID {
+	id: string;
+	name?: string;
+	start: WithXY;
+	end: WithXY;
 }
 
 export interface GameState {
+	paused: boolean;
 	width: number;
 	height: number;
 	date: number;
-	agents: Agent[];
-	roads: Road[];
+	agents: { [key: string]: Agent };
+	roads: { [key: string]: Road };
 }
