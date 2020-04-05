@@ -30,11 +30,23 @@ export type MoverState = BaseState & {
 export type AgentState = UnitState | MoverState;
 
 export interface Agent<S extends AgentState = AgentState> {
-	loop: (tick) => void;
+	loop: (tick, GameState) => void;
 	state: S;
 }
 
+export interface Road {
+	state: {
+		x1: number;
+		y1: number;
+		x2: number;
+		y2: number;
+	};
+}
+
 export interface GameState {
+	width: number;
+	height: number;
 	date: number;
 	agents: Agent[];
+	roads: Road[];
 }

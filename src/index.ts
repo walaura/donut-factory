@@ -38,7 +38,32 @@ const Consumer = (): Agent => {
 	return { state, loop };
 };
 
-let state: GameState = { date: 0, agents: [] };
+let state: GameState = {
+	width: 80,
+	height: 40,
+	date: 0,
+	agents: [],
+	roads: [
+		{
+			name: 'first',
+			state: {
+				x1: 4,
+				y1: 4,
+				x2: 15,
+				y2: 30,
+			},
+		},
+		{
+			name: 'second',
+			state: {
+				x1: 15,
+				y1: 30,
+				x2: 30,
+				y2: 15,
+			},
+		},
+	],
+};
 let factory = Factory();
 let consumer = Consumer();
 let mover = Mover([factory], [consumer]);
@@ -52,7 +77,7 @@ const loop = () => {
 
 	state.date += 1000;
 	for (let unit of state.agents) {
-		unit.loop(delta);
+		unit.loop(delta, state);
 	}
 	renderGame(state);
 	requestAnimationFrame(loop);

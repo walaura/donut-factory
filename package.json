@@ -9,6 +9,7 @@
 	"author": "walaura",
 	"license": "ISC",
 	"dependencies": {
+		"d3-polygon": "^1.0.6",
 		"lit-html": "^1.2.1",
 		"parcel": "^1.12.4"
 	},
