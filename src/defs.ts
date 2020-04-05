@@ -3,10 +3,13 @@ export enum AgentType {
 	'MOVER',
 }
 
-export interface BaseState {
-	emoji: string;
+export interface WithXY {
 	x: number;
 	y: number;
+}
+
+export interface BaseState extends WithXY {
+	emoji: string;
 	type: AgentType;
 }
 
@@ -25,6 +28,7 @@ export type MoverState = BaseState & {
 	to: Agent<UnitState>[];
 	type: AgentType.MOVER;
 	state: MoverStateType;
+	path: WithXY[];
 };
 
 export type AgentState = UnitState | MoverState;
@@ -36,10 +40,9 @@ export interface Agent<S extends AgentState = AgentState> {
 
 export interface Road {
 	state: {
-		x1: number;
-		y1: number;
-		x2: number;
-		y2: number;
+		name?: string;
+		start: WithXY;
+		end: WithXY;
 	};
 }
 

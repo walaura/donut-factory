@@ -9,9 +9,12 @@
 	"author": "walaura",
 	"license": "ISC",
 	"dependencies": {
+		"@types/node": "^13.11.0",
 		"d3-polygon": "^1.0.6",
 		"lit-html": "^1.2.1",
-		"parcel": "^1.12.4"
+		"parcel": "^1.12.4",
+		"postcss-nested": "^4.2.1",
+		"uniqid": "^5.2.0"
 	},
 	"devDependencies": {
 		"typescript": "^3.8.3"

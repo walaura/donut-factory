@@ -1,1 +1,7 @@
-{ "compilerOptions": { "lib": ["esnext", "dom"], "target": "es6" } }
+{
+	"compilerOptions": {
+		"moduleResolution": "node",
+		"lib": ["esnext", "dom", "webworker"],
+		"target": "es6"
+	}
+}

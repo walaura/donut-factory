@@ -1,7 +1,7 @@
-import { GameState, AgentState, Road as RoadT } from './defs';
+import { GameState, AgentState, RoadasRoadT, WithXY, Road } from './defs';
 import './game.css';
-//@ts-ignore
-import { html, svg, render } from 'lit-html';
+
+import { html, svg, render, directive } from 'lit-html';
 //@ts-ignore
 import { styleMap } from 'lit-html/directives/style-map.js';
 //@ts-ignore
@@ -40,31 +40,93 @@ const Agent = (state: AgentState) => {
 	</x-unit>`;
 };
 
-const Road = ({ state }: RoadT) =>
+const MkRoad = ({ state }: Road) =>
 	svg`<line
-		x1="${state.x1 * 10}"
-		y1="${state.y1 * 10}"
-		x2="${state.x2 * 10}"
-		y2="${state.y2 * 10}"
+		x1="${state.start.x * 10}"
+		y1="${state.start.y * 10}"
+		x2="${state.end.x * 10}"
+		y2="${state.end.y * 10}"
 		stroke="black"
 	/>`;
 
+const useDraggable = (pos: WithXY) => {
+	let delta = { x: 0, y: 0 };
+	let dragging = false;
+
+	let handler = ({ screenX: x, screenY: y }) => {
+		if (!dragging) {
+			return;
+		}
+		pos.x = pos.x + x - delta.x;
+		pos.y = pos.y + y - delta.y;
+
+		delta = { x, y };
+	};
+	window.addEventListener('mouseup', () => {
+		dragging = false;
+	});
+	window.addEventListener('mousemove', (ev) => {
+		handler(ev);
+	});
+	const dragHandle = ({ screenX: x, screenY: y }) => {
+		delta = { x, y };
+		dragging = true;
+	};
+	const $draggable = (children) => html`<x-draggable
+		style="--left: ${pos.x}px;--top: ${pos.y}px"
+	>
+		${children}
+	</x-draggable>`;
+	return { dragHandle, $draggable };
+};
+
+const MkWindow = (emoji, title, renderer) => {
+	const { dragHandle, $draggable } = useDraggable({ x: 20, y: 20 });
+	return (state: GameState) =>
+		$draggable(html`<x-window>
+			<x-window-header @mousedown=${dragHandle}>
+				<x-window-header-emoji>${emoji}</x-window-header-emoji>
+				<x-window-header-title>${title}</x-window-header-title>
+			</x-window-header>
+			<x-window-body>${renderer(state)}</x-window-body>
+		</x-window>`);
+};
+
 const Board = (state: GameState) =>
-	html`<svg
+	html`
+		${windows.map((w) => w(state))}
+		<svg
 			width=${state.width * 10}
 			height=${state.height * 10}
 			xmlns="http://www.w3.org/2000/svg"
 		>
-			${state.roads.map(Road)} ${state.roads.map(Road)} ${state.roads.map(Road)}
+			${state.roads.map(MkRoad)}}
 		</svg>
-		${state.agents.map((a) => Agent(a.state))}`;
+		${state.agents.map((a) => Agent(a.state))}
+	`;
+
+let windows = [];
+windows.push(
+	MkWindow('📅', 'Date', (state: GameState) => {
+		let date = new Date(state.date);
+		const dtf = new Intl.DateTimeFormat('en', {
+			year: 'numeric',
+			month: 'short',
+			day: '2-digit',
+			hour: 'numeric',
+			minute: 'numeric',
+			second: 'numeric',
+		});
+		return dtf.format(date);
+	})
+);
 
 const renderGame = (state: GameState) => {
-	logger.innerText = JSON.stringify(state, null, 2);
 	game.style.width = state.width * 10;
 	game.style.height = state.height * 10;
+
 	render(Board(state), game);
-	render(html`<div>dsfdsf${new Date(state.date)}</div>`, statusbaar);
+	//	render(html`<div>${new Date(state.date)}</div>`, statusbaar);
 };
 
 export default renderGame;

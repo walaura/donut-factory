@@ -1,6 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Dosis:wght@600;800&display=swap');
+
+* {
+	-webkit-user-select: none;
+	-webkit-user-drag: none;
+}
+
 :root {
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
 		Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+	font-size: 0.85em;
+	--bg: #fce4ec;
+	--bg-dark: #f06292;
+	--bg-light: #fff;
+	--radius: 1em;
+	--space-h: 0.75em;
+	--space-v: 0.5em;
 }
 
 #game {
@@ -95,4 +109,35 @@ x-status > * {
 
 x-status > * + * {
 	border-left: 1px solid #fff;
+}
+
+x-draggable {
+	position: fixed;
+	top: 0;
+	left: 0;
+	transform: translate(var(--left), var(--top));
+}
+
+x-window {
+	background: var(--bg);
+	border-radius: var(--radius);
+	display: grid;
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1),
+		0 0.25em 0.25em 0.25em rgba(0, 0, 0, 0.05);
+	overflow: hidden;
+	width: 10em;
+
+	x-window-header {
+		font-family: 'Dosis';
+		font-weight: 600;
+		background: var(--bg-light);
+		padding: var(--space-v) var(--space-h);
+		cursor: pointer;
+		&:hover {
+			transform: scale(1.05);
+		}
+	}
+	x-window-body {
+		padding: var(--space-v) var(--space-h);
+	}
 }

@@ -1,4 +1,4 @@
-import { GameState, Road } from './../defs';
+import { GameState, Road, WithXY } from './../defs';
 import {
 	Agent,
 	AgentState,
@@ -6,6 +6,8 @@ import {
 	MoverState,
 	MoverStateType,
 } from '../defs';
+import { xy2arr, xy } from '../helper/xy';
+import { listen, MsgActions } from '../helper/message';
 const d3 = require('d3-polygon');
 
 type Movement = {
@@ -14,8 +16,20 @@ type Movement = {
 	top: number;
 	bottom: number;
 };
+const addSpeed = (movement: Movement, speed: number): Movement => ({
+	right: movement.right * speed,
+	left: movement.left * speed,
+	bottom: movement.bottom * speed,
+	top: movement.top * speed,
+});
 
-const midpoint = ([x1, y1], [x2, y2]) => [(x1 + x2) / 2, (y1 + y2) / 2];
+const midpoint = (
+	{ x: x1, y: y1 }: WithXY,
+	{ x: x2, y: y2 }: WithXY
+): WithXY => ({
+	x: (x1 + x2) / 2,
+	y: (y1 + y2) / 2,
+});
 
 const combineMovements = (mvmnts: Movement[]): Movement => {
 	let movement = {
@@ -40,30 +54,28 @@ const correctForRoad = (obj: Movement) => {
 	) as Movement;
 };
 
-const distanceToOtherRoad = (road: Road['state'], [x, y]) => {
-	let roadHyp = Math.hypot(road.x2 - road.x1, road.y2 - road.y1);
-	let roadMidpoint = midpoint([road.x1, road.y1], [road.x2, road.y2]);
+const getRoadMoverMinDistance = (road: Road['state'], { x, y }: WithXY) => {
+	let roadHyp = Math.hypot(
+		road.start.x - road.end.x,
+		road.start.y - road.end.y
+	);
+	/* get midpoint too just in case the vehice is roaming round the field */
+	let roadMidpoint = midpoint(road.start, road.end);
 	return Math.min(
-		Math.hypot(road.x1 - x, road.y1 - y) - roadHyp,
-		Math.hypot(road.x2 - x, road.y2 - y) - roadHyp,
-		Math.hypot(roadMidpoint[0] - x, roadMidpoint[1] - y) - roadHyp
+		Math.hypot(road.start.x - x, road.start.y - y) - roadHyp,
+		Math.hypot(road.end.x - x, road.end.y - y) - roadHyp,
+		Math.hypot(roadMidpoint.x - x, roadMidpoint.y - y) - roadHyp
 	);
 };
 
-const closenessToRoad = (road: Road['state'], [x, y]) => {
+const getRoadMoverTriangleArea = (road: Road['state'], mover: WithXY) => {
 	return Math.abs(
-		d3.polygonArea([
-			[road.x1, road.y1],
-			[x, y],
-			[road.x2, road.y2],
-		])
+		d3.polygonArea([xy2arr(road.start), xy2arr(mover), xy2arr(road.end)])
 	);
 };
 
-const atPos = (from: AgentState, to: AgentState) => {
-	let tox = to.x;
-	let toy = to.y;
-	return Math.max(...[from.x - tox, toy - from.y].map(Math.abs)) < 1;
+const atPos = (from: WithXY, to: WithXY) => {
+	return Math.hypot(from.x - to.x, from.y - to.y) < 1;
 };
 
 const Mover = (from = [], to = []): Agent => {
@@ -76,80 +88,93 @@ const Mover = (from = [], to = []): Agent => {
 		from,
 		to,
 		state: MoverStateType.Empty,
-		movementHistory: [],
+		path: [],
+		//distanceHistory: [],
 	};
 
-	const move = (from: AgentState, to: AgentState, roads: Road[]) => {
+	const move = (from: WithXY, to: WithXY, roads: Road[]) => {
 		let speed = 0.05;
-		let tox = to.x;
-		let toy = to.y;
 
 		let closestRoad = roads.sort(
 			(a, b) =>
-				distanceToOtherRoad(a.state, [from.x, from.y]) -
-				distanceToOtherRoad(b.state, [from.x, from.y])
+				getRoadMoverMinDistance(a.state, from) -
+				getRoadMoverMinDistance(b.state, from)
 		)[0];
 		let r = closestRoad.state;
-
-		const isInRoad = () => closenessToRoad(r, [from.x, from.y]);
-		const closestToRoad = (): Movement =>
-			Object.fromEntries(
+		const closestToRoad = (): Movement => {
+			const transforms = {
+				left: xy([from.x - speed, from.y]),
+				right: xy([from.x + speed, from.y]),
+				top: xy([from.x, from.y + speed]),
+				bottom: xy([from.x, from.y - speed]),
+			};
+			const apply = (t: WithXY) => getRoadMoverTriangleArea(r, t);
+			return Object.fromEntries(
 				Object.entries({
-					right: closenessToRoad(r, [from.x + speed * 3, from.y]),
-					left: closenessToRoad(r, [from.x - speed * 3, from.y]),
-					top: closenessToRoad(r, [from.x + speed * 3, from.y]),
-					bottom: closenessToRoad(r, [from.x - speed * 3, from.y]),
-				}).sort((a, b) => b[1] - a[1])
+					bottom: apply(transforms.bottom),
+					left: apply(transforms.left),
+					top: apply(transforms.top),
+					right: apply(transforms.right),
+				})
 			) as Movement;
-
+		};
 		const applyMovement = (movement: Movement) => {
-			from.x += movement.right * speed;
-			from.x -= movement.left * speed;
-			from.y += movement.bottom * speed;
-			from.y -= movement.top * speed;
-			console.log(Object.values(movement).reduce((a, b) => a + Math.abs(b)));
+			from.x += movement.right;
+			from.x -= movement.left;
+			from.y += movement.bottom;
+			from.y -= movement.top;
 		};
 
 		let movements: Movement[] = [];
-
-		let distanceToRoad = isInRoad();
-		if (distanceToRoad > 2) {
-			const movement = correctForRoad(closestToRoad());
-			movements.push(movement);
-		}
-		movements.push({
-			left: from.x > tox ? from.x - tox : 0,
-			right: from.x < tox ? tox - from.x : 0,
-			top: from.y > toy ? from.y - toy : 0,
-			bottom: from.y < toy ? toy - from.y : 0,
-		});
+		const triangleArea = Math.max(getRoadMoverTriangleArea(r, from), 10);
+		const movement = correctForRoad(closestToRoad());
+		movements.push(addSpeed(movement, speed / 10));
+		movements.push(
+			addSpeed(
+				{
+					left: from.x > to.x ? from.x - to.x : 0,
+					right: from.x < to.x ? to.x - from.x : 0,
+					top: from.y > to.y ? from.y - to.y : 0,
+					bottom: from.y < to.y ? to.y - from.y : 0,
+				},
+				triangleArea < 2 ? speed : speed / 10
+			)
+		);
 
 		applyMovement(combineMovements(movements));
 	};
 
+	const isEmpty = () => state.held <= 0;
+
 	const loop = (tick, gameState: GameState) => {
-		if (state.state === MoverStateType.Empty) {
-			let moveTo = state.from[0];
-			if (!atPos(state, moveTo.state)) {
-				move(state, moveTo.state, gameState.roads);
+		let moveFrom = state.from[0];
+		let moveTo = state.to[0];
+		if (state.path.length > 0) {
+			let currentVisit = state.path[0];
+			if (!atPos(state, currentVisit)) {
+				move(state, currentVisit, gameState.roads);
 			} else {
-				state.held += 0.01;
-				moveTo.state.exports -= 0.01;
+				state.path.shift();
 			}
+		}
+
+		if (atPos(state, moveFrom.state)) {
+			state.held += 0.01;
+			moveFrom.state.exports -= 0.01;
 			if (state.held >= 1) {
-				state.state = MoverStateType.Loaded;
+				state.path = [gameState.roads[0].state.end, moveTo.state];
 			}
-		} else {
-			let moveTo = state.to[0];
-			if (!atPos(state, moveTo.state)) {
-				move(state, moveTo.state, gameState.roads);
-			} else {
-				state.held -= 0.01;
-				moveTo.state.imports += 0.01;
+		}
+		if (atPos(state, moveTo.state)) {
+			state.held -= 0.01;
+			moveTo.state.imports += 0.01;
+			if (isEmpty()) {
+				state.path = [gameState.roads[0].state.end, moveFrom.state];
 			}
-			if (state.held <= 0) {
-				state.state = MoverStateType.Empty;
-			}
+		}
+
+		if (isEmpty() && state.path.length === 0) {
+			state.path.push(moveFrom.state);
 		}
 	};
 	return { state, loop };
