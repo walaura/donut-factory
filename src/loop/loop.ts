@@ -81,8 +81,10 @@ export const gameLoop = (prevState: GameState) => {
 
 	while (agentMutations.length) {
 		const muta = agentMutations.pop();
-		let agent = findAgent(muta.agentId, gameState);
-		agent = muta.mutation(agent, gameState);
+		gameState.agents[muta.agentId] = muta.mutation(
+			gameState.agents[muta.agentId],
+			gameState
+		);
 	}
 
 	while (gameMutations.length) {

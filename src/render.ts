@@ -40,7 +40,7 @@ const Info = (agentId: ID, gameState: GameState) => {
 		return html`On their way to ${findAgent(agent.from[0], gameState).emoji}`;
 	} else {
 		return html`delivering ${agent.held} boxes to
-		${findAgent(agent.from[0], gameState).emoji}`;
+		${findAgent(agent.to[0], gameState).emoji}`;
 	}
 };
 

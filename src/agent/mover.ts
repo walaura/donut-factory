@@ -4,221 +4,37 @@ import { Road, RoadEnd } from '../dressing/road';
 import { midpoint, xy, xy2arr } from '../helper/xy';
 import { findAgent, mutateAgent } from '../loop/loop';
 import { Handler, UnitAgent, WithXY } from './../defs';
-const d3 = require('d3-polygon');
+import { Movement, addSpeedToMovement } from '../helper/movement';
+import {
+	Target,
+	targetFromXY,
+	unnestTargets,
+	StatefulTarget,
+	NestedStatefulTarget,
+	mkFindTarget,
+	getDistanceToPoint,
+	mkFindPath,
+} from '../helper/pathfinding';
 
-type Movement = {
-	left: number;
-	right: number;
-	top: number;
-	bottom: number;
+const isAtPos = (from: WithXY, to: WithXY) => {
+	return getDistanceToPoint(from, to) < 1;
 };
-const addSpeed = (movement: Movement, speed: number): Movement => ({
-	right: movement.right * speed,
-	left: movement.left * speed,
-	bottom: movement.bottom * speed,
-	top: movement.top * speed,
-});
-
-const combineMovements = (mvmnts: Movement[]): Movement => {
-	let movement = {
-		left: 0,
-		right: 0,
-		top: 0,
-		bottom: 0,
-	};
-	mvmnts.forEach((mvmnt) => {
-		movement.left += mvmnt.left;
-		movement.right += mvmnt.right;
-		movement.top += mvmnt.top;
-		movement.bottom += mvmnt.bottom;
-	});
-	return movement;
-};
-
-const correctForRoad = (obj: Movement) => {
-	let max = Math.max(...Object.values(obj));
-	return Object.fromEntries(
-		Object.entries(obj).map(([k, val]) => [k, max - val])
-	) as Movement;
-};
-
-const getRoadMoverMinDistance = (road: Road, { x, y }: WithXY) => {
-	let roadHyp = Math.hypot(
-		road.start.x - road.end.x,
-		road.start.y - road.end.y
-	);
-	/* get midpoint too just in case the vehice is roaming round the field */
-	let roadMidpoint = midpoint(road.start, road.end);
-	return Math.min(
-		Math.hypot(road.start.x - x, road.start.y - y) - roadHyp,
-		Math.hypot(road.end.x - x, road.end.y - y) - roadHyp,
-		Math.hypot(roadMidpoint.x - x, roadMidpoint.y - y) - roadHyp
-	);
-};
-
-const getRoadMoverTriangleArea = (road: Road, mover: WithXY) => {
-	return Math.abs(
-		d3.polygonArea([xy2arr(road.start), xy2arr(mover), xy2arr(road.end)])
-	);
-};
-
-const getDistanceToPoint = (a: WithXY, b: WithXY) => {
-	return Math.hypot(a.x - b.x, a.y - b.y);
-};
-
-const atPos = (from: WithXY, to: WithXY) => {
-	return Math.hypot(from.x - to.x, from.y - to.y) < 1;
-};
-
-type Target =
-	| {
-			roadId: ID;
-			roadEnd: RoadEnd;
-	  }
-	| {
-			agentId: ID;
-	  }
-	| { xy: WithXY }
-	| { isFinal: true; xy: WithXY };
-
-type StatefulTarget = Target & {
-	debug?: any;
-	score: number;
-};
-
-type NestedStatefulTarget = StatefulTarget & {
-	next?: NestedStatefulTarget[];
-};
-
-const unnestTargets = (
-	what: NestedStatefulTarget[]
-): { path: StatefulTarget[]; score: number }[] => {
-	let paths: StatefulTarget[][] = [];
-	const visitor = (
-		history: StatefulTarget[] = [],
-		what: NestedStatefulTarget[]
-	) => {
-		for (let w of what) {
-			if (w.next) {
-				const { next, ...filter } = w;
-				visitor([...history, filter], w.next);
-			} else {
-				const pushable: StatefulTarget[] = [
-					...(history as StatefulTarget[]),
-					w as StatefulTarget,
-				];
-				paths.push(pushable);
-			}
-		}
-	};
-	visitor([], what);
-
-	return paths
-		.map((path) => ({
-			path,
-			score: path.reduce((acc, { score }) => acc + score, 0),
-		}))
-		.sort((a, b) => a.score - b.score)
-		.splice(0, 4);
-};
-
-const targetFromXY = ({ x, y }: WithXY): Target => ({ xy: { x, y } });
 
 export const moverHandler: Handler<MoverAgent> = (tick, state, gameState) => {
-	const findTarget = (target: Target): WithXY => {
-		if ('roadId' in target) {
-			return gameState.roads[target.roadId][target.roadEnd];
-		}
-		if ('agentId' in target) {
-			return findAgent(target.agentId, gameState);
-		}
-		return target.xy;
-	};
+	const findTarget = mkFindTarget(gameState);
+	const findPath = mkFindPath(gameState, Object.values(gameState.roads));
 
 	const isEmpty = () => state.held <= 0;
+	const isFull = () => state.held >= state.capacity;
 
-	const path = (from: WithXY, to: WithXY, roads: Road[]): Target[] => {
-		const usableRoads: Target[] = roads
-			.map((road) => [
-				{
-					roadId: road.id,
-					roadEnd: RoadEnd.end,
-				},
-				{
-					roadId: road.id,
-					roadEnd: RoadEnd.start,
-				},
-			])
-			.flat();
-		usableRoads.push({ ...targetFromXY(from), isFinal: true });
-
-		const getDistanceScoreFrom = (
-			targets: Target[],
-			from: Target
-		): StatefulTarget[] => {
-			const xy = findTarget(from);
-			return targets
-				.map((rd) => {
-					const road = findTarget(rd);
-					let score = getDistanceToPoint(road, xy);
-					// prefer same road
-					if ('roadId' in from && 'roadId' in rd) {
-						if (from.roadId === rd.roadId) {
-							score = score / 10;
-						}
-					}
-					return { ...rd, score };
-				})
-				.sort((a, b) => a.score - b.score);
-		};
-
-		const addNext = (
-			targets: Target[],
-			fromTarget: Target
-		): NestedStatefulTarget[] => {
-			const score = getDistanceScoreFrom(targets, fromTarget);
-			return score.map((target) => {
-				if ('isFinal' in target) {
-					return target;
-				}
-				const road = findTarget(target);
-				const nextTargets = targets.filter((tg) => findTarget(tg) !== road);
-				const next = addNext(nextTargets, target);
-				return { ...target, next };
-			});
-		};
-
-		const journeys = addNext([...usableRoads], targetFromXY(to));
-		const best = unnestTargets(journeys)[0].path;
-		const path = [...best.reverse(), targetFromXY(to)];
-		return path;
+	const isAtTarget = (target: Target) => {
+		const to = findTarget(target);
+		return isAtPos(state, to);
 	};
-
-	const move = (from: WithXY, to: WithXY, roads: Road[]) => {
+	const move = (from: WithXY, target: Target) => {
 		let speed = 0.05;
+		let to = findTarget(target);
 
-		let closestRoad = roads.sort(
-			(a, b) =>
-				getRoadMoverMinDistance(a, from) - getRoadMoverMinDistance(b, from)
-		)[0];
-		let r = closestRoad;
-		const closestToRoad = (): Movement => {
-			const transforms = {
-				left: xy([from.x - speed, from.y]),
-				right: xy([from.x + speed, from.y]),
-				top: xy([from.x, from.y + speed]),
-				bottom: xy([from.x, from.y - speed]),
-			};
-			const apply = (t: WithXY) => getRoadMoverTriangleArea(r, t);
-			return Object.fromEntries(
-				Object.entries({
-					bottom: apply(transforms.bottom),
-					left: apply(transforms.left),
-					top: apply(transforms.top),
-					right: apply(transforms.right),
-				})
-			) as Movement;
-		};
 		const applyMovement = (movement: Movement) => {
 			from.x += movement.right;
 			from.x -= movement.left;
@@ -226,55 +42,49 @@ export const moverHandler: Handler<MoverAgent> = (tick, state, gameState) => {
 			from.y -= movement.top;
 		};
 
-		let movements: Movement[] = [];
-		const triangleArea = Math.max(getRoadMoverTriangleArea(r, from), 10);
-		const movement = correctForRoad(closestToRoad());
-		movements.push(addSpeed(movement, speed / 10));
-		movements.push(
-			addSpeed(
-				{
-					left: from.x > to.x ? from.x - to.x : 0,
-					right: from.x < to.x ? to.x - from.x : 0,
-					top: from.y > to.y ? from.y - to.y : 0,
-					bottom: from.y < to.y ? to.y - from.y : 0,
-				},
-				speed / 2
-			)
+		const movement = addSpeedToMovement(
+			{
+				left: from.x > to.x ? from.x - to.x : 0,
+				right: from.x < to.x ? to.x - from.x : 0,
+				top: from.y > to.y ? from.y - to.y : 0,
+				bottom: from.y < to.y ? to.y - from.y : 0,
+			},
+			speed / 2
 		);
 
-		applyMovement(combineMovements(movements));
+		applyMovement(movement);
 	};
 
 	let moveFrom = findAgent(state.from[0], gameState);
 	let moveTo = findAgent(state.to[0], gameState);
 	if (state.path.length > 0) {
-		let currentVisit = findTarget(state.path[0]);
-		if (!atPos(state, currentVisit)) {
-			move(state, currentVisit, Object.values(gameState.roads));
+		const target = state.path[0];
+		if (!isAtTarget(target)) {
+			move(state, target);
 		} else {
 			state.path.shift();
 		}
 	}
 
-	if (atPos(state, moveFrom)) {
+	if (isAtPos(state, moveFrom)) {
 		state.held += state.loadSpeed;
 		mutateAgent<UnitAgent>(moveFrom.id, (prev) => ({
 			...prev,
 			exports: prev.exports - state.loadSpeed,
 		}));
-		if (state.held >= state.capacity && state.path.length <= 0) {
-			state.path = path(state, moveTo, Object.values(gameState.roads));
+		if (isFull() && state.path.length <= 0) {
+			state.path = findPath(state, moveTo);
 		}
 	}
-	if (atPos(state, moveTo)) {
+	if (isAtPos(state, moveTo)) {
 		state.held -= state.loadSpeed;
 		mutateAgent<UnitAgent>(moveTo.id, (prev) => ({
 			...prev,
+			emoji: '1212',
 			imports: prev.imports + state.loadSpeed,
 		}));
 		if (isEmpty() && state.path.length <= 0) {
-			state.path = path(state, moveFrom, Object.values(gameState.roads));
-			pauseGame();
+			state.path = findPath(state, moveFrom);
 		}
 	}
 
