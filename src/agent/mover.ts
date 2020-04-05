@@ -137,7 +137,7 @@ const Mover = (from = [], to = []): Agent => {
 					top: from.y > to.y ? from.y - to.y : 0,
 					bottom: from.y < to.y ? to.y - from.y : 0,
 				},
-				triangleArea < 2 ? speed : speed / 10
+				speed / 2
 			)
 		);
 
