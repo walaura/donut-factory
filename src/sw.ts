@@ -1,9 +1,16 @@
 import { listenInSw, MsgActions, postFromSw } from './helper/message';
-import { gameLoop, initialState } from './loop/loop';
+import { gameLoop, initialState, mutateAgent } from './loop/loop';
 
 let state = initialState;
-listenInSw(({ action }) => {
-	if (action !== MsgActions.TICK) {
+listenInSw((message) => {
+	if (message.action === MsgActions.MUTATE_AGENT) {
+		mutateAgent(
+			message.agentId,
+			new Function(`return ${message.mutation}`)(),
+			message.context
+		);
+	}
+	if (message.action !== MsgActions.TICK) {
 		return;
 	}
 	state = gameLoop(state);

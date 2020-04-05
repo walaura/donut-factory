@@ -1,25 +1,26 @@
-import { WithXY } from './../defs';
+import { WithXY, ID } from './../defs';
 import { GameState } from '../defs';
 
 export enum MsgActions {
 	'TOCK' = 'TOCK',
 	'TICK' = 'TICK',
-	'MOVE' = 'MOVE',
 	'PAUSE' = 'PAUSE',
+	'MUTATE_AGENT' = 'MUTATE_AGENT',
 }
 
 export type Message =
 	| {
-			action: Exclude<MsgActions, MsgActions.TOCK | MsgActions.MOVE>;
+			action: Exclude<MsgActions, MsgActions.TOCK | MsgActions.MUTATE_AGENT>;
 	  }
 	| {
 			action: MsgActions.TOCK;
 			state: GameState;
 	  }
 	| {
-			action: MsgActions.MOVE;
-			unit: string;
-			to: WithXY;
+			action: MsgActions.MUTATE_AGENT;
+			agentId: ID;
+			context: any[];
+			mutation: string;
 	  };
 
 export const isMessage = (data): data is Message => true;

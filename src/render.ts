@@ -1,10 +1,19 @@
-import { findAgent } from './loop/loop';
+import { findAgent, mutateAgent } from './loop/loop';
 import { html, render, svg, TemplateResult } from 'lit-html';
 //@ts-ignore
 import { styleMap } from 'lit-html/directives/style-map.js';
-import { Agent, AgentStateType, GameState, Road, WithXY, ID } from './defs';
+import {
+	Agent,
+	AgentStateType,
+	GameState,
+	WithXY,
+	ID,
+	UnitAgent,
+} from './defs';
 import './game.css';
 import { midpoint } from './helper/xy';
+import { Road } from './dressing/road';
+import { MoverAgent } from './agent/mover';
 
 //@ts-ignore
 const { logger, game, statusbaar } = window;
@@ -17,31 +26,75 @@ const icons = {
 	imports: '📥',
 };
 
+const shortNumber = (number: number): string => {
+	const round = Math.round(number * 10) / 10;
+	if (number % 1 === 0) {
+		return number + '';
+	}
+	return round.toFixed(1);
+};
+
+function numberWithCommas(x) {
+	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
 const Chip = (key: keyof typeof icons, state: Agent) => {
-	if (!state[key]) {
+	if (!state[key] || state[key] === 0) {
 		return null;
 	}
-	const short = Math.round(state[key] * 10) / 10;
 	return html`<div>
 		<small>${icons[key]}</small>
-		${short}
+		${shortNumber(state[key])}
 	</div>`;
 };
 
 const Info = (agentId: ID, gameState: GameState) => {
+	let txt = '';
 	const agent = findAgent(agentId, gameState);
 	if (agent.type !== AgentStateType.MOVER) {
 		return;
 	}
 	if (agent.path.length === 0) {
-		return html`stuck or loading/unloading`;
+		txt = `Stuck or loading/unloading`;
 	}
 	if (agent.held <= 0) {
-		return html`On their way to ${findAgent(agent.from[0], gameState).emoji}`;
+		txt = `On their way to ${findAgent(agent.from[0], gameState).emoji}`;
 	} else {
-		return html`delivering ${agent.held} boxes to
+		txt = `Delivering ${shortNumber(agent.held)} boxes to
 		${findAgent(agent.to[0], gameState).emoji}`;
 	}
+
+	return html`${txt}
+	<hr />
+		Tires
+		<select @change=${(ev) => {
+			const value = parseInt(ev.target.value, 10) / 10;
+			mutateAgent<MoverAgent>(
+				agent.id,
+				(prev, _, [offroadSpeed]) => ({
+					...prev,
+					offroadSpeed,
+				}),
+				[value]
+			);
+		}}>
+			<option value="5">Road lover</option>
+			<option value="10">Balanced</option>
+			<option value="20">Bananas</option>
+		</select>
+		</button>
+		<hr />
+		This vehicle wants to ${agent.preferenceForRoads} offroad
+		<button
+			@click="${() => {
+				mutateAgent<MoverAgent>(agent.id, (prev) => ({
+					...prev,
+					preferenceForRoads: prev.preferenceForRoads - 5,
+				}));
+			}}"
+		>
+			more
+		</button> `;
 };
 
 const MkAgent = (agent: Agent, gameState: GameState) => {
@@ -60,7 +113,7 @@ const MkAgent = (agent: Agent, gameState: GameState) => {
 		(gameState) =>
 			html`${Info(agent.id, gameState)}
 				<hr />
-				${pretty(agent)}`
+				${pretty(findAgent(agent.id, gameState))}`
 	);
 	return html`<x-unit
 		@click=${() => {
@@ -175,6 +228,21 @@ const Tools = (state: GameState) => {
 	});
 
 	return html`<x-dock>
+		<button
+			as="x-dock-panel"
+			@click=${() => {
+				windows.push(
+					MkWindow('💰', 'Money', (state: GameState) => pretty(state.ledger))
+				);
+			}}
+		>
+			<xdp-emoji><span>💰</span></xdp-emoji>
+			<xdp-text>
+				${numberWithCommas(
+					state.ledger.map(({ tx }) => tx).reduce((a, b) => a + b)
+				)}
+			</xdp-text>
+		</button>
 		<button
 			as="x-dock-panel"
 			@click=${() => {

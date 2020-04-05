@@ -1,20 +1,13 @@
-import { pauseGame } from './../loop/loop';
 import { AgentStateType, BaseAgent, ID } from '../defs';
-import { Road, RoadEnd } from '../dressing/road';
-import { midpoint, xy, xy2arr } from '../helper/xy';
-import { findAgent, mutateAgent } from '../loop/loop';
-import { Handler, UnitAgent, WithXY } from './../defs';
-import { Movement, addSpeedToMovement } from '../helper/movement';
+import { addSpeedToMovement, Movement } from '../helper/movement';
 import {
-	Target,
-	targetFromXY,
-	unnestTargets,
-	StatefulTarget,
-	NestedStatefulTarget,
-	mkFindTarget,
 	getDistanceToPoint,
 	mkFindPath,
+	mkFindTarget,
+	Target,
 } from '../helper/pathfinding';
+import { findAgent, mutateAgent, addFunds } from '../loop/loop';
+import { Handler, UnitAgent, WithXY } from './../defs';
 
 const isAtPos = (from: WithXY, to: WithXY) => {
 	return getDistanceToPoint(from, to) < 1;
@@ -33,8 +26,15 @@ export const moverHandler: Handler<MoverAgent> = (tick, state, gameState) => {
 	};
 	const move = (from: WithXY, target: Target) => {
 		let speed = 0.05;
-		let to = findTarget(target);
 
+		if (
+			!('roadId' in target) ||
+			!('roadId' in state.gross.lastDiscardedPathTarget)
+		) {
+			speed = speed * state.offroadSpeed;
+		}
+
+		let to = findTarget(target);
 		const applyMovement = (movement: Movement) => {
 			from.x += movement.right;
 			from.x -= movement.left;
@@ -57,33 +57,42 @@ export const moverHandler: Handler<MoverAgent> = (tick, state, gameState) => {
 
 	let moveFrom = findAgent(state.from[0], gameState);
 	let moveTo = findAgent(state.to[0], gameState);
+
 	if (state.path.length > 0) {
 		const target = state.path[0];
 		if (!isAtTarget(target)) {
 			move(state, target);
 		} else {
-			state.path.shift();
+			state.gross.lastDiscardedPathTarget = state.path.shift();
 		}
 	}
 
 	if (isAtPos(state, moveFrom)) {
-		state.held += state.loadSpeed;
-		mutateAgent<UnitAgent>(moveFrom.id, (prev) => ({
-			...prev,
-			exports: prev.exports - state.loadSpeed,
-		}));
+		if (!isFull()) {
+			state.held += state.loadSpeed;
+			mutateAgent<UnitAgent>(moveFrom.id, (prev) => ({
+				...prev,
+				exports: prev.exports - state.loadSpeed,
+			}));
+		}
 		if (isFull() && state.path.length <= 0) {
 			state.path = findPath(state, moveTo);
 		}
 	}
 	if (isAtPos(state, moveTo)) {
-		state.held -= state.loadSpeed;
-		mutateAgent<UnitAgent>(moveTo.id, (prev) => ({
-			...prev,
-			emoji: '1212',
-			imports: prev.imports + state.loadSpeed,
-		}));
+		if (!isEmpty()) {
+			state.held -= state.loadSpeed;
+			mutateAgent<UnitAgent>(moveTo.id, (prev) => ({
+				...prev,
+				imports: prev.imports + state.loadSpeed,
+			}));
+		}
 		if (isEmpty() && state.path.length <= 0) {
+			addFunds({
+				tx: 100,
+				reason: `Sold goods to ${moveTo.emoji}`,
+			});
+
 			state.path = findPath(state, moveFrom);
 		}
 	}
@@ -98,11 +107,16 @@ export const moverHandler: Handler<MoverAgent> = (tick, state, gameState) => {
 export interface MoverAgent extends BaseAgent {
 	held: number;
 	loadSpeed: number;
+	preferenceForRoads: number;
+	offroadSpeed: number;
 	capacity: number;
 	from: ID[];
 	to: ID[];
 	type: AgentStateType.MOVER;
 	path: Target[];
+	gross: {
+		lastDiscardedPathTarget?: Target;
+	};
 }
 
 const MkMover = (from = [], to = []): MoverAgent => {
@@ -112,13 +126,16 @@ const MkMover = (from = [], to = []): MoverAgent => {
 		x: 10,
 		y: 0,
 		held: 0,
+		loadSpeed: 0.1,
+		capacity: 4,
+		preferenceForRoads: 10,
+		offroadSpeed: 0.5,
 		type: AgentStateType.MOVER,
 		from,
 		to,
 		path: [],
 		handler: 'moverHandler',
-		loadSpeed: 0.75,
-		capacity: 4,
+		gross: {},
 		//distanceHistory: [],
 	};
 };

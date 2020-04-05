@@ -38,11 +38,18 @@ export interface UnitAgent extends BaseAgent {
 
 export type Agent = UnitAgent | MoverAgent;
 
+export interface LedgerRecord {
+	tx: number;
+	reason: string;
+	date: number;
+}
+
 export interface GameState {
 	paused: boolean;
 	width: number;
 	height: number;
 	date: number;
+	ledger: LedgerRecord[];
 	agents: { [key: string]: Agent };
 	roads: { [key: string]: Road };
 }

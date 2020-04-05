@@ -7,7 +7,7 @@ export const MkConsumer = (): Agent => {
 		imports: 0,
 		type: AgentStateType.UNIT,
 		emoji: '🧚‍♀️',
-		x: 35,
+		x: 40,
 		y: 15,
 	};
 };

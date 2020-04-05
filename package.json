@@ -17,6 +17,12 @@
 		"postcss-nested": "^4.2.1",
 		"uniqid": "^5.2.0"
 	},
+	"browserslist": [
+		"last 1 Chrome versions"
+	],
+	"engines": {
+		"node": ">= 12"
+	},
 	"devDependencies": {
 		"typescript": "^3.8.3"
 	}

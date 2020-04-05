@@ -1,9 +1,11 @@
-import { GameState, ID, Agent } from './../defs';
+import { GameState, ID, Agent, LedgerRecord } from './../defs';
 import { MkConsumer } from '../agent/consumer';
 import { MkFactory } from '../agent/factory';
 import { MkMover } from '../agent/mover';
 import { MkRoad, Road } from '../dressing/road';
 import { handlers } from './handlers';
+import { makeRoadName } from '../helper/names';
+import { Message, MsgActions } from '../helper/message';
 
 let time = Date.now();
 let agentMutations: AgentMutation[] = [];
@@ -11,16 +13,29 @@ let gameMutations: GameMutation[] = [];
 
 interface AgentMutation<S extends Agent = Agent> {
 	agentId: string;
-	mutation: (prevState: S, gameState: GameState) => S;
+	mutation: (prevState: S, gameState: GameState, context: any[]) => S;
+	context: any[];
 }
 
 type GameMutation = (gameState: GameState) => GameState;
 
 export const mutateAgent = <S extends Agent = Agent>(
 	agentId: AgentMutation['agentId'],
-	mutation: AgentMutation<S>['mutation']
+	mutation: AgentMutation<S>['mutation'],
+	context: any[] = []
 ) => {
-	agentMutations.push({ agentId, mutation });
+	if (self.document) {
+		navigator.serviceWorker.ready.then((sw) => {
+			sw.active.postMessage({
+				action: MsgActions.MUTATE_AGENT,
+				agentId,
+				context,
+				mutation: mutation.toString(),
+			} as Message);
+		});
+	} else {
+		agentMutations.push({ agentId, mutation, context });
+	}
 };
 
 const mutateGame = (mutation: GameMutation) => {
@@ -52,7 +67,15 @@ export const addRoad = (road: Road) => {
 	}));
 };
 
+export const addFunds = (record: Omit<LedgerRecord, 'date'>) => {
+	mutateGame((state) => ({
+		...state,
+		ledger: [...state.ledger, { ...record, date: state.date }],
+	}));
+};
+
 const initialState: GameState = {
+	ledger: [],
 	paused: false,
 	width: 80,
 	height: 40,
@@ -64,12 +87,18 @@ let factory = MkFactory();
 let consumer = MkConsumer();
 let mover = MkMover([factory.id], [consumer.id]);
 
+let firstRoad = MkRoad(makeRoadName(), { x: 10, y: 10 }, { x: 15, y: 28 });
 [factory, consumer, mover].map(addAgent);
 [
-	MkRoad('first road', { x: 10, y: 10 }, { x: 15, y: 30 }),
-	MkRoad('second approach', { x: 30, y: 15 }, { x: 15, y: 30 }),
-	MkRoad('weir', { x: 60, y: 20 }, { x: 55, y: 15 }),
+	firstRoad,
+	MkRoad(makeRoadName(), { x: 32, y: 15 }, { x: 15, y: 30 }),
+	MkRoad(makeRoadName(), { x: 60, y: 20 }, { x: 55, y: 15 }),
 ].map(addRoad);
+
+addFunds({
+	tx: 10000,
+	reason: `The owners of ${firstRoad.name} saw great potential in you`,
+});
 
 export const gameLoop = (prevState: GameState) => {
 	let gameState = { ...prevState };
@@ -83,7 +112,8 @@ export const gameLoop = (prevState: GameState) => {
 		const muta = agentMutations.pop();
 		gameState.agents[muta.agentId] = muta.mutation(
 			gameState.agents[muta.agentId],
-			gameState
+			gameState,
+			muta.context
 		);
 	}
 

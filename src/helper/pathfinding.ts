@@ -1,9 +1,10 @@
-import { GameState } from '../defs';
+import { GameState, Agent } from '../defs';
 import { ID, WithXY } from '../defs';
 import { RoadEnd, Road } from '../dressing/road';
 import { findAgent } from '../loop/loop';
+import { MoverAgent } from '../agent/mover';
 
-export type Target =
+type SharedTargets =
 	| {
 			roadId: ID;
 			roadEnd: RoadEnd;
@@ -11,11 +12,17 @@ export type Target =
 	| {
 			agentId: ID;
 	  }
-	| { xy: WithXY }
-	| { isFinal: true; xy: WithXY };
+	| { xy: WithXY };
+
+export type Target = SharedTargets &
+	(
+		| {
+				isFinal: true;
+		  }
+		| {}
+	);
 
 export type StatefulTarget = Target & {
-	debug?: any;
 	score: number;
 };
 
@@ -23,7 +30,7 @@ export type NestedStatefulTarget = StatefulTarget & {
 	next?: NestedStatefulTarget[];
 };
 
-export const unnestTargets = (
+const unnestTargets = (
 	what: NestedStatefulTarget[]
 ): { path: StatefulTarget[]; score: number }[] => {
 	let paths: StatefulTarget[][] = [];
@@ -73,12 +80,8 @@ export const mkFindTarget = (gameState: GameState) => (
 	return target.xy;
 };
 
-export const mkFindPath = (gameState: GameState, roads: Road[]) => (
-	from: WithXY,
-	to: WithXY
-): Target[] => {
-	const findTarget = mkFindTarget(gameState);
-	const usableRoads: Target[] = roads
+const getUsableRoadList = (roads: Road[], final: Agent): Target[] => {
+	let returnable: Target[] = roads
 		.map((road) => [
 			{
 				roadId: road.id,
@@ -90,29 +93,36 @@ export const mkFindPath = (gameState: GameState, roads: Road[]) => (
 			},
 		])
 		.flat();
-	usableRoads.push({ ...targetFromXY(from), isFinal: true });
+	returnable.push({ agentId: final.id, isFinal: true });
+	return returnable;
+};
+
+export const mkFindPath = (gameState: GameState, roads: Road[]) => (
+	mover: MoverAgent,
+	to: Agent
+): Target[] => {
+	const findTarget = mkFindTarget(gameState);
+	const usableRoads = getUsableRoadList(roads, mover);
 
 	const getDistanceScoreFrom = (
 		targets: Target[],
 		from: Target
 	): StatefulTarget[] => {
 		const xy = findTarget(from);
-		return targets
-			.map((rd) => {
-				const road = findTarget(rd);
-				let score = getDistanceToPoint(road, xy);
-				// prefer same road
-				if ('roadId' in from && 'roadId' in rd) {
-					if (from.roadId === rd.roadId) {
-						score = score / 10;
-					}
+		return targets.map((rd) => {
+			const road = findTarget(rd);
+			let score = getDistanceToPoint(road, xy);
+			// prefer same road
+			if ('roadId' in from && 'roadId' in rd) {
+				if (from.roadId === rd.roadId) {
+					score = score / mover.preferenceForRoads;
 				}
-				return { ...rd, score };
-			})
-			.sort((a, b) => a.score - b.score);
+			}
+			return { ...rd, score };
+		});
 	};
 
-	const addNext = (
+	const calculateAllPaths = (
 		targets: Target[],
 		fromTarget: Target
 	): NestedStatefulTarget[] => {
@@ -123,13 +133,14 @@ export const mkFindPath = (gameState: GameState, roads: Road[]) => (
 			}
 			const road = findTarget(target);
 			const nextTargets = targets.filter((tg) => findTarget(tg) !== road);
-			const next = addNext(nextTargets, target);
+			const next = calculateAllPaths(nextTargets, target);
 			return { ...target, next };
 		});
 	};
 
-	const journeys = addNext([...usableRoads], targetFromXY(to));
+	const toTarget = { agentId: to.id };
+	const journeys = calculateAllPaths([...usableRoads], toTarget);
 	const best = unnestTargets(journeys)[0].path;
-	const path = [...best.reverse(), targetFromXY(to)];
+	const path = [...best.reverse(), toTarget];
 	return path;
 };
