@@ -1,8 +1,8 @@
-import { GameState, ID, Agent, Road } from './../defs';
+import { GameState, ID, Agent } from './../defs';
 import { MkConsumer } from '../agent/consumer';
 import { MkFactory } from '../agent/factory';
 import { MkMover } from '../agent/mover';
-import { MkRoad } from '../dressing/road';
+import { MkRoad, Road } from '../dressing/road';
 import { handlers } from './handlers';
 
 let time = Date.now();
@@ -68,6 +68,7 @@ let mover = MkMover([factory.id], [consumer.id]);
 [
 	MkRoad('first road', { x: 10, y: 10 }, { x: 15, y: 30 }),
 	MkRoad('second approach', { x: 30, y: 15 }, { x: 15, y: 30 }),
+	MkRoad('weir', { x: 60, y: 20 }, { x: 55, y: 15 }),
 ].map(addRoad);
 
 export const gameLoop = (prevState: GameState) => {

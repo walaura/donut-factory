@@ -1,8 +1,9 @@
-import { Agent, AgentStateType, MoverAgent } from '../defs';
-import { MsgActions, postFromSw } from '../helper/message';
-import { xy, xy2arr } from '../helper/xy';
-import { findAgent, mutateAgent, pauseGame } from '../loop/loop';
-import { Handler, Road, UnitAgent, WithXY } from './../defs';
+import { pauseGame } from './../loop/loop';
+import { AgentStateType, BaseAgent, ID } from '../defs';
+import { Road, RoadEnd } from '../dressing/road';
+import { midpoint, xy, xy2arr } from '../helper/xy';
+import { findAgent, mutateAgent } from '../loop/loop';
+import { Handler, UnitAgent, WithXY } from './../defs';
 const d3 = require('d3-polygon');
 
 type Movement = {
@@ -16,14 +17,6 @@ const addSpeed = (movement: Movement, speed: number): Movement => ({
 	left: movement.left * speed,
 	bottom: movement.bottom * speed,
 	top: movement.top * speed,
-});
-
-const midpoint = (
-	{ x: x1, y: y1 }: WithXY,
-	{ x: x2, y: y2 }: WithXY
-): WithXY => ({
-	x: (x1 + x2) / 2,
-	y: (y1 + y2) / 2,
 });
 
 const combineMovements = (mvmnts: Movement[]): Movement => {
@@ -69,11 +62,138 @@ const getRoadMoverTriangleArea = (road: Road, mover: WithXY) => {
 	);
 };
 
+const getDistanceToPoint = (a: WithXY, b: WithXY) => {
+	return Math.hypot(a.x - b.x, a.y - b.y);
+};
+
 const atPos = (from: WithXY, to: WithXY) => {
 	return Math.hypot(from.x - to.x, from.y - to.y) < 1;
 };
 
+type Target =
+	| {
+			roadId: ID;
+			roadEnd: RoadEnd;
+	  }
+	| {
+			agentId: ID;
+	  }
+	| { xy: WithXY }
+	| { isFinal: true; xy: WithXY };
+
+type StatefulTarget = Target & {
+	debug?: any;
+	score: number;
+};
+
+type NestedStatefulTarget = StatefulTarget & {
+	next?: NestedStatefulTarget[];
+};
+
+const unnestTargets = (
+	what: NestedStatefulTarget[]
+): { path: StatefulTarget[]; score: number }[] => {
+	let paths: StatefulTarget[][] = [];
+	const visitor = (
+		history: StatefulTarget[] = [],
+		what: NestedStatefulTarget[]
+	) => {
+		for (let w of what) {
+			if (w.next) {
+				const { next, ...filter } = w;
+				visitor([...history, filter], w.next);
+			} else {
+				const pushable: StatefulTarget[] = [
+					...(history as StatefulTarget[]),
+					w as StatefulTarget,
+				];
+				paths.push(pushable);
+			}
+		}
+	};
+	visitor([], what);
+
+	return paths
+		.map((path) => ({
+			path,
+			score: path.reduce((acc, { score }) => acc + score, 0),
+		}))
+		.sort((a, b) => a.score - b.score)
+		.splice(0, 4);
+};
+
+const targetFromXY = ({ x, y }: WithXY): Target => ({ xy: { x, y } });
+
 export const moverHandler: Handler<MoverAgent> = (tick, state, gameState) => {
+	const findTarget = (target: Target): WithXY => {
+		if ('roadId' in target) {
+			return gameState.roads[target.roadId][target.roadEnd];
+		}
+		if ('agentId' in target) {
+			return findAgent(target.agentId, gameState);
+		}
+		return target.xy;
+	};
+
+	const isEmpty = () => state.held <= 0;
+
+	const path = (from: WithXY, to: WithXY, roads: Road[]): Target[] => {
+		const usableRoads: Target[] = roads
+			.map((road) => [
+				{
+					roadId: road.id,
+					roadEnd: RoadEnd.end,
+				},
+				{
+					roadId: road.id,
+					roadEnd: RoadEnd.start,
+				},
+			])
+			.flat();
+		usableRoads.push({ ...targetFromXY(from), isFinal: true });
+
+		const getDistanceScoreFrom = (
+			targets: Target[],
+			from: Target
+		): StatefulTarget[] => {
+			const xy = findTarget(from);
+			return targets
+				.map((rd) => {
+					const road = findTarget(rd);
+					let score = getDistanceToPoint(road, xy);
+					// prefer same road
+					if ('roadId' in from && 'roadId' in rd) {
+						if (from.roadId === rd.roadId) {
+							score = score / 10;
+						}
+					}
+					return { ...rd, score };
+				})
+				.sort((a, b) => a.score - b.score);
+		};
+
+		const addNext = (
+			targets: Target[],
+			fromTarget: Target
+		): NestedStatefulTarget[] => {
+			const score = getDistanceScoreFrom(targets, fromTarget);
+			return score.map((target) => {
+				if ('isFinal' in target) {
+					return target;
+				}
+				const road = findTarget(target);
+				const nextTargets = targets.filter((tg) => findTarget(tg) !== road);
+				const next = addNext(nextTargets, target);
+				return { ...target, next };
+			});
+		};
+
+		const journeys = addNext([...usableRoads], targetFromXY(to));
+		const best = unnestTargets(journeys)[0].path;
+		const path = [...best.reverse(), targetFromXY(to)];
+		return path;
+	};
+
 	const move = (from: WithXY, to: WithXY, roads: Road[]) => {
 		let speed = 0.05;
 
@@ -125,12 +245,10 @@ export const moverHandler: Handler<MoverAgent> = (tick, state, gameState) => {
 		applyMovement(combineMovements(movements));
 	};
 
-	const isEmpty = () => state.held <= 0;
-
 	let moveFrom = findAgent(state.from[0], gameState);
 	let moveTo = findAgent(state.to[0], gameState);
 	if (state.path.length > 0) {
-		let currentVisit = state.path[0];
+		let currentVisit = findTarget(state.path[0]);
 		if (!atPos(state, currentVisit)) {
 			move(state, currentVisit, Object.values(gameState.roads));
 		} else {
@@ -139,36 +257,45 @@ export const moverHandler: Handler<MoverAgent> = (tick, state, gameState) => {
 	}
 
 	if (atPos(state, moveFrom)) {
-		state.held += 0.1;
+		state.held += state.loadSpeed;
 		mutateAgent<UnitAgent>(moveFrom.id, (prev) => ({
 			...prev,
-			exports: prev.exports - 0.1,
+			exports: prev.exports - state.loadSpeed,
 		}));
-		if (state.held >= 10) {
-			state.path = [Object.values(gameState.roads)[0].end, moveTo];
-			console.log('pathing');
-			pauseGame();
+		if (state.held >= state.capacity && state.path.length <= 0) {
+			state.path = path(state, moveTo, Object.values(gameState.roads));
 		}
 	}
 	if (atPos(state, moveTo)) {
-		state.held -= 0.01;
+		state.held -= state.loadSpeed;
 		mutateAgent<UnitAgent>(moveTo.id, (prev) => ({
 			...prev,
-			exports: prev.imports + 0.1,
+			imports: prev.imports + state.loadSpeed,
 		}));
-		if (isEmpty()) {
-			state.path = [Object.values(gameState.roads)[0].end, moveFrom];
+		if (isEmpty() && state.path.length <= 0) {
+			state.path = path(state, moveFrom, Object.values(gameState.roads));
+			pauseGame();
 		}
 	}
 
 	if (isEmpty() && state.path.length === 0) {
-		state.path.push(moveFrom);
+		state.path.push({ agentId: moveFrom.id });
 	}
 
 	return state;
 };
 
-const MkMover = (from = [], to = []): Agent => {
+export interface MoverAgent extends BaseAgent {
+	held: number;
+	loadSpeed: number;
+	capacity: number;
+	from: ID[];
+	to: ID[];
+	type: AgentStateType.MOVER;
+	path: Target[];
+}
+
+const MkMover = (from = [], to = []): MoverAgent => {
 	return {
 		id: 'TEST_mover',
 		emoji: '🚚',
@@ -180,6 +307,8 @@ const MkMover = (from = [], to = []): Agent => {
 		to,
 		path: [],
 		handler: 'moverHandler',
+		loadSpeed: 0.75,
+		capacity: 4,
 		//distanceHistory: [],
 	};
 };

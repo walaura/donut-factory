@@ -1,6 +1,16 @@
-import { Road } from '../defs';
+import { WithID, WithXY } from '../defs';
 
-const fakeName = () => {};
+export enum RoadEnd {
+	'start' = 'start',
+	'end' = 'end',
+}
+
+export interface Road extends WithID {
+	id: string;
+	name?: string;
+	[RoadEnd.start]: WithXY;
+	[RoadEnd.end]: WithXY;
+}
 
 const MkRoad = (
 	name = 'wah',

@@ -4,6 +4,7 @@ import { html, render, svg, TemplateResult } from 'lit-html';
 import { styleMap } from 'lit-html/directives/style-map.js';
 import { Agent, AgentStateType, GameState, Road, WithXY, ID } from './defs';
 import './game.css';
+import { midpoint } from './helper/xy';
 
 //@ts-ignore
 const { logger, game, statusbaar } = window;
@@ -39,7 +40,7 @@ const Info = (agentId: ID, gameState: GameState) => {
 		return html`On their way to ${findAgent(agent.from[0], gameState).emoji}`;
 	} else {
 		return html`delivering ${agent.held} boxes to
-		${findAgent(agent.from[1], gameState).emoji}`;
+		${findAgent(agent.from[0], gameState).emoji}`;
 	}
 };
 
@@ -59,7 +60,7 @@ const MkAgent = (agent: Agent, gameState: GameState) => {
 		(gameState) =>
 			html`${Info(agent.id, gameState)}
 				<hr />
-				<pre>${agent}</pre>`
+				${pretty(agent)}`
 	);
 	return html`<x-unit
 		@click=${() => {
@@ -72,14 +73,29 @@ const MkAgent = (agent: Agent, gameState: GameState) => {
 	</x-unit>`;
 };
 
-const MkRoad = (road: Road) =>
-	svg`<line
-		x1="${road.start.x * 10}"
-		y1="${road.start.y * 10}"
-		x2="${road.end.x * 10}"
-		y2="${road.end.y * 10}"
-		stroke="black"
-	/>`;
+const MkRoad = (road: Road) => {
+	const start = {
+		x: road.start.x * 10,
+		y: road.start.y * 10,
+	};
+	const end = {
+		x: road.end.x * 10,
+		y: road.end.y * 10,
+	};
+
+	const mid = midpoint(start, end);
+
+	return svg`
+	  <text x=${mid.x} y=${mid.y}>${road.name}</text>
+		<line
+			x1="${start.x}"
+			y1="${start.y}"
+			x2="${end.x}"
+			y2="${end.y}"
+			stroke="black"
+		/>
+	`;
+};
 
 const useDraggable = (pos: WithXY) => {
 	let delta = { x: 0, y: 0 };
@@ -145,8 +161,6 @@ const Board = (state: GameState) =>
 	`;
 
 let windows = [];
-
-//const Button = () =>
 
 const Tools = (state: GameState) => {
 	let date = new Date(state.date);

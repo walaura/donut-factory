@@ -1,4 +1,6 @@
 import { handlers } from './loop/handlers';
+import { MoverAgent } from './agent/mover';
+import { Road } from './dressing/road';
 
 export type ID = string;
 
@@ -34,22 +36,7 @@ export interface UnitAgent extends BaseAgent {
 	type: AgentStateType.UNIT;
 }
 
-export interface MoverAgent extends BaseAgent {
-	held: number;
-	from: ID[];
-	to: ID[];
-	type: AgentStateType.MOVER;
-	path: WithXY[];
-}
-
 export type Agent = UnitAgent | MoverAgent;
-
-export interface Road extends WithID {
-	id: string;
-	name?: string;
-	start: WithXY;
-	end: WithXY;
-}
 
 export interface GameState {
 	paused: boolean;
