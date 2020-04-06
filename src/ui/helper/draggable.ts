@@ -1,7 +1,7 @@
-import { WithXY } from '../../defs';
+import { XY } from '../../defs';
 import { html } from 'lit-html';
 
-export const draggable = (pos: WithXY) => {
+export const draggable = (pos: XY) => {
 	let delta = { x: 0, y: 0 };
 	let dragging = false;
 

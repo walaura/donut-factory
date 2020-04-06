@@ -1,12 +1,8 @@
+import { Road } from '../dressing/road';
+import { MsgActions } from '../helper/message';
+import { Agent, GameState, ID, LedgerRecord } from './../defs';
 import { postFromWindow } from './../helper/message';
-import { GameState, ID, Agent, LedgerRecord } from './../defs';
-import { MkConsumer } from '../agent/consumer';
-import { MkFactory } from '../agent/factory';
-import { MkMover } from '../agent/mover';
-import { MkRoad, Road } from '../dressing/road';
-import { handlers } from './handlers';
-import { makeRoadName } from '../helper/names';
-import { Message, MsgActions } from '../helper/message';
+import { getHandlers } from './handlers';
 
 let time = Date.now();
 let agentMutations: AgentMutation[] = [];
@@ -37,7 +33,7 @@ export const mutateAgent = <S extends Agent = Agent>(
 	}
 };
 
-const mutateGame = (mutation: GameMutation) => {
+export const mutateGame = (mutation: GameMutation) => {
 	gameMutations.push(mutation);
 };
 
@@ -73,39 +69,18 @@ export const addFunds = (record: Omit<LedgerRecord, 'date'>) => {
 	}));
 };
 
-const initialState: GameState = {
-	ledger: [],
-	paused: false,
-	width: 80,
-	height: 40,
-	date: 0,
-	agents: {},
-	roads: {},
-};
-let factory = MkFactory();
-let consumer = MkConsumer();
-let mover = MkMover([factory.id], [consumer.id]);
-
-let firstRoad = MkRoad(makeRoadName(), { x: 10, y: 10 }, { x: 15, y: 28 });
-[factory, consumer, mover].map(addAgent);
-[
-	firstRoad,
-	MkRoad(makeRoadName(), { x: 32, y: 15 }, { x: 15, y: 30 }),
-	MkRoad(makeRoadName(), { x: 60, y: 20 }, { x: 55, y: 15 }),
-].map(addRoad);
-
-addFunds({
-	tx: 10000,
-	reason: `The owners of ${firstRoad.name} saw great potential in you`,
-});
-
 export const gameLoop = (prevState: GameState) => {
 	let gameState = { ...prevState };
+
 	gameState.paused = false;
 	const now = Date.now();
 	const delta = (now - time) / 16;
 	time = now;
 	gameState.date += 1000;
+
+	while (gameMutations.length) {
+		gameState = gameMutations.pop()(gameState);
+	}
 
 	while (agentMutations.length) {
 		const muta = agentMutations.pop();
@@ -116,16 +91,10 @@ export const gameLoop = (prevState: GameState) => {
 		);
 	}
 
-	while (gameMutations.length) {
-		gameState = gameMutations.pop()(gameState);
-	}
-
 	for (let unit of Object.values(gameState.agents)) {
 		if (unit.handler) {
-			unit = handlers[unit.handler](delta, unit as any, gameState);
+			unit = getHandlers()[unit.handler](delta, unit as any, gameState);
 		}
 	}
 	return gameState;
 };
-
-export { initialState };

@@ -17,10 +17,19 @@ listenFromWindow((data) => {
 			return;
 	}
 });
-postFromWindow({ action: MsgActions.TICK });
+let initialState = null;
+try {
+	initialState = JSON.parse(localStorage.getItem('autosave'));
+} catch {}
+postFromWindow({ action: MsgActions.START, initialState });
 
+let lastAutosave = Date.now();
 const loopWithState = (state: GameState) => {
 	renderGame(state);
+	if (Date.now() - lastAutosave > 2000) {
+		lastAutosave = Date.now();
+		window.localStorage.setItem('autosave', JSON.stringify(state));
+	}
 	if (!state.paused) {
 		postFromWindow({ action: MsgActions.TICK });
 	}

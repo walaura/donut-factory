@@ -1,4 +1,4 @@
-import { AgentStateType, BaseAgent, ID } from '../defs';
+import { AgentStateType, BasePlaceableAgent, ID } from '../defs';
 import { addSpeedToMovement, Movement } from '../helper/movement';
 import {
 	getDistanceToPoint,
@@ -6,14 +6,17 @@ import {
 	mkFindTarget,
 	Target,
 } from '../helper/pathfinding';
-import { findAgent, mutateAgent, addFunds } from '../loop/loop';
-import { Handler, UnitAgent, WithXY } from './../defs';
+import { xy } from '../helper/xy';
+import { addFunds, findAgent, mutateAgent } from '../loop/loop';
+import { UnitAgent, XY } from './../defs';
+import { addId, addPosition } from './helper/generate';
+import { HandlerFn } from '../loop/handlers';
 
-const isAtPos = (from: WithXY, to: WithXY) => {
+const isAtPos = (from: XY, to: XY) => {
 	return getDistanceToPoint(from, to) < 1;
 };
 
-export const moverHandler: Handler<MoverAgent> = (tick, state, gameState) => {
+export const moverHandler: HandlerFn<MoverAgent> = (tick, state, gameState) => {
 	const findTarget = mkFindTarget(gameState);
 	const findPath = mkFindPath(gameState, Object.values(gameState.roads));
 
@@ -24,7 +27,7 @@ export const moverHandler: Handler<MoverAgent> = (tick, state, gameState) => {
 		const to = findTarget(target);
 		return isAtPos(state, to);
 	};
-	const move = (from: WithXY, target: Target) => {
+	const move = (from: XY, target: Target) => {
 		let speed = 0.05;
 
 		if (
@@ -109,7 +112,7 @@ export const moverHandler: Handler<MoverAgent> = (tick, state, gameState) => {
 	return state;
 };
 
-export interface MoverAgent extends BaseAgent {
+export interface MoverAgent extends BasePlaceableAgent {
 	held: number;
 	loadSpeed: number;
 	preferenceForRoads: number;
@@ -124,12 +127,12 @@ export interface MoverAgent extends BaseAgent {
 	};
 }
 
-const MkMover = (from = [], to = []): MoverAgent => {
+export const MkMover = (from = [], to = []): MoverAgent => {
 	return {
-		id: 'TEST_mover',
+		...addId(),
+		...addPosition(xy([0, 0])),
+		name: 'Bus 1',
 		emoji: '🚚',
-		x: 10,
-		y: 0,
 		held: 0,
 		loadSpeed: 0.1,
 		capacity: 4,
@@ -141,8 +144,5 @@ const MkMover = (from = [], to = []): MoverAgent => {
 		path: [],
 		handler: 'moverHandler',
 		gross: {},
-		//distanceHistory: [],
 	};
 };
-
-export { MkMover };

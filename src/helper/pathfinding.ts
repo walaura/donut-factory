@@ -1,5 +1,5 @@
 import { GameState, Agent } from '../defs';
-import { ID, WithXY } from '../defs';
+import { ID, XY } from '../defs';
 import { RoadEnd, Road } from '../dressing/road';
 import { findAgent } from '../loop/loop';
 import { MoverAgent } from '../agent/mover';
@@ -12,7 +12,7 @@ type SharedTargets =
 	| {
 			agentId: ID;
 	  }
-	| { xy: WithXY };
+	| { xy: XY };
 
 export type Target = SharedTargets &
 	(
@@ -62,15 +62,13 @@ const unnestTargets = (
 		.splice(0, 4);
 };
 
-export const getDistanceToPoint = (a: WithXY, b: WithXY) => {
+export const getDistanceToPoint = (a: XY, b: XY) => {
 	return Math.hypot(a.x - b.x, a.y - b.y);
 };
 
-export const targetFromXY = ({ x, y }: WithXY): Target => ({ xy: { x, y } });
+export const targetFromXY = ({ x, y }: XY): Target => ({ xy: { x, y } });
 
-export const mkFindTarget = (gameState: GameState) => (
-	target: Target
-): WithXY => {
+export const mkFindTarget = (gameState: GameState) => (target: Target): XY => {
 	if ('roadId' in target) {
 		return gameState.roads[target.roadId][target.roadEnd];
 	}

@@ -1,20 +1,28 @@
-import { WithXY, ID } from './../defs';
+import { XY, ID } from './../defs';
 import { GameState } from '../defs';
 
 export enum MsgActions {
 	'TOCK' = 'TOCK',
 	'TICK' = 'TICK',
 	'PAUSE' = 'PAUSE',
+	'START' = 'START',
 	'MUTATE_AGENT' = 'MUTATE_AGENT',
 }
 
 export type Message =
 	| {
-			action: Exclude<MsgActions, MsgActions.TOCK | MsgActions.MUTATE_AGENT>;
+			action: Exclude<
+				MsgActions,
+				MsgActions.TOCK | MsgActions.START | MsgActions.MUTATE_AGENT
+			>;
 	  }
 	| {
 			action: MsgActions.TOCK;
 			state: GameState;
+	  }
+	| {
+			action: MsgActions.START;
+			initialState: GameState;
 	  }
 	| {
 			action: MsgActions.MUTATE_AGENT;

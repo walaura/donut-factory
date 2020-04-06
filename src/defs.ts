@@ -1,36 +1,40 @@
-import { handlers } from './loop/handlers';
+import { HandlerName } from './loop/handlers';
 import { MoverAgent } from './agent/mover';
 import { Road } from './dressing/road';
 
 export type ID = string;
-
-export type Handler<T extends Agent = Agent> = (
-	tick: number,
-	ownState: T,
-	gameState: GameState
-) => T;
 
 export enum AgentStateType {
 	'UNIT',
 	'MOVER',
 }
 
-export interface WithXY {
+export interface XY {
 	x: number;
 	y: number;
+}
+
+export interface WithXY extends XY {
+	placeable: true;
 }
 
 export interface WithID {
 	id: ID;
 }
 
-export interface BaseAgent extends WithXY, WithID {
-	emoji: string;
-	type: AgentStateType;
-	handler?: keyof typeof handlers;
+export interface WithName {
+	name: string;
 }
 
-export interface UnitAgent extends BaseAgent {
+export interface BaseAgent extends WithID, WithName {
+	emoji: string;
+	type: AgentStateType;
+	handler?: HandlerName;
+}
+
+export interface BasePlaceableAgent extends BaseAgent, WithXY {}
+
+export interface UnitAgent extends BasePlaceableAgent, XY {
 	exports: number;
 	imports: number;
 	type: AgentStateType.UNIT;

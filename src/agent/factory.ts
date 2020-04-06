@@ -1,6 +1,9 @@
-import { UnitAgent, Handler, Agent, AgentStateType } from '../defs';
+import { UnitAgent, Agent, AgentStateType, XY } from '../defs';
+import { addId, addPosition } from './helper/generate';
+import { makeFactoryName } from '../helper/names';
+import { HandlerFn } from '../loop/handlers';
 
-export const factoryHandler: Handler<UnitAgent> = (
+export const factoryHandler: HandlerFn<UnitAgent> = (
 	tick,
 	ownState,
 	gameState
@@ -9,13 +12,16 @@ export const factoryHandler: Handler<UnitAgent> = (
 	return ownState;
 };
 
-export const MkFactory = (): Agent => {
+export const MkFactory = (xy: XY): UnitAgent => {
 	const state: UnitAgent = {
-		id: 'TEST_Factory',
+		...addId(),
+		...addPosition(xy),
+		name: makeFactoryName(),
 		exports: 0,
 		imports: 0,
 		type: AgentStateType.UNIT,
 		emoji: '🏭',
+		placeable: true,
 		x: 10,
 		y: 10,
 		handler: 'factoryHandler',

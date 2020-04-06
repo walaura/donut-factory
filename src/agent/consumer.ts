@@ -1,13 +1,15 @@
+import { XY } from './../defs';
 import { UnitAgent, Agent, AgentStateType } from '../defs';
+import { addId, addPosition } from './helper/generate';
 
-export const MkConsumer = (): Agent => {
+export const MkConsumer = (xy: XY): UnitAgent => {
 	return {
-		id: 'TEST_CONSUMER2323',
+		...addId(),
+		...addPosition(xy),
+		name: 'Fairy lalal',
 		exports: 0,
 		imports: 0,
 		type: AgentStateType.UNIT,
 		emoji: '🧚‍♀️',
-		x: 40,
-		y: 15,
 	};
 };

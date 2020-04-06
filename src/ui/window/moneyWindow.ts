@@ -16,8 +16,8 @@ const $row = (rc: LedgerRecord) => html`
 	</table-row>
 `;
 
-const $moneyWindow = $window('💰', 'Money', (state: GameState) =>
-	[...state.ledger].reverse().map($row)
-);
+const $moneyWindow = $window('💰', 'Money', (state: GameState) => [
+	html`<xw-row>${[...state.ledger].reverse().map($row)}</xw-row>`,
+]);
 
 export { $moneyWindow };

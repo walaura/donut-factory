@@ -1,15 +1,13 @@
-import { WithID, WithXY } from '../defs';
+import { WithID, XY, WithName } from '../defs';
 
 export enum RoadEnd {
 	'start' = 'start',
 	'end' = 'end',
 }
 
-export interface Road extends WithID {
-	id: string;
-	name?: string;
-	[RoadEnd.start]: WithXY;
-	[RoadEnd.end]: WithXY;
+export interface Road extends WithID, WithName {
+	[RoadEnd.start]: XY;
+	[RoadEnd.end]: XY;
 }
 
 const MkRoad = (
