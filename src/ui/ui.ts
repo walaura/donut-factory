@@ -119,12 +119,15 @@ const MkRoad = (road: Road) => {
 
 	return svg`
 	  <text x=${mid.x} y=${mid.y}>${road.name}</text>
+		<circle cx=${start.x} cy=${start.y} r="4"/>
+		<circle cx=${end.x} cy=${end.y} r="4"/>
 		<line
 			x1="${start.x}"
 			y1="${start.y}"
 			x2="${end.x}"
 			y2="${end.y}"
 			stroke="black"
+			stroke-width="2" stroke-linecap="butt"
 		/>
 	`;
 };
