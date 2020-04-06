@@ -99,6 +99,7 @@ export const moverHandler: HandlerFn<MoverAgent> = (tick, state, gameState) => {
 			addFunds({
 				tx: state.capacity * 20,
 				reason: `Sold ${state.capacity} goods to ${moveTo.emoji}`,
+				relevantAgents: [state.id, moveTo.id],
 			});
 
 			state.path = findPath(state, moveFrom);

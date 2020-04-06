@@ -1,4 +1,5 @@
-import { GameState } from './helper/defs';
+import { findAgent } from './loop/loop';
+import { GameState, ID, WithID } from './helper/defs';
 import {
 	RendererWorkerMessage,
 	MsgActions,
@@ -6,6 +7,7 @@ import {
 } from './helper/message';
 import { getDistanceToPoint, Target } from './helper/pathfinding';
 import { XY, scale as mkScale, xy2arr } from './helper/xy';
+import { appendWithId } from './agent/helper/generate';
 let canvas: OffscreenCanvas;
 let ctx: OffscreenCanvasRenderingContext2D;
 let delta = 0;
@@ -49,17 +51,100 @@ export type RendererState = {
 	selected: Target;
 };
 
-function draw(state: GameState): RendererState {
-	delta++;
+let animations: { [key in string]: AnimationCell } = {};
 
+const lerp = (start, end, t) => {
+	return start * (1 - t) + end * t;
+};
+
+interface Animation extends WithID {
+	to: number;
+	speed: number;
+	progress: number;
+	lastActive?: number;
+	reverses?: boolean;
+	then?: () => void;
+}
+interface AnimationCell extends WithID {
+	value: number;
+	original: number;
+	queue: { [key in string]: Animation };
+}
+
+const useAnimatedValue = (original, id: ID) => {
+	if (!animations[id]) {
+		animations[id] = {
+			id,
+			original,
+			value: original,
+			queue: {},
+		};
+	}
+	return {
+		value: animations[id].value,
+		hover: (toId: ID, props: Omit<Animation, 'id' | 'progress'>) => {
+			if (!animations[id].queue[toId]) {
+				animations[id].queue[toId] = {
+					id: toId,
+					...props,
+					progress: 0,
+					lastActive: Date.now(),
+					reverses: true,
+				};
+			} else {
+				animations[id].queue[toId].lastActive = Date.now();
+			}
+		},
+		toFixed: (toId: ID, props: Omit<Animation, 'id' | 'progress'>) => {
+			if (!animations[id].queue[toId]) {
+				animations[id].queue[toId] = {
+					id: toId,
+					...props,
+					progress: 0,
+				};
+			}
+		},
+	};
+};
+
+let feedback = {};
+
+function draw(prevState: GameState, state: GameState): RendererState {
+	delta++;
+	const now = Date.now();
 	selected = { xy: cursor };
 
 	ctx.clearRect(0, 0, width, height);
 	bg();
 
-	// agents
+	// anim
+	for (let animation of Object.values(animations)) {
+		for (let cell of Object.values(animation.queue)) {
+			cell.progress = Math.min(cell.progress + cell.speed, 1);
+			animation.value = lerp(animation.value, cell.to, cell.progress);
+			if (
+				(!cell.lastActive && cell.progress >= 1) ||
+				(cell.lastActive && cell.lastActive < now - 30)
+			) {
+				delete animation.queue[cell.id];
+				if (cell.then) {
+					cell.then();
+				}
+				if (cell.reverses) {
+					animation.queue['reverse-' + cell.id] = {
+						id: 'reverse-' + cell.id,
+						to: animation.original,
+						speed: cell.speed,
+						progress: 0,
+						reverses: false,
+					};
+				}
+			}
+		}
+	}
 	ctx.fillStyle = 'black';
 
+	//roads
 	for (let road of Object.values(state.roads)) {
 		ctx.beginPath();
 		ctx.moveTo(...scaleArr(road.start));
@@ -71,6 +156,7 @@ function draw(state: GameState): RendererState {
 		ctx.fill();
 	}
 
+	//agents
 	for (let agent of Object.values(state.agents)) {
 		if ('agentId' in selected) {
 			break;
@@ -85,19 +171,60 @@ function draw(state: GameState): RendererState {
 	}
 
 	for (let agent of Object.values(state.agents)) {
-		ctx.font = '40px Arial';
+		let fontSize = useAnimatedValue(40, 'ag:' + agent.id);
 		if ('agentId' in selected && selected.agentId === agent.id) {
-			ctx.font = '50px Arial';
+			fontSize.hover('hover', {
+				to: 50,
+				speed: 0.5,
+			});
 		}
+		ctx.font = fontSize.value + 'px Arial';
 		ctx.fillText(agent.emoji, ...xy2arr(scale(agent)));
 	}
 
-	if (pika) {
-		//	ctx.drawImage(pika, 0, 0);
+	// pop cool text
+	if (
+		prevState.ledger.length !== state.ledger.length &&
+		state.ledger[state.ledger.length - 1].relevantAgents
+	) {
+		feedback = appendWithId(feedback, {
+			xy: findAgent(
+				state.ledger[state.ledger.length - 1].relevantAgents[0],
+				state
+			),
+			text: state.ledger[state.ledger.length - 1].tx,
+		});
 	}
+
+	// overlays
+	for (let toast of Object.values(feedback)) {
+		const yDelta = useAnimatedValue(0, 'toast:' + toast.id);
+		yDelta.toFixed('pop', {
+			to: 1,
+			speed: 0.0025,
+			then: () => {
+				delete feedback[toast.id];
+				//console.log(feedback[toast.id]);
+			},
+		});
+		ctx.font = '16px sans-serif';
+		ctx.globalAlpha = lerp(2, 0, yDelta.value);
+		ctx.fillText(
+			toast.text,
+			...xy2arr(
+				scale({
+					x: toast.xy.x,
+					y: toast.xy.y + lerp(0, -10, yDelta.value),
+				})
+			)
+		);
+		ctx.globalAlpha = 1;
+	}
+
 	return { selected };
 }
 
+let prevState;
 self.onmessage = function (ev) {
 	let msg = ev.data as RendererWorkerMessage;
 	if (msg.action === MsgActions.SEND_CANVAS) {
@@ -110,8 +237,9 @@ self.onmessage = function (ev) {
 	if (msg.action === MsgActions.TOCK) {
 		postFromWorker<RendererWorkerMessage>({
 			action: MsgActions.CANVAS_RESPONSE,
-			rendererState: draw(msg.state),
+			rendererState: draw(prevState || msg.state, msg.state),
 		});
+		prevState = msg.state;
 	}
 	if (msg.action === MsgActions.SEND_CURSOR) {
 		cursor = { ...msg.pos };

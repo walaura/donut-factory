@@ -42,6 +42,7 @@ export interface LedgerRecord {
 	tx: number;
 	reason: string;
 	date: number;
+	relevantAgents?: ID[];
 }
 
 export type Ledger = LedgerRecord[];
