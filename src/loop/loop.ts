@@ -15,7 +15,10 @@ interface AgentMutation<S extends Agent = Agent> {
 	context: any[];
 }
 
-type GameMutation = (gameState: GameState) => GameState;
+interface GameMutation {
+	mutation: (gameState: GameState, context: any[]) => GameState;
+	context: any[];
+}
 
 export const mutateAgent = <S extends Agent = Agent>(
 	agentId: AgentMutation['agentId'],
@@ -34,8 +37,19 @@ export const mutateAgent = <S extends Agent = Agent>(
 	}
 };
 
-export const mutateGame = (mutation: GameMutation) => {
-	gameMutations.push(mutation);
+export const mutateGame = (
+	mutation: GameMutation['mutation'],
+	context: any[] = []
+) => {
+	if (self.document) {
+		postFromWindow({
+			action: MsgActions.MUTATE_GAME,
+			context,
+			mutation: mutation.toString(),
+		});
+	} else {
+		gameMutations.push({ mutation, context });
+	}
 };
 
 export const findAgent = (id: ID, gameState: GameState): Agent => {
@@ -50,10 +64,13 @@ export const pauseGame = () => {
 };
 
 export const addAgent = (agent: Agent) => {
-	mutateGame((state) => ({
-		...state,
-		agents: { ...state.agents, [agent.id]: agent },
-	}));
+	mutateGame(
+		(state, [agent]: [Agent]) => ({
+			...state,
+			agents: { ...state.agents, [agent.id]: agent },
+		}),
+		[agent]
+	);
 };
 
 export const addRoad = (road: Road) => {
@@ -80,7 +97,8 @@ export const gameLoop = (prevState: GameState) => {
 	gameState.date += 1000;
 
 	while (gameMutations.length) {
-		gameState = gameMutations.pop()(gameState);
+		const muta = gameMutations.pop();
+		gameState = muta.mutation(gameState, muta.context);
 	}
 
 	while (agentMutations.length) {

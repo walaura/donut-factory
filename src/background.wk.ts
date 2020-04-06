@@ -1,6 +1,6 @@
 import { listenFromWorker, MsgActions, postFromWorker } from './helper/message';
 import { getInitialState, startGame } from './loop/initial';
-import { gameLoop, mutateAgent } from './loop/loop';
+import { gameLoop, mutateAgent, mutateGame } from './loop/loop';
 
 let state = getInitialState();
 listenFromWorker((message) => {
@@ -10,6 +10,10 @@ listenFromWorker((message) => {
 			new Function(`return ${message.mutation}`)(),
 			message.context
 		);
+	}
+
+	if (message.action === MsgActions.MUTATE_GAME) {
+		mutateGame(new Function(`return ${message.mutation}`)(), message.context);
 	}
 	if (message.action === MsgActions.START) {
 		if (message.initialState) {

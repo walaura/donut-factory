@@ -1,30 +1,20 @@
-import { numberWithCommas, longDate, clock } from './../helper/format';
+import { html } from 'lit-html';
 import { LedgerRecord } from '../../helper/defs';
+import { UIStatePriority, useGameState } from '../helper/state';
+import { clock, longDate, numberWithCommas } from './../helper/format';
+import { $table, $tableRow } from './rows/table';
 import { $window } from './window';
-import { GameState } from '../../helper/defs';
-import { $pretty } from './rows/pretty';
-import { html, directive } from 'lit-html';
-import { useGameState, UIStatePriority } from '../helper/state';
 
 const currency = '$';
 
-const $row = (rc: LedgerRecord) => html`
-	<table-row>
-		<tr-icon>${rc.tx > 0 ? '🤑' : '🔥'}</tr-icon>
-		${console.log('money')}
-		<div>
-			<strong
-				>${rc.tx > 0 ? '+ ' : '- '}${currency}${numberWithCommas(
-					Math.abs(rc.tx)
-				)}</strong
-			>
-			<span>${rc.reason}</span>
-			<span>${longDate(rc.date)} ${clock(rc.date)}</span>
-		</div>
-	</table-row>
-`;
-
-const $table = (state: LedgerRecord[]) => [...state].reverse().map($row);
+const $row = (rc: LedgerRecord) =>
+	$tableRow({
+		icon: rc.tx > 0 ? '🤑' : '🔥',
+		heading: `${rc.tx > 0 ? '+ ' : '- '}${currency}${numberWithCommas(
+			Math.abs(rc.tx)
+		)}`,
+		accesories: [rc.reason, `${longDate(rc.date)} ${clock(rc.date)}`],
+	});
 
 const $moneyWindow = () =>
 	$window('💰', 'Money', [
@@ -35,7 +25,7 @@ const $moneyWindow = () =>
 				)}
 			</h1>`;
 		}, UIStatePriority.Snail),
-		html`<x-table>${useGameState((state) => $table(state.ledger))}</x-table>`,
+		$table(useGameState((state) => [...state.ledger].reverse().map($row))),
 	]);
 
 export { $moneyWindow };

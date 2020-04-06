@@ -20,6 +20,7 @@ export const MkFactory = (xy: XY): UnitAgent => {
 		name: makeFactoryName(),
 		exports: 0,
 		imports: 0,
+		color: 0,
 		type: AgentStateType.UNIT,
 		emoji: '🏭',
 		placeable: true,

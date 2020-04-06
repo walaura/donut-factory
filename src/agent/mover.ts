@@ -70,8 +70,10 @@ export const moverHandler: HandlerFn<MoverAgent> = (tick, state, gameState) => {
 		}
 	}
 
+	state.gross.isLoadingOrUnloading = false;
 	if (isAtPos(state, moveFrom)) {
 		if (!isFull()) {
+			state.gross.isLoadingOrUnloading = true;
 			state.held += state.loadSpeed;
 			mutateAgent<UnitAgent>(moveFrom.id, (prev) => ({
 				...prev,
@@ -83,12 +85,13 @@ export const moverHandler: HandlerFn<MoverAgent> = (tick, state, gameState) => {
 				tx: state.held * -10,
 				reason: `Bought ${state.held} goods from ${moveFrom.emoji}`,
 			});
-
+			state.gross.isLoadingOrUnloading = false;
 			state.path = findPath(state, moveTo);
 		}
 	}
 	if (isAtPos(state, moveTo)) {
 		if (!isEmpty()) {
+			state.gross.isLoadingOrUnloading = true;
 			state.held -= state.loadSpeed;
 			mutateAgent<UnitAgent>(moveTo.id, (prev) => ({
 				...prev,
@@ -101,12 +104,12 @@ export const moverHandler: HandlerFn<MoverAgent> = (tick, state, gameState) => {
 				reason: `Sold ${state.capacity} goods to ${moveTo.emoji}`,
 				relevantAgents: [state.id, moveTo.id],
 			});
-
+			state.gross.isLoadingOrUnloading = false;
 			state.path = findPath(state, moveFrom);
 		}
 	}
 
-	if (isEmpty() && state.path.length === 0) {
+	if (!state.gross.isLoadingOrUnloading && state.path.length === 0) {
 		state.path.push({ agentId: moveFrom.id });
 	}
 
@@ -124,6 +127,7 @@ export interface MoverAgent extends BasePlaceableAgent {
 	type: AgentStateType.MOVER;
 	path: Target[];
 	gross: {
+		isLoadingOrUnloading: boolean;
 		lastDiscardedPathTarget?: Target;
 	};
 }
@@ -133,6 +137,7 @@ export const MkMover = (from = [], to = []): MoverAgent => {
 		...addId(),
 		...addPosition(xy([0, 0])),
 		name: 'Bus 1',
+		color: 0,
 		emoji: '🚚',
 		held: 0,
 		loadSpeed: 0.1,
@@ -144,6 +149,8 @@ export const MkMover = (from = [], to = []): MoverAgent => {
 		to,
 		path: [],
 		handler: 'moverHandler',
-		gross: {},
+		gross: {
+			isLoadingOrUnloading: false,
+		},
 	};
 };

@@ -1,7 +1,7 @@
 import { findAgent } from './loop/loop';
 import { GameState, ID, WithID } from './helper/defs';
 import {
-	RendererWorkerMessage,
+	WorldWorkerMessage,
 	MsgActions,
 	postFromWorker,
 } from './helper/message';
@@ -71,7 +71,7 @@ interface AnimationCell extends WithID {
 	queue: { [key in string]: Animation };
 }
 
-const useAnimatedValue = (original, id: ID) => {
+const useAnimatedValue = (original: number, id: ID) => {
 	if (!animations[id]) {
 		animations[id] = {
 			id,
@@ -107,7 +107,12 @@ const useAnimatedValue = (original, id: ID) => {
 	};
 };
 
-let feedback = {};
+interface Feedback extends WithID {
+	text: string;
+	xy: XY;
+}
+
+let feedback: { [key in string]: Feedback } = {};
 
 function draw(prevState: GameState, state: GameState): RendererState {
 	delta++;
@@ -151,7 +156,9 @@ function draw(prevState: GameState, state: GameState): RendererState {
 		ctx.lineTo(...scaleArr(road.end));
 		ctx.stroke();
 		ctx.beginPath();
+		//@ts-ignore
 		ctx.arc(...scaleArr(road.start), 3, 0, 2 * Math.PI);
+		//@ts-ignore
 		ctx.arc(...scaleArr(road.end), 3, 0, 2 * Math.PI);
 		ctx.fill();
 	}
@@ -178,8 +185,11 @@ function draw(prevState: GameState, state: GameState): RendererState {
 				speed: 0.5,
 			});
 		}
+
+		ctx.filter = `hue-rotate(${agent.color}deg)`;
 		ctx.font = fontSize.value + 'px Arial';
 		ctx.fillText(agent.emoji, ...xy2arr(scale(agent)));
+		ctx.filter = 'none';
 	}
 
 	// pop cool text
@@ -204,7 +214,6 @@ function draw(prevState: GameState, state: GameState): RendererState {
 			speed: 0.0025,
 			then: () => {
 				delete feedback[toast.id];
-				//console.log(feedback[toast.id]);
 			},
 		});
 		ctx.font = '16px sans-serif';
@@ -226,7 +235,7 @@ function draw(prevState: GameState, state: GameState): RendererState {
 
 let prevState;
 self.onmessage = function (ev) {
-	let msg = ev.data as RendererWorkerMessage;
+	let msg = ev.data as WorldWorkerMessage;
 	if (msg.action === MsgActions.SEND_CANVAS) {
 		canvas = msg.canvas;
 		ctx = canvas.getContext('2d');
@@ -235,7 +244,7 @@ self.onmessage = function (ev) {
 		height = canvas.height / ev.data.scale;
 	}
 	if (msg.action === MsgActions.TOCK) {
-		postFromWorker<RendererWorkerMessage>({
+		postFromWorker<WorldWorkerMessage>({
 			action: MsgActions.CANVAS_RESPONSE,
 			rendererState: draw(prevState || msg.state, msg.state),
 		});

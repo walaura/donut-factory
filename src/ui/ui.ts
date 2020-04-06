@@ -6,7 +6,8 @@ import {
 	listenFromWindow,
 	LoopWorkerMessage,
 	MsgActions,
-	RendererWorkerMessage,
+	WorldWorkerMessage,
+	postFromWindow,
 } from '../helper/message';
 import { Target } from '../helper/pathfinding';
 import { findAgent, mutateAgent } from '../loop/loop';
@@ -17,6 +18,7 @@ import { $agentWindow } from './window/agentWindow';
 import { $moneyWindow } from './window/moneyWindow';
 import { $pretty } from './window/rows/pretty';
 import { $window, $windowDock, addDynamicWindow } from './window/window';
+import { $agentsWindow } from './window/agentsWindow';
 
 const Board = () => html`${$windowDock()}${Tools()} `;
 
@@ -65,13 +67,11 @@ const Tools = () => {
 			<button
 				as="xdp-emoji"
 				@click=${() => {
-					console.log('not yet lol');
+					addDynamicWindow($agentsWindow());
 				}}
 			>
 				<span>
-					${useGameState((state) => {
-						state.paused ? '▶️' : '⏸';
-					}, UIStatePriority.UI)}
+					🌈
 				</span>
 			</button>
 			<button
@@ -98,6 +98,7 @@ const renderSetup = () => {
 		worker.postMessage({ action: 'TOCK', state } as LoopWorkerMessage);
 	};
 	let selected: Target;
+
 	const scale = 2;
 	const $canvas = (window as any).floor as HTMLCanvasElement;
 	$canvas.width = window.innerWidth * scale;
@@ -109,24 +110,24 @@ const renderSetup = () => {
 		worker.postMessage({
 			action: MsgActions.SEND_CURSOR,
 			pos: { x, y },
-		} as RendererWorkerMessage);
+		} as WorldWorkerMessage);
 	});
 	$canvas.addEventListener('click', () => {
-		console.log(selected);
 		if ('agentId' in selected) {
 			addDynamicWindow($agentWindow(selected.agentId));
 		}
 	});
-	const worker = new Worker('../ui.wk.ts');
+
+	const worker = new Worker('../world.wk.ts');
 	worker.postMessage(
 		{
 			action: MsgActions.SEND_CANVAS,
 			canvas: offscreenCanvas,
 			scale,
-		} as RendererWorkerMessage,
+		} as WorldWorkerMessage,
 		[offscreenCanvas]
 	);
-	listenFromWindow<RendererWorkerMessage>((msg) => {
+	listenFromWindow<WorldWorkerMessage>((msg) => {
 		if (msg.action === MsgActions.CANVAS_RESPONSE) {
 			selected = msg.rendererState.selected;
 		}

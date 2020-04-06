@@ -10,6 +10,7 @@
 	background: transparent;
 	box-sizing: border-box;
 	-webkit-font-smoothing: antialiased;
+	font-size: 1em;
 }
 
 button {
@@ -19,6 +20,7 @@ button {
 :root {
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
 		Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+	line-height: 1.2;
 	font-size: 0.85em;
 	--bg: #fff2f6;
 	--bg-dark: #e91e63;
@@ -40,6 +42,14 @@ x-draggable {
 	transform: translate(var(--left), var(--top));
 }
 
+.x-window-breakout {
+	display: block;
+	margin: calc(var(--space-v) * -2) calc(var(--space-h) * -1);
+}
+.x-window-breakout-padding,
+xw-body-row {
+	padding: calc(var(--space-v) * 2) var(--space-h);
+}
 x-window {
 	contain: content;
 	z-index: 9999999;
@@ -54,7 +64,7 @@ x-window {
 	height: 100%;
 	background: var(--bg-light);
 
-	x-window-header {
+	xw-header {
 		font-weight: 600;
 		transform: lowercase;
 		color: var(--bg-dark);
@@ -70,15 +80,15 @@ x-window {
 		&:hover {
 			background: var(--bg);
 		}
-		x-window-header-title {
+		xw-header-title {
 			transform: translate(0, 0.1em);
 		}
-		x-window-header-icon {
+		xw-header-icon {
 			text-align: center;
 			transform: scale(1.25);
 		}
 	}
-	x-window-body {
+	xw-body {
 		border-radius: var(--radius-small);
 		overflow: hidden;
 		background: var(--bg);
@@ -86,8 +96,7 @@ x-window {
 		height: 100%;
 		grid-template-columns: 1fr;
 	}
-	xw-row {
-		padding: calc(var(--space-v) * 2) var(--space-h);
+	xw-body-row {
 		overflow: scroll;
 		&:not(:last-child) {
 			border-bottom: 1px solid var(--bg-light);
@@ -154,18 +163,49 @@ xdp-emoji,
 	}
 }
 
+x-window x-table {
+	display: block;
+}
+
+x-form {
+	display: grid !important;
+	grid-auto-rows: 1fr;
+	align-self: center;
+}
+
+x-form xf-row {
+	display: grid;
+	grid-template-rows: 1fr;
+	grid-template-columns: 1fr 1fr;
+	grid-gap: var(--space-h);
+	border-bottom: 1px solid var(--bg-light);
+}
+
+x-form xf-row h3 {
+	font-weight: 400;
+}
+
 table-row {
 	display: flex;
+	border-bottom: 1px solid var(--bg-light);
 	tr-icon {
 		width: calc(var(--pressable));
 		margin-left: calc(var(--space-h) * -1);
-		margin-top: 0.25em;
+		margin-top: 1em;
 		text-align: center;
 		transform: scale(1.33);
 		flex: 0 0 auto;
+		line-height: 1;
 	}
-	> div > * {
+	> tr-body > * {
 		display: block;
 		margin-bottom: 0.25em;
 	}
+}
+
+x-window select,
+x-window button {
+	background: #fff;
+	padding: 0.5em;
+	box-shadow: var(--shadow-1);
 }

@@ -1,7 +1,7 @@
 import { ID } from './defs';
 import { GameState } from './defs';
 import { XY } from './xy';
-import { RendererState } from '../ui.wk';
+import { RendererState } from '../world.wk';
 
 export enum MsgActions {
 	'SEND_CANVAS' = 'SEND_CANVAS',
@@ -12,9 +12,10 @@ export enum MsgActions {
 	'PAUSE' = 'PAUSE',
 	'START' = 'START',
 	'MUTATE_AGENT' = 'MUTATE_AGENT',
+	'MUTATE_GAME' = 'MUTATE_GAME',
 }
 
-export type RendererWorkerMessage =
+export type WorldWorkerMessage =
 	| {
 			action: MsgActions.SEND_CANVAS;
 			canvas: OffscreenCanvas;
@@ -50,9 +51,14 @@ export type LoopWorkerMessage =
 			agentId: ID;
 			context: any[];
 			mutation: string;
+	  }
+	| {
+			action: MsgActions.MUTATE_GAME;
+			context: any[];
+			mutation: string;
 	  };
 
-export type WorkerMessage = LoopWorkerMessage | RendererWorkerMessage;
+export type WorkerMessage = LoopWorkerMessage | WorldWorkerMessage;
 
 export const isMessage = <M = WorkerMessage>(data): data is M => true;
 
@@ -68,7 +74,7 @@ export const listenFromWorker = <M = WorkerMessage>(
 };
 
 export const postFromWorker = <
-	M extends LoopWorkerMessage | RendererWorkerMessage = LoopWorkerMessage
+	M extends LoopWorkerMessage | WorldWorkerMessage = LoopWorkerMessage
 >(
 	msg: M
 ) => {

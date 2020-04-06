@@ -24,6 +24,7 @@ export interface WithName {
 
 export interface BaseAgent extends WithID, WithName {
 	emoji: string;
+	color: number;
 	type: AgentStateType;
 	handler?: HandlerName;
 }

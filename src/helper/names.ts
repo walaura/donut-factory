@@ -33,3 +33,7 @@ export const makeRoadName = () => {
 export const makeFactoryName = () => {
 	return [names, names, factorySuffix].map(randomArrKey).map(ucFirst).join(' ');
 };
+
+export const makeConsumerName = () => {
+	return [names, names].map(randomArrKey).map(ucFirst).join(' ');
+};
