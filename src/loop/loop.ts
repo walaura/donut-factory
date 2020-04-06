@@ -1,3 +1,4 @@
+import { postFromWindow } from './../helper/message';
 import { GameState, ID, Agent, LedgerRecord } from './../defs';
 import { MkConsumer } from '../agent/consumer';
 import { MkFactory } from '../agent/factory';
@@ -25,13 +26,11 @@ export const mutateAgent = <S extends Agent = Agent>(
 	context: any[] = []
 ) => {
 	if (self.document) {
-		navigator.serviceWorker.ready.then((sw) => {
-			sw.active.postMessage({
-				action: MsgActions.MUTATE_AGENT,
-				agentId,
-				context,
-				mutation: mutation.toString(),
-			} as Message);
+		postFromWindow({
+			action: MsgActions.MUTATE_AGENT,
+			agentId,
+			context,
+			mutation: mutation.toString(),
 		});
 	} else {
 		agentMutations.push({ agentId, mutation, context });

@@ -1,42 +1,25 @@
-import { findAgent, mutateAgent } from './loop/loop';
-import { html, render, svg, TemplateResult } from 'lit-html';
+import { html, render, svg } from 'lit-html';
 //@ts-ignore
 import { styleMap } from 'lit-html/directives/style-map.js';
-import {
-	Agent,
-	AgentStateType,
-	GameState,
-	WithXY,
-	ID,
-	UnitAgent,
-} from './defs';
+import { MoverAgent } from '../agent/mover';
+import { Agent, AgentStateType, GameState, ID } from '../defs';
+import { Road } from '../dressing/road';
+import { midpoint } from '../helper/xy';
+import { findAgent, mutateAgent } from '../loop/loop';
 import './game.css';
-import { midpoint } from './helper/xy';
-import { Road } from './dressing/road';
-import { MoverAgent } from './agent/mover';
+import { $moneyWindow } from './window/moneyWindow';
+import { $pretty } from './window/rows/pretty';
+import { $window, addDynamicWindow, getAllWindows } from './window/window';
+import { shortNumber, numberWithCommas } from './helper/format';
 
 //@ts-ignore
 const { logger, game, statusbaar } = window;
-
-const pretty = (str) => html`<pre>${JSON.stringify(str, null, 2)}</pre>`;
 
 const icons = {
 	exports: '📤',
 	held: '📦',
 	imports: '📥',
 };
-
-const shortNumber = (number: number): string => {
-	const round = Math.round(number * 10) / 10;
-	if (number % 1 === 0) {
-		return number + '';
-	}
-	return round.toFixed(1);
-};
-
-function numberWithCommas(x) {
-	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-}
 
 const Chip = (key: keyof typeof icons, state: Agent) => {
 	if (!state[key] || state[key] === 0) {
@@ -107,17 +90,13 @@ const MkAgent = (agent: Agent, gameState: GameState) => {
 		.map((key) => Chip(key as keyof typeof icons, agent))
 		.filter(Boolean);
 
-	let controller = MkWindow(
-		agent.emoji,
-		'Agent info',
-		(gameState) =>
-			html`${Info(agent.id, gameState)}
-				<hr />
-				${pretty(findAgent(agent.id, gameState))}`
-	);
+	let controller = $window(agent.emoji, 'Agent info', (gameState) => [
+		Info(agent.id, gameState),
+		$pretty(findAgent(agent.id, gameState)),
+	]);
 	return html`<x-unit
 		@click=${() => {
-			windows.push(controller);
+			addDynamicWindow(controller);
 		}}
 		style="${style}"
 	>
@@ -150,56 +129,6 @@ const MkRoad = (road: Road) => {
 	`;
 };
 
-const useDraggable = (pos: WithXY) => {
-	let delta = { x: 0, y: 0 };
-	let dragging = false;
-
-	let handler = ({ screenX: x, screenY: y }) => {
-		if (!dragging) {
-			return;
-		}
-		pos.x = pos.x + x - delta.x;
-		pos.y = pos.y + y - delta.y;
-
-		delta = { x, y };
-	};
-	window.addEventListener('mouseup', () => {
-		dragging = false;
-	});
-	window.addEventListener('mousemove', (ev) => {
-		handler(ev);
-	});
-	const dragHandle = ({ screenX: x, screenY: y }) => {
-		delta = { x, y };
-		dragging = true;
-	};
-	const $draggable = (children) => html`<x-draggable
-		style="--left: ${pos.x}px;--top: ${pos.y}px"
-	>
-		${children}
-	</x-draggable>`;
-	return { dragHandle, $draggable };
-};
-
-const MkWindow = (
-	emoji: string,
-	title: string,
-	renderer: (state: GameState) => TemplateResult | string
-) => {
-	const { dragHandle, $draggable } = useDraggable({ x: 20, y: 20 });
-	return (state: GameState) =>
-		$draggable(html`<x-window>
-			<x-window-header @mousedown=${dragHandle}>
-				<x-window-header-icon>${emoji}</x-window-header-icon>
-				<x-window-header-title>${title}</x-window-header-title>
-				<x-window-header-icon @click=${() => windows.pop()}
-					>x</x-window-header-icon
-				>
-			</x-window-header>
-			<x-window-body>${renderer(state)}</x-window-body>
-		</x-window>`);
-};
-
 const Board = (state: GameState) =>
 	html`
 		<svg
@@ -210,10 +139,10 @@ const Board = (state: GameState) =>
 			${Object.values(state.roads).map(MkRoad)}}
 		</svg>
 		${Object.values(state.agents).map((a) => MkAgent(a, state))}
-		${windows.map((w) => w(state))} ${Tools(state)}
+		${getAllWindows().map((w) => w(state))} ${Tools(state)}
 	`;
 
-let windows = [];
+addDynamicWindow($moneyWindow);
 
 const Tools = (state: GameState) => {
 	let date = new Date(state.date);
@@ -231,9 +160,7 @@ const Tools = (state: GameState) => {
 		<button
 			as="x-dock-panel"
 			@click=${() => {
-				windows.push(
-					MkWindow('💰', 'Money', (state: GameState) => pretty(state.ledger))
-				);
+				addDynamicWindow($moneyWindow);
 			}}
 		>
 			<xdp-emoji><span>💰</span></xdp-emoji>
@@ -246,8 +173,8 @@ const Tools = (state: GameState) => {
 		<button
 			as="x-dock-panel"
 			@click=${() => {
-				windows.push(
-					MkWindow('📅', 'Date', (state: GameState) => {
+				addDynamicWindow(
+					$window('📅', 'Date', (state: GameState) => {
 						let date = new Date(state.date);
 						const dtf = new Intl.DateTimeFormat('en', {
 							year: 'numeric',
@@ -255,9 +182,8 @@ const Tools = (state: GameState) => {
 							day: '2-digit',
 							hour: 'numeric',
 							minute: 'numeric',
-							second: 'numeric',
 						});
-						return dtf.format(date);
+						return [dtf.format(date)];
 					})
 				);
 			}}
@@ -277,7 +203,9 @@ const Tools = (state: GameState) => {
 			</button>
 			<button
 				@click=${() => {
-					windows.push(MkWindow('🤓', 'All state', (state) => pretty(state)));
+					addDynamicWindow(
+						$window('🤓', 'All state', (state) => [$pretty(state)])
+					);
 				}}
 				title="Show global state"
 				as="xdp-emoji"

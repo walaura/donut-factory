@@ -76,6 +76,11 @@ export const moverHandler: Handler<MoverAgent> = (tick, state, gameState) => {
 			}));
 		}
 		if (isFull() && state.path.length <= 0) {
+			addFunds({
+				tx: state.held * 10,
+				reason: `Bought ${state.held} goods from ${moveFrom.emoji}`,
+			});
+
 			state.path = findPath(state, moveTo);
 		}
 	}
@@ -89,8 +94,8 @@ export const moverHandler: Handler<MoverAgent> = (tick, state, gameState) => {
 		}
 		if (isEmpty() && state.path.length <= 0) {
 			addFunds({
-				tx: 100,
-				reason: `Sold goods to ${moveTo.emoji}`,
+				tx: state.capacity * 20,
+				reason: `Sold ${state.capacity} goods to ${moveTo.emoji}`,
 			});
 
 			state.path = findPath(state, moveFrom);

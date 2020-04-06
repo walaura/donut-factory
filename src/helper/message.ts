@@ -25,7 +25,7 @@ export type Message =
 
 export const isMessage = (data): data is Message => true;
 
-export const listenInSw = (onAction: (msg: Message) => void) => {
+export const listenFromWorker = (onAction: (msg: Message) => void) => {
 	self.addEventListener('message', ({ data }) => {
 		if (!isMessage(data)) {
 			return;
@@ -34,8 +34,22 @@ export const listenInSw = (onAction: (msg: Message) => void) => {
 	});
 };
 
-export const postFromSw = (msg: Message) => {
-	((self as unknown) as ServiceWorkerGlobalScope).clients
-		.matchAll()
-		.then((all) => all.map((client) => client.postMessage(msg)));
+export const postFromWorker = (msg: Message) => {
+	self.postMessage(msg);
+};
+
+let wk: Worker | null;
+export const registerBackgroundWorkers = () => {
+	wk = new Worker('./../background.wk.ts');
+};
+export const postFromWindow = (msg: Message) => {
+	wk.postMessage(msg);
+};
+export const listenFromWindow = (onAction: (msg: Message) => void) => {
+	wk.onmessage = ({ data }) => {
+		if (!isMessage(data)) {
+			return;
+		}
+		onAction(data);
+	};
 };
