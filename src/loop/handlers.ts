@@ -1,6 +1,6 @@
 import { factoryHandler } from './../agent/factory';
 import { moverHandler } from './../agent/mover';
-import { GameState, Agent } from '../defs';
+import { GameState, Agent } from '../helper/defs';
 
 export type HandlerName = keyof ReturnType<typeof getHandlers>;
 

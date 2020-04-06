@@ -1,11 +1,12 @@
-import { GameState } from './defs';
+import { GameState } from './helper/defs';
 import {
 	listenFromWindow,
 	MsgActions,
 	postFromWindow,
 	registerBackgroundWorkers,
 } from './helper/message';
-import renderGame from './ui/ui';
+
+import renderSetup from './ui/ui';
 
 let state: GameState | null;
 
@@ -23,10 +24,11 @@ try {
 } catch {}
 postFromWindow({ action: MsgActions.START, initialState });
 
+const renderGame = renderSetup();
 let lastAutosave = Date.now();
 const loopWithState = (state: GameState) => {
 	renderGame(state);
-	if (Date.now() - lastAutosave > 2000) {
+	if (Date.now() - lastAutosave > 20000) {
 		lastAutosave = Date.now();
 		window.localStorage.setItem('autosave', JSON.stringify(state));
 	}

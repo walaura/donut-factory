@@ -1,6 +1,6 @@
-import { XY } from './../defs';
-import { UnitAgent, Agent, AgentStateType } from '../defs';
+import { UnitAgent, Agent, AgentStateType } from '../helper/defs';
 import { addId, addPosition } from './helper/generate';
+import { XY } from '../helper/xy';
 
 export const MkConsumer = (xy: XY): UnitAgent => {
 	return {

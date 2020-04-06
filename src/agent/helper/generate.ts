@@ -1,5 +1,6 @@
-import { XY, BasePlaceableAgent, BaseAgent } from './../../defs';
-import { WithID } from '../../defs';
+import { BasePlaceableAgent, BaseAgent } from '../../helper/defs';
+import { WithID } from '../../helper/defs';
+import { XY } from '../../helper/xy';
 const uniqid = require('uniqid');
 
 export const addId = (): WithID => ({

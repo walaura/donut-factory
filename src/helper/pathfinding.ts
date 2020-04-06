@@ -1,8 +1,9 @@
-import { GameState, Agent } from '../defs';
-import { ID, XY } from '../defs';
+import { GameState, Agent } from './defs';
+import { ID } from './defs';
 import { RoadEnd, Road } from '../dressing/road';
 import { findAgent } from '../loop/loop';
 import { MoverAgent } from '../agent/mover';
+import { XY } from './xy';
 
 type SharedTargets =
 	| {

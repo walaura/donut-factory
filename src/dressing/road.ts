@@ -1,4 +1,5 @@
-import { WithID, XY, WithName } from '../defs';
+import { WithID, WithName } from '../helper/defs';
+import { XY } from '../helper/xy';
 
 export enum RoadEnd {
 	'start' = 'start',

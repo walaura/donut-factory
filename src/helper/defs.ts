@@ -1,17 +1,13 @@
-import { HandlerName } from './loop/handlers';
-import { MoverAgent } from './agent/mover';
-import { Road } from './dressing/road';
+import { HandlerName } from '../loop/handlers';
+import { MoverAgent } from '../agent/mover';
+import { Road } from '../dressing/road';
+import { XY } from './xy';
 
 export type ID = string;
 
 export enum AgentStateType {
 	'UNIT',
 	'MOVER',
-}
-
-export interface XY {
-	x: number;
-	y: number;
 }
 
 export interface WithXY extends XY {
@@ -48,12 +44,14 @@ export interface LedgerRecord {
 	date: number;
 }
 
+export type Ledger = LedgerRecord[];
+
 export interface GameState {
 	paused: boolean;
 	width: number;
 	height: number;
 	date: number;
-	ledger: LedgerRecord[];
+	ledger: Ledger;
 	agents: { [key: string]: Agent };
 	roads: { [key: string]: Road };
 }

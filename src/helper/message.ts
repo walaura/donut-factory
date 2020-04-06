@@ -1,7 +1,12 @@
-import { XY, ID } from './../defs';
-import { GameState } from '../defs';
+import { ID } from './defs';
+import { GameState } from './defs';
+import { XY } from './xy';
+import { RendererState } from '../ui.wk';
 
 export enum MsgActions {
+	'SEND_CANVAS' = 'SEND_CANVAS',
+	'CANVAS_RESPONSE' = 'CANVAS_RESPONSE',
+	'SEND_CURSOR' = 'SEND_CURSOR',
 	'TOCK' = 'TOCK',
 	'TICK' = 'TICK',
 	'PAUSE' = 'PAUSE',
@@ -9,16 +14,32 @@ export enum MsgActions {
 	'MUTATE_AGENT' = 'MUTATE_AGENT',
 }
 
-export type Message =
+export type RendererWorkerMessage =
 	| {
-			action: Exclude<
-				MsgActions,
-				MsgActions.TOCK | MsgActions.START | MsgActions.MUTATE_AGENT
-			>;
+			action: MsgActions.SEND_CANVAS;
+			canvas: OffscreenCanvas;
+			scale: number;
+	  }
+	| {
+			action: MsgActions.CANVAS_RESPONSE;
+			rendererState: RendererState;
+	  }
+	| {
+			action: MsgActions.SEND_CURSOR;
+			pos: XY;
 	  }
 	| {
 			action: MsgActions.TOCK;
 			state: GameState;
+	  };
+
+export type LoopWorkerMessage =
+	| {
+			action: MsgActions.TOCK;
+			state: GameState;
+	  }
+	| {
+			action: MsgActions.TICK;
 	  }
 	| {
 			action: MsgActions.START;
@@ -31,18 +52,26 @@ export type Message =
 			mutation: string;
 	  };
 
-export const isMessage = (data): data is Message => true;
+export type WorkerMessage = LoopWorkerMessage | RendererWorkerMessage;
 
-export const listenFromWorker = (onAction: (msg: Message) => void) => {
+export const isMessage = <M = WorkerMessage>(data): data is M => true;
+
+export const listenFromWorker = <M = WorkerMessage>(
+	onAction: (msg: M) => void
+) => {
 	self.addEventListener('message', ({ data }) => {
-		if (!isMessage(data)) {
+		if (!isMessage<M>(data)) {
 			return;
 		}
 		onAction(data);
 	});
 };
 
-export const postFromWorker = (msg: Message) => {
+export const postFromWorker = <
+	M extends LoopWorkerMessage | RendererWorkerMessage = LoopWorkerMessage
+>(
+	msg: M
+) => {
 	self.postMessage(msg);
 };
 
@@ -50,12 +79,18 @@ let wk: Worker | null;
 export const registerBackgroundWorkers = () => {
 	wk = new Worker('./../background.wk.ts');
 };
-export const postFromWindow = (msg: Message) => {
-	wk.postMessage(msg);
+export const postFromWindow = <M = WorkerMessage>(
+	msg: M,
+	worker: Worker = wk
+) => {
+	worker.postMessage(msg);
 };
-export const listenFromWindow = (onAction: (msg: Message) => void) => {
-	wk.onmessage = ({ data }) => {
-		if (!isMessage(data)) {
+export const listenFromWindow = <M = WorkerMessage>(
+	onAction: (msg: M) => void,
+	worker: Worker = wk
+) => {
+	worker.onmessage = ({ data }) => {
+		if (!isMessage<M>(data)) {
 			return;
 		}
 		onAction(data);

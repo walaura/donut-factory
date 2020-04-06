@@ -1,4 +1,4 @@
-import { AgentStateType, BasePlaceableAgent, ID } from '../defs';
+import { AgentStateType, BasePlaceableAgent, ID } from '../helper/defs';
 import { addSpeedToMovement, Movement } from '../helper/movement';
 import {
 	getDistanceToPoint,
@@ -6,9 +6,9 @@ import {
 	mkFindTarget,
 	Target,
 } from '../helper/pathfinding';
-import { xy } from '../helper/xy';
+import { xy, XY } from '../helper/xy';
 import { addFunds, findAgent, mutateAgent } from '../loop/loop';
-import { UnitAgent, XY } from './../defs';
+import { UnitAgent } from '../helper/defs';
 import { addId, addPosition } from './helper/generate';
 import { HandlerFn } from '../loop/handlers';
 
@@ -80,7 +80,7 @@ export const moverHandler: HandlerFn<MoverAgent> = (tick, state, gameState) => {
 		}
 		if (isFull() && state.path.length <= 0) {
 			addFunds({
-				tx: state.held * 10,
+				tx: state.held * -10,
 				reason: `Bought ${state.held} goods from ${moveFrom.emoji}`,
 			});
 

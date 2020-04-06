@@ -4,7 +4,7 @@ import { MkMover } from '../agent/mover';
 import { MkRoad } from '../dressing/road';
 import { makeRoadName } from '../helper/names';
 import { xy } from '../helper/xy';
-import { GameState } from './../defs';
+import { GameState } from '../helper/defs';
 import { addAgent, addRoad, addFunds } from './loop';
 
 export const startGame = () => {

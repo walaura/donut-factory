@@ -1,7 +1,8 @@
-import { UnitAgent, Agent, AgentStateType, XY } from '../defs';
-import { addId, addPosition } from './helper/generate';
+import { AgentStateType, UnitAgent } from '../helper/defs';
 import { makeFactoryName } from '../helper/names';
+import { XY } from '../helper/xy';
 import { HandlerFn } from '../loop/handlers';
+import { addId, addPosition } from './helper/generate';
 
 export const factoryHandler: HandlerFn<UnitAgent> = (
 	tick,

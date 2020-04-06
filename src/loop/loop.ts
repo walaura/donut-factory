@@ -1,8 +1,9 @@
 import { Road } from '../dressing/road';
 import { MsgActions } from '../helper/message';
-import { Agent, GameState, ID, LedgerRecord } from './../defs';
+import { Agent, GameState, ID, LedgerRecord } from '../helper/defs';
 import { postFromWindow } from './../helper/message';
 import { getHandlers } from './handlers';
+import { semiFlatten } from '../helper/ledger';
 
 let time = Date.now();
 let agentMutations: AgentMutation[] = [];
@@ -96,5 +97,11 @@ export const gameLoop = (prevState: GameState) => {
 			unit = getHandlers()[unit.handler](delta, unit as any, gameState);
 		}
 	}
+
+	//clean the ledger lol;
+	if (gameState.ledger.length > 200) {
+		gameState.ledger = semiFlatten(gameState.ledger);
+	}
+
 	return gameState;
 };

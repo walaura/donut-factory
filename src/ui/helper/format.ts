@@ -1,13 +1,21 @@
+const roundTo = (number, len = 10) => {
+	return Math.round(number * len) / len;
+};
+
 export const shortNumber = (number: number): string => {
-	const round = Math.round(number * 10) / 10;
-	if (number % 1 === 0) {
-		return number + '';
+	const noFixed = roundTo(number, 1000);
+
+	if (noFixed % 1 === 0) {
+		return noFixed + '';
 	}
+	const round = roundTo(number, 10);
 	return round.toFixed(1);
 };
 
 export function numberWithCommas(x) {
-	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+	return roundTo(x, 2)
+		.toString()
+		.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
 export const clock = (dt) => {
