@@ -13,7 +13,11 @@ import { Target } from '../helper/pathfinding';
 import { findAgent, mutateAgent } from '../loop/loop';
 import './game.css';
 import { numberWithCommas, shortNumber } from './helper/format';
-import { onStateUpdate, UIStatePriority, useGameState } from './helper/state';
+import {
+	onStateUpdate,
+	UIStatePriority,
+	useGameState,
+} from './helper/gameState';
 import { $agentWindow } from './window/agentWindow';
 import { $moneyWindow } from './window/moneyWindow';
 import { $pretty } from './window/rows/pretty';
@@ -99,7 +103,7 @@ const renderSetup = () => {
 	};
 	let selected: Target;
 
-	const scale = 2;
+	const scale = 0.9;
 	const $canvas = (window as any).floor as HTMLCanvasElement;
 	$canvas.width = window.innerWidth * scale;
 	$canvas.height = window.innerHeight * scale;

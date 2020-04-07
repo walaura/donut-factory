@@ -22,7 +22,8 @@ button {
 		Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 	line-height: 1.2;
 	font-size: 0.85em;
-	--bg: #fff2f6;
+	--bg: rgb(255, 231, 238);
+	--bg-tabbar: rgb(250, 242, 244);
 	--bg-dark: #e91e63;
 	--bg-light: #fff;
 	--radius: 0.66em;
@@ -84,7 +85,9 @@ x-window {
 			transform: translate(0, 0.1em);
 		}
 		xw-header-icon {
-			text-align: center;
+			display: grid;
+			align-items: center;
+			justify-content: center;
 			transform: scale(1.25);
 		}
 	}
@@ -208,4 +211,45 @@ x-window button {
 	background: #fff;
 	padding: 0.5em;
 	box-shadow: var(--shadow-1);
+}
+
+x-tabbar {
+	display: grid;
+	grid-auto-columns: min-content;
+	grid-auto-flow: column;
+	justify-content: center;
+	grid-gap: calc(var(--space-h) / 4);
+}
+x-tabbar button {
+	width: var(--pressable);
+	height: var(--pressable);
+	background: var(--bg-tabbar);
+	border-top-left-radius: var(--radius-small);
+	border-top-right-radius: var(--radius-small);
+	box-shadow: none !important;
+	display: grid;
+	align-items: center;
+	justify-content: center;
+	&[data-active='true'] {
+		background: var(--bg);
+	}
+}
+
+x-emoji {
+	display: grid;
+	width: 1em;
+	height: 1em;
+	align-items: center;
+	justify-content: center;
+	line-height: 1em;
+	vertical-align: 1em;
+	transform: scale(1.33);
+}
+
+xe-glyph {
+	font-size: 1em;
+	display: inline;
+	line-height: 1em;
+	vertical-align: 1em;
+	transform: translate(10%, 5%);
 }

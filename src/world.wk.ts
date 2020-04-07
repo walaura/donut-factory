@@ -1,5 +1,6 @@
 import { findAgent } from './loop/loop';
 import { GameState, ID, WithID } from './helper/defs';
+import { mkBackground } from './ui/canvas/bg';
 import {
 	WorldWorkerMessage,
 	MsgActions,
@@ -15,38 +16,12 @@ let selected: Target = { xy: { x: 0, y: 0 } };
 let cursor: XY = { x: 20, y: 40 };
 let pika;
 
-const grass = '#dcedc8';
 const zoom = 10;
 
 const scale = (xy: XY) => mkScale(xy, zoom);
 const scaleArr = (xy: XY) => xy2arr(mkScale(xy, zoom));
 
 let width, height;
-
-const bg = () => {
-	ctx.fillStyle = grass;
-	ctx.beginPath();
-	ctx.rect(0, 0, width, height);
-	ctx.fill();
-
-	let rows = new Array(Math.ceil(height / zoom)).fill(null);
-	let columns = new Array(Math.ceil(width / zoom)).fill(null);
-	ctx.globalAlpha = 0.05;
-	rows.forEach((_, i) => {
-		ctx.beginPath();
-		ctx.moveTo(0, i * zoom - 1);
-		ctx.lineTo(width, i * zoom - 1);
-		ctx.stroke();
-	});
-	columns.forEach((_, i) => {
-		ctx.beginPath();
-		ctx.moveTo(i * zoom - 1, 0);
-		ctx.lineTo(i * zoom - 1, height);
-		ctx.stroke();
-	});
-	ctx.globalAlpha = 1;
-};
-
 export type RendererState = {
 	selected: Target;
 };
@@ -113,14 +88,18 @@ interface Feedback extends WithID {
 }
 
 let feedback: { [key in string]: Feedback } = {};
-
+let $bg;
 function draw(prevState: GameState, state: GameState): RendererState {
 	delta++;
 	const now = Date.now();
 	selected = { xy: cursor };
 
+	if (!$bg) {
+		$bg = mkBackground(width, height, zoom);
+	}
+
 	ctx.clearRect(0, 0, width, height);
-	bg();
+	ctx.drawImage($bg, 0, 0);
 
 	// anim
 	for (let animation of Object.values(animations)) {
@@ -176,7 +155,6 @@ function draw(prevState: GameState, state: GameState): RendererState {
 			};
 		}
 	}
-
 	for (let agent of Object.values(state.agents)) {
 		let fontSize = useAnimatedValue(40, 'ag:' + agent.id);
 		if ('agentId' in selected && selected.agentId === agent.id) {
@@ -185,7 +163,6 @@ function draw(prevState: GameState, state: GameState): RendererState {
 				speed: 0.5,
 			});
 		}
-
 		ctx.filter = `hue-rotate(${agent.color}deg)`;
 		ctx.font = fontSize.value + 'px Arial';
 		ctx.fillText(agent.emoji, ...xy2arr(scale(agent)));

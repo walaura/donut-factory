@@ -1,6 +1,6 @@
 import { html } from 'lit-html';
 import { LedgerRecord } from '../../helper/defs';
-import { UIStatePriority, useGameState } from '../helper/state';
+import { UIStatePriority, useGameState } from '../helper/gameState';
 import { clock, longDate, numberWithCommas } from './../helper/format';
 import { $table, $tableRow } from './rows/table';
 import { $window } from './window';

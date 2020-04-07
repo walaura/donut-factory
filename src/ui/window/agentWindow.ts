@@ -2,7 +2,7 @@ import { html } from 'lit-html';
 import { MoverAgent } from '../../agent/mover';
 import { AgentStateType, GameState, ID, Agent } from '../../helper/defs';
 import { findAgent, mutateAgent } from '../../loop/loop';
-import { UIStatePriority, useGameState } from '../helper/state';
+import { UIStatePriority, useGameState } from '../helper/gameState';
 import { getAgentStatus } from '../helper/status';
 import { $pretty } from './rows/pretty';
 import { $window, $tabbedWindow } from './window';
@@ -50,7 +50,10 @@ const $colorRow = (agent: Agent) =>
 const $info = (agentId: ID, gameState: GameState) => {
 	const agent = findAgent(agentId, gameState);
 	if (agent.type !== AgentStateType.MOVER) {
-		return $form([$colorRow(agent)]);
+		return $form([
+			$formRow({ label: 'Name', control: agent.name }),
+			$colorRow(agent),
+		]);
 	}
 
 	const tires = {
@@ -132,7 +135,6 @@ const $agentWindow = (agentId: ID) =>
 						(state) => getAgentStatus(agentId, state),
 						UIStatePriority.Cat
 					),
-					useGameState((state) => $pretty(findAgent(agentId, state))),
 				],
 			},
 			{

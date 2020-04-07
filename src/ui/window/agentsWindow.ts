@@ -2,7 +2,7 @@ import { addAgent } from './../../loop/loop';
 import { GameState } from './../../helper/defs';
 import { ID, Agent } from '../../helper/defs';
 import { findAgent } from '../../loop/loop';
-import { useGameState } from '../helper/state';
+import { useGameState } from '../helper/gameState';
 import { $table, $tableRow } from './rows/table';
 import { $window, addDynamicWindow } from './window';
 import { getAgentStatus } from '../helper/status';
