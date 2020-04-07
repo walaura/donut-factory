@@ -2,13 +2,14 @@ import { html } from 'lit-html';
 import { LedgerRecord } from '../../helper/defs';
 import { UIStatePriority, useGameState } from '../helper/gameState';
 import { clock, longDate, numberWithCommas } from './../helper/format';
-import { $table, $tableRow } from './rows/table';
+import { $infoBig } from './rows/info';
 import { $window } from './window';
+import { $rows } from './rows/row';
 
 const currency = '$';
 
 const $row = (rc: LedgerRecord) =>
-	$tableRow({
+	$infoBig({
 		icon: rc.tx > 0 ? '🤑' : '🔥',
 		heading: `${rc.tx > 0 ? '+ ' : '- '}${currency}${numberWithCommas(
 			Math.abs(rc.tx)
@@ -25,7 +26,7 @@ const $moneyWindow = () =>
 				)}
 			</h1>`;
 		}, UIStatePriority.Snail),
-		$table(useGameState((state) => [...state.ledger].reverse().map($row))),
+		useGameState((state) => $rows([...state.ledger].reverse().map($row))),
 	]);
 
 export { $moneyWindow };

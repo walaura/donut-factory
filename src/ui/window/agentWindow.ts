@@ -1,12 +1,15 @@
 import { html } from 'lit-html';
 import { MoverAgent } from '../../agent/mover';
 import { AgentStateType, GameState, ID, Agent } from '../../helper/defs';
-import { findAgent, mutateAgent } from '../../loop/loop';
+import { findAgent, mutateAgent, addAgent, deleteAgent } from '../../loop/loop';
 import { UIStatePriority, useGameState } from '../helper/gameState';
 import { getAgentStatus } from '../helper/status';
 import { $pretty } from './rows/pretty';
 import { $window, $tabbedWindow } from './window';
-import { $form, $formRow } from './rows/form';
+import { $form } from './rows/form';
+import { $rows } from './rows/row';
+import { $infoSmall } from './rows/info';
+import { shortNumber } from '../helper/format';
 
 const $select = ({ values, selected, onChange }) => html`
 	<select
@@ -24,7 +27,7 @@ const $select = ({ values, selected, onChange }) => html`
 `;
 
 const $colorRow = (agent: Agent) =>
-	$formRow({
+	$form({
 		label: `Color`,
 		control: html` <input
 			@change=${(ev) => {
@@ -49,11 +52,40 @@ const $colorRow = (agent: Agent) =>
 
 const $info = (agentId: ID, gameState: GameState) => {
 	const agent = findAgent(agentId, gameState);
-	if (agent.type !== AgentStateType.MOVER) {
-		return $form([
-			$formRow({ label: 'Name', control: agent.name }),
-			$colorRow(agent),
-		]);
+	if (!agent) {
+		return;
+	}
+	if (agent && agent.type !== AgentStateType.MOVER) {
+		return $rows(
+			[
+				agent.exports &&
+					$infoSmall({
+						label: 'Exports',
+						info: [
+							{
+								body: `${shortNumber(agent.exports)} products`,
+								accesory: new Array(Math.ceil(agent.exports))
+									.fill('📦')
+									.splice(0, 200),
+							},
+						],
+					}),
+				agent.imports &&
+					$infoSmall({
+						label: 'Imports',
+						info: [
+							{
+								body: `${shortNumber(agent.imports)} products`,
+								accesory: new Array(Math.ceil(agent.imports))
+									.fill('📦')
+									.splice(0, 200),
+							},
+						],
+					}),
+				$form({ label: 'Name', control: agent.name }),
+				$colorRow(agent),
+			].filter(Boolean)
+		);
 	}
 
 	const tires = {
@@ -66,8 +98,17 @@ const $info = (agentId: ID, gameState: GameState) => {
 		Object.entries(gameState.agents).map(([id, agent]) => [id, agent.name])
 	);
 
-	return $form([
-		$formRow({
+	return $rows([
+		$infoSmall({
+			label: 'Held',
+			info: [
+				{
+					body: `${shortNumber(agent.held)} products`,
+					accesory: new Array(Math.ceil(agent.held)).fill('📦').splice(0, 200),
+				},
+			],
+		}),
+		$form({
 			label: 'Deliver to',
 			control: $select({
 				values: deliveries,
@@ -84,7 +125,7 @@ const $info = (agentId: ID, gameState: GameState) => {
 				},
 			}),
 		}),
-		$formRow({
+		$form({
 			label: 'Tires',
 			control: $select({
 				values: tires,
@@ -102,7 +143,7 @@ const $info = (agentId: ID, gameState: GameState) => {
 				},
 			}),
 		}),
-		$formRow({
+		$form({
 			label: `This vehicle likes roads a ${agent.preferenceForRoads}/10`,
 			control: html`
 				<button
@@ -123,7 +164,7 @@ const $info = (agentId: ID, gameState: GameState) => {
 
 const $agentWindow = (agentId: ID) =>
 	$tabbedWindow(
-		useGameState((state) => findAgent(agentId, state).emoji),
+		useGameState((state) => findAgent(agentId, state)?.emoji),
 		'Agent info',
 		[
 			{
@@ -140,7 +181,16 @@ const $agentWindow = (agentId: ID) =>
 			{
 				emoji: '🔧',
 				name: 'System',
-				contents: [useGameState((state) => $pretty(findAgent(agentId, state)))],
+				contents: [
+					useGameState((state) => $pretty(findAgent(agentId, state))),
+					html`<button
+						@click=${() => {
+							deleteAgent(agentId);
+						}}
+					>
+						Delete agent
+					</button>`,
+				],
 			},
 		]
 	);

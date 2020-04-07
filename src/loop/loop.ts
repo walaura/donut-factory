@@ -52,8 +52,11 @@ export const mutateGame = (
 	}
 };
 
-export const findAgent = (id: ID, gameState: GameState): Agent => {
-	return gameState.agents[id];
+export const findAgent = (id: ID, gameState: GameState): Agent | null => {
+	if (gameState.agents[id]) {
+		return gameState.agents[id];
+	}
+	return null;
 };
 
 export const pauseGame = () => {
@@ -61,6 +64,16 @@ export const pauseGame = () => {
 		...state,
 		paused: true,
 	}));
+};
+
+export const deleteAgent = (agentId: ID) => {
+	mutateGame(
+		(state, [agentId]: [ID]) => {
+			delete state.agents[agentId];
+			return state;
+		},
+		[agentId]
+	);
 };
 
 export const addAgent = (agent: Agent) => {
@@ -98,11 +111,13 @@ export const gameLoop = (prevState: GameState) => {
 
 	while (gameMutations.length) {
 		const muta = gameMutations.pop();
+		if (!muta) continue;
 		gameState = muta.mutation(gameState, muta.context);
 	}
 
 	while (agentMutations.length) {
 		const muta = agentMutations.pop();
+		if (!muta) continue;
 		gameState.agents[muta.agentId] = muta.mutation(
 			gameState.agents[muta.agentId],
 			gameState,

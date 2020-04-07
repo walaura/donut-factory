@@ -103,10 +103,10 @@ const renderSetup = () => {
 	};
 	let selected: Target;
 
-	const scale = 0.9;
+	const pixelRatio = 1.5;
 	const $canvas = (window as any).floor as HTMLCanvasElement;
-	$canvas.width = window.innerWidth * scale;
-	$canvas.height = window.innerHeight * scale;
+	$canvas.width = window.innerWidth * pixelRatio;
+	$canvas.height = window.innerHeight * pixelRatio;
 	$canvas.style.width = window.innerWidth + 'px';
 	$canvas.style.height = window.innerHeight + 'px';
 	const offscreenCanvas = $canvas.transferControlToOffscreen();
@@ -127,7 +127,7 @@ const renderSetup = () => {
 		{
 			action: MsgActions.SEND_CANVAS,
 			canvas: offscreenCanvas,
-			scale,
+			pixelRatio,
 		} as WorldWorkerMessage,
 		[offscreenCanvas]
 	);

@@ -22,6 +22,8 @@ button {
 		Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 	line-height: 1.2;
 	font-size: 0.85em;
+	color: var(--text-dim);
+
 	--bg: rgb(255, 231, 238);
 	--bg-tabbar: rgb(250, 242, 244);
 	--bg-dark: #e91e63;
@@ -31,9 +33,12 @@ button {
 	--space-h: 0.66em;
 	--space-v: 0.33em;
 	--pressable: 3em;
-	--text-dim: rgb(75, 75, 75);
+	--text-dim: rgb(50, 50, 50);
+	--text-bold: rgb(10, 10, 10);
 	--shadow-1: 0 0 0 1px rgba(255, 255, 255, 0.5),
 		0 0.25em 0.25em 0.25em rgba(0, 0, 0, 0.05);
+
+	--font-bold: 600;
 }
 
 x-draggable {
@@ -41,70 +46,6 @@ x-draggable {
 	top: 0;
 	left: 0;
 	transform: translate(var(--left), var(--top));
-}
-
-.x-window-breakout {
-	display: block;
-	margin: calc(var(--space-v) * -2) calc(var(--space-h) * -1);
-}
-.x-window-breakout-padding,
-xw-body-row {
-	padding: calc(var(--space-v) * 2) var(--space-h);
-}
-x-window {
-	contain: content;
-	z-index: 9999999;
-	border-radius: var(--radius);
-	padding: 2px;
-	display: grid;
-	grid-template-rows: min-content 1fr;
-	box-shadow: var(--shadow-1);
-	overflow: hidden;
-	width: 20em;
-	max-height: 30em;
-	height: 100%;
-	background: var(--bg-light);
-
-	xw-header {
-		font-weight: 600;
-		transform: lowercase;
-		color: var(--bg-dark);
-		padding: var(--space-v) 0;
-		min-height: var(--pressable);
-		display: grid;
-		border-radius: var(--radius-small);
-		grid-template-columns: calc(var(--pressable)) 1fr calc(var(--pressable));
-		align-items: center;
-		justify-content: center;
-		margin-bottom: 2px;
-		cursor: pointer;
-		&:hover {
-			background: var(--bg);
-		}
-		xw-header-title {
-			transform: translate(0, 0.1em);
-		}
-		xw-header-icon {
-			display: grid;
-			align-items: center;
-			justify-content: center;
-			transform: scale(1.25);
-		}
-	}
-	xw-body {
-		border-radius: var(--radius-small);
-		overflow: hidden;
-		background: var(--bg);
-		display: grid;
-		height: 100%;
-		grid-template-columns: 1fr;
-	}
-	xw-body-row {
-		overflow: scroll;
-		&:not(:last-child) {
-			border-bottom: 1px solid var(--bg-light);
-		}
-	}
 }
 
 x-dock {
@@ -116,7 +57,7 @@ x-dock {
 	grid-gap: calc(var(--space-h) * 2);
 	button {
 		&:hover {
-			filter: brightness(0.95);
+			background: var(--bg-tabbar);
 		}
 	}
 }
@@ -124,8 +65,7 @@ x-dock {
 x-dock-panel,
 [as='x-dock-panel'] {
 	background: var(--bg-light);
-	color: var(--text-dim);
-	font-weight: 500;
+	font-weight: var(--font-bold);
 	display: grid;
 	border-radius: 1000em;
 	height: var(--pressable);
@@ -168,42 +108,6 @@ xdp-emoji,
 
 x-window x-table {
 	display: block;
-}
-
-x-form {
-	display: grid !important;
-	grid-auto-rows: 1fr;
-	align-self: center;
-}
-
-x-form xf-row {
-	display: grid;
-	grid-template-rows: 1fr;
-	grid-template-columns: 1fr 1fr;
-	grid-gap: var(--space-h);
-	border-bottom: 1px solid var(--bg-light);
-}
-
-x-form xf-row h3 {
-	font-weight: 400;
-}
-
-table-row {
-	display: flex;
-	border-bottom: 1px solid var(--bg-light);
-	tr-icon {
-		width: calc(var(--pressable));
-		margin-left: calc(var(--space-h) * -1);
-		margin-top: 1em;
-		text-align: center;
-		transform: scale(1.33);
-		flex: 0 0 auto;
-		line-height: 1;
-	}
-	> tr-body > * {
-		display: block;
-		margin-bottom: 0.25em;
-	}
 }
 
 x-window select,

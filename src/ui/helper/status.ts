@@ -6,6 +6,9 @@ import { shortNumber } from './format';
 export const getAgentStatus = (agentId: ID, gameState: GameState) => {
 	const agent = findAgent(agentId, gameState);
 	let txt = 'n/a';
+	if (!agent) {
+		return txt;
+	}
 	if (agent.type !== AgentStateType.MOVER) {
 		return txt;
 	}
@@ -14,11 +17,12 @@ export const getAgentStatus = (agentId: ID, gameState: GameState) => {
 	}
 	if (agent.held <= 0) {
 		const from = findAgent(agent.from[0], gameState);
-		txt = `On their way to ${from.emoji} ${from.name}`;
+		from && (txt = `On their way to ${from.emoji} ${from.name}`);
 	} else {
 		const to = findAgent(agent.to[0], gameState);
-		txt = `Delivering ${shortNumber(agent.held)} boxes to
-		${to.emoji} ${to.name}`;
+		to &&
+			(txt = `Delivering ${shortNumber(agent.held)} boxes to
+		${to.emoji} ${to.name}`);
 	}
 
 	return txt;

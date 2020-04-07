@@ -1,6 +1,7 @@
 {
 	"compilerOptions": {
 		"moduleResolution": "node",
+		"strictNullChecks": true,
 		"lib": ["esnext", "dom", "webworker"],
 		"target": "es6"
 	}

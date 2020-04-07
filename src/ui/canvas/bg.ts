@@ -2,7 +2,7 @@ const grass = '#dcedc8';
 
 const mkBackground = (width, height, zoom) => {
 	const $bg = new OffscreenCanvas(width, height);
-	const ctx = $bg.getContext('2d');
+	const ctx = $bg.getContext('2d') as OffscreenCanvasRenderingContext2D;
 	ctx.drawImage($bg, 0, 0);
 
 	ctx.fillStyle = grass;

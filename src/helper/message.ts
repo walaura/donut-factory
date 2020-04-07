@@ -19,7 +19,7 @@ export type WorldWorkerMessage =
 	| {
 			action: MsgActions.SEND_CANVAS;
 			canvas: OffscreenCanvas;
-			scale: number;
+			pixelRatio: number;
 	  }
 	| {
 			action: MsgActions.CANVAS_RESPONSE;
@@ -81,7 +81,7 @@ export const postFromWorker = <
 	self.postMessage(msg);
 };
 
-let wk: Worker | null;
+let wk: Worker;
 export const registerBackgroundWorkers = () => {
 	wk = new Worker('./../background.wk.ts');
 };

@@ -1,13 +1,23 @@
 import { html } from 'lit-html';
+import { $heading } from '../components/type';
 
-const $formRow = ({ label, control = null }) => html`
-	<xf-row class="x-window-breakout-padding">
-		<h3>${label}</h3>
-		${control}
-	</xf-row>
+const $form = ({ label, control = null }: { label: any; control: any }) => html`
+	<style>
+		x-form {
+			display: grid;
+			grid-template-rows: 1fr;
+			grid-template-columns: 1fr 1fr;
+			grid-gap: var(--space-h);
+		}
+		x-form h3 {
+			font-weight: var(--font-bold);
+			color: var(--text-bold);
+		}
+	</style>
+
+	<x-form>
+		${$heading(label)} ${control}
+	</x-form>
 `;
 
-const $form = (children: any) =>
-	html`<x-form class="x-window-breakout">${children}</x-form>`;
-
-export { $form, $formRow };
+export { $form };

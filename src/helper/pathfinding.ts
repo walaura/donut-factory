@@ -69,12 +69,14 @@ export const getDistanceToPoint = (a: XY, b: XY) => {
 
 export const targetFromXY = ({ x, y }: XY): Target => ({ xy: { x, y } });
 
-export const mkFindTarget = (gameState: GameState) => (target: Target): XY => {
+export const mkFindTarget = (gameState: GameState) => (
+	target: Target
+): XY | null => {
 	if ('roadId' in target) {
 		return gameState.roads[target.roadId][target.roadEnd];
 	}
 	if ('agentId' in target) {
-		return findAgent(target.agentId, gameState);
+		return findAgent(target.agentId, gameState) ?? null;
 	}
 	return target.xy;
 };
@@ -110,7 +112,10 @@ export const mkFindPath = (gameState: GameState, roads: Road[]) => (
 		const xy = findTarget(from);
 		return targets.map((rd) => {
 			const road = findTarget(rd);
-			let score = getDistanceToPoint(road, xy);
+			let score = getDistanceToPoint(
+				road ?? { x: -Infinity, y: -Infinity },
+				xy ?? { x: Infinity, y: Infinity }
+			);
 			// prefer same road
 			if ('roadId' in from && 'roadId' in rd) {
 				if (from.roadId === rd.roadId) {

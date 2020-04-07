@@ -1,20 +1,24 @@
-import { findAgent } from './loop/loop';
-import { GameState, ID, WithID } from './helper/defs';
-import { mkBackground } from './ui/canvas/bg';
+import { appendWithId } from './agent/helper/generate';
+import { GameState, WithID, AgentStateType } from './helper/defs';
 import {
-	WorldWorkerMessage,
 	MsgActions,
 	postFromWorker,
+	WorldWorkerMessage,
 } from './helper/message';
 import { getDistanceToPoint, Target } from './helper/pathfinding';
-import { XY, scale as mkScale, xy2arr } from './helper/xy';
-import { appendWithId } from './agent/helper/generate';
+import { scale as mkScale, XY, xy2arr } from './helper/xy';
+import { findAgent } from './loop/loop';
+import {
+	animationTick,
+	useAnimatedValue,
+	useBouncyValue,
+} from './ui/canvas/animation';
+import { mkBackground } from './ui/canvas/bg';
+import { mkAgents } from './ui/canvas/agent';
 let canvas: OffscreenCanvas;
 let ctx: OffscreenCanvasRenderingContext2D;
-let delta = 0;
 let selected: Target = { xy: { x: 0, y: 0 } };
 let cursor: XY = { x: 20, y: 40 };
-let pika;
 
 const zoom = 10;
 
@@ -26,60 +30,8 @@ export type RendererState = {
 	selected: Target;
 };
 
-let animations: { [key in string]: AnimationCell } = {};
-
 const lerp = (start, end, t) => {
 	return start * (1 - t) + end * t;
-};
-
-interface Animation extends WithID {
-	to: number;
-	speed: number;
-	progress: number;
-	lastActive?: number;
-	reverses?: boolean;
-	then?: () => void;
-}
-interface AnimationCell extends WithID {
-	value: number;
-	original: number;
-	queue: { [key in string]: Animation };
-}
-
-const useAnimatedValue = (original: number, id: ID) => {
-	if (!animations[id]) {
-		animations[id] = {
-			id,
-			original,
-			value: original,
-			queue: {},
-		};
-	}
-	return {
-		value: animations[id].value,
-		hover: (toId: ID, props: Omit<Animation, 'id' | 'progress'>) => {
-			if (!animations[id].queue[toId]) {
-				animations[id].queue[toId] = {
-					id: toId,
-					...props,
-					progress: 0,
-					lastActive: Date.now(),
-					reverses: true,
-				};
-			} else {
-				animations[id].queue[toId].lastActive = Date.now();
-			}
-		},
-		toFixed: (toId: ID, props: Omit<Animation, 'id' | 'progress'>) => {
-			if (!animations[id].queue[toId]) {
-				animations[id].queue[toId] = {
-					id: toId,
-					...props,
-					progress: 0,
-				};
-			}
-		},
-	};
 };
 
 interface Feedback extends WithID {
@@ -89,46 +41,25 @@ interface Feedback extends WithID {
 
 let feedback: { [key in string]: Feedback } = {};
 let $bg;
+let mkAgent;
 function draw(prevState: GameState, state: GameState): RendererState {
-	delta++;
-	const now = Date.now();
 	selected = { xy: cursor };
 
 	if (!$bg) {
 		$bg = mkBackground(width, height, zoom);
+	}
+	if (!mkAgent) {
+		mkAgent = mkAgents().mkAgent;
 	}
 
 	ctx.clearRect(0, 0, width, height);
 	ctx.drawImage($bg, 0, 0);
 
 	// anim
-	for (let animation of Object.values(animations)) {
-		for (let cell of Object.values(animation.queue)) {
-			cell.progress = Math.min(cell.progress + cell.speed, 1);
-			animation.value = lerp(animation.value, cell.to, cell.progress);
-			if (
-				(!cell.lastActive && cell.progress >= 1) ||
-				(cell.lastActive && cell.lastActive < now - 30)
-			) {
-				delete animation.queue[cell.id];
-				if (cell.then) {
-					cell.then();
-				}
-				if (cell.reverses) {
-					animation.queue['reverse-' + cell.id] = {
-						id: 'reverse-' + cell.id,
-						to: animation.original,
-						speed: cell.speed,
-						progress: 0,
-						reverses: false,
-					};
-				}
-			}
-		}
-	}
-	ctx.fillStyle = 'black';
+	animationTick();
 
 	//roads
+	ctx.fillStyle = 'black';
 	for (let road of Object.values(state.roads)) {
 		ctx.beginPath();
 		ctx.moveTo(...scaleArr(road.start));
@@ -156,43 +87,57 @@ function draw(prevState: GameState, state: GameState): RendererState {
 		}
 	}
 	for (let agent of Object.values(state.agents)) {
-		let fontSize = useAnimatedValue(40, 'ag:' + agent.id);
+		let fontSize = useBouncyValue({ value: 0 }, 'ag:' + agent.id);
+		let agentSize = 50;
 		if ('agentId' in selected && selected.agentId === agent.id) {
-			fontSize.hover('hover', {
-				to: 50,
-				speed: 0.5,
-			});
+			fontSize.up();
 		}
-		ctx.filter = `hue-rotate(${agent.color}deg)`;
-		ctx.font = fontSize.value + 'px Arial';
-		ctx.fillText(agent.emoji, ...xy2arr(scale(agent)));
-		ctx.filter = 'none';
+		const { x, y } = scale(agent);
+		let flip = false;
+		if (agent.type === AgentStateType.MOVER && prevState.agents[agent.id]) {
+			if (agent.x - prevState.agents[agent.id].x > 0) {
+				flip = true;
+			}
+		}
+		ctx.drawImage(
+			mkAgent(agent, { size: agentSize * 4, flip, scale: fontSize.value }),
+			x - agentSize / 2,
+			y - agentSize / 2,
+			agentSize,
+			agentSize
+		);
 	}
 
 	// pop cool text
+	let lastUpdate = state.ledger[state.ledger.length - 1];
 	if (
 		prevState.ledger.length !== state.ledger.length &&
-		state.ledger[state.ledger.length - 1].relevantAgents
+		lastUpdate.relevantAgents
 	) {
-		feedback = appendWithId(feedback, {
-			xy: findAgent(
-				state.ledger[state.ledger.length - 1].relevantAgents[0],
-				state
-			),
-			text: state.ledger[state.ledger.length - 1].tx,
-		});
+		const xy = findAgent(lastUpdate.relevantAgents[0], state);
+		if (xy) {
+			feedback = appendWithId(feedback, {
+				xy,
+				text: state.ledger[state.ledger.length - 1].tx,
+			});
+		}
 	}
 
 	// overlays
 	for (let toast of Object.values(feedback)) {
-		const yDelta = useAnimatedValue(0, 'toast:' + toast.id);
-		yDelta.toFixed('pop', {
-			to: 1,
-			speed: 0.0025,
-			then: () => {
-				delete feedback[toast.id];
+		const yDelta = useAnimatedValue(
+			{
+				value: 0,
+				speed: 100,
 			},
-		});
+			'toast:' + toast.id
+		);
+		if (yDelta.value < yDelta.max) {
+			yDelta.up();
+		} else {
+			delete feedback[toast.id];
+			yDelta.discard();
+		}
 		ctx.font = '16px sans-serif';
 		ctx.globalAlpha = lerp(2, 0, yDelta.value);
 		ctx.fillText(
@@ -215,10 +160,10 @@ self.onmessage = function (ev) {
 	let msg = ev.data as WorldWorkerMessage;
 	if (msg.action === MsgActions.SEND_CANVAS) {
 		canvas = msg.canvas;
-		ctx = canvas.getContext('2d');
-		ctx.scale(ev.data.scale, ev.data.scale);
-		width = canvas.width / ev.data.scale;
-		height = canvas.height / ev.data.scale;
+		ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
+		ctx.scale(msg.pixelRatio, msg.pixelRatio);
+		width = canvas.width / msg.pixelRatio;
+		height = canvas.height / msg.pixelRatio;
 	}
 	if (msg.action === MsgActions.TOCK) {
 		postFromWorker<WorldWorkerMessage>({

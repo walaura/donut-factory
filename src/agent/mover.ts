@@ -25,6 +25,7 @@ export const moverHandler: HandlerFn<MoverAgent> = (tick, state, gameState) => {
 
 	const isAtTarget = (target: Target) => {
 		const to = findTarget(target);
+		if (!to) return false;
 		return isAtPos(state, to);
 	};
 	const move = (from: XY, target: Target) => {
@@ -32,18 +33,24 @@ export const moverHandler: HandlerFn<MoverAgent> = (tick, state, gameState) => {
 
 		if (
 			!('roadId' in target) ||
-			!('roadId' in state.gross.lastDiscardedPathTarget)
+			!(
+				state.gross.lastDiscardedPathTarget &&
+				'roadId' in state.gross.lastDiscardedPathTarget
+			)
 		) {
 			speed = speed * state.offroadSpeed;
 		}
 
-		let to = findTarget(target);
 		const applyMovement = (movement: Movement) => {
 			from.x += movement.right;
 			from.x -= movement.left;
 			from.y += movement.bottom;
 			from.y -= movement.top;
 		};
+		let to = findTarget(target);
+		if (!to) {
+			return false;
+		}
 
 		const movement = addSpeedToMovement(
 			{
@@ -54,17 +61,26 @@ export const moverHandler: HandlerFn<MoverAgent> = (tick, state, gameState) => {
 			},
 			speed / 2
 		);
-
 		applyMovement(movement);
+		return true;
 	};
 
 	let moveFrom = findAgent(state.from[0], gameState);
 	let moveTo = findAgent(state.to[0], gameState);
 
+	if (!moveFrom || !moveTo) {
+		console.error('TODO: lost/depot state??');
+		return state;
+	}
+
 	if (state.path.length > 0) {
 		const target = state.path[0];
 		if (!isAtTarget(target)) {
-			move(state, target);
+			let attempt = move(state, target);
+			if (!attempt) {
+				//failed to move here, lets break that path off
+				state.path.shift();
+			}
 		} else {
 			state.gross.lastDiscardedPathTarget = state.path.shift();
 		}
@@ -132,7 +148,7 @@ export interface MoverAgent extends BasePlaceableAgent {
 	};
 }
 
-export const MkMover = (from = [], to = []): MoverAgent => {
+export const MkMover = (from: ID[] = [], to: ID[] = []): MoverAgent => {
 	return {
 		...addId(),
 		...addPosition(xy([0, 0])),
