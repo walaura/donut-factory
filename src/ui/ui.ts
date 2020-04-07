@@ -17,7 +17,7 @@ import {
 	onStateUpdate,
 	UIStatePriority,
 	useGameState,
-} from './helper/gameState';
+} from './helper/useGameState';
 import { $agentWindow } from './window/agentWindow';
 import { $moneyWindow } from './window/moneyWindow';
 import { $pretty } from './window/rows/pretty';

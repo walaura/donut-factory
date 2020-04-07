@@ -1,7 +1,8 @@
+import { MkMover } from './../../agent/mover';
 import { html } from 'lit-html';
 import { MkConsumer } from '../../agent/consumer';
 import { Agent } from '../../helper/defs';
-import { useGameState } from '../helper/gameState';
+import { useGameState } from '../helper/useGameState';
 import { getAgentStatus } from '../helper/status';
 import { GameState } from './../../helper/defs';
 import { addAgent } from './../../loop/loop';
@@ -35,6 +36,13 @@ const $agentsWindow = () =>
 			}}
 		>
 			add fairy
+		</button>`,
+		html`<button
+			@click=${() => {
+				addAgent(MkMover());
+			}}
+		>
+			add truck
 		</button>`,
 	]);
 

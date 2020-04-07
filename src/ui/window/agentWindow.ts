@@ -2,7 +2,7 @@ import { html } from 'lit-html';
 import { MoverAgent } from '../../agent/mover';
 import { AgentStateType, GameState, ID, Agent } from '../../helper/defs';
 import { findAgent, mutateAgent, addAgent, deleteAgent } from '../../loop/loop';
-import { UIStatePriority, useGameState } from '../helper/gameState';
+import { UIStatePriority, useGameState } from '../helper/useGameState';
 import { getAgentStatus } from '../helper/status';
 import { $pretty } from './rows/pretty';
 import { $window, $tabbedWindow } from './window';
@@ -19,7 +19,10 @@ const $select = ({ values, selected, onChange }) => html`
 	>
 		${Object.entries(values).map(
 			([key, val]) =>
-				html`<option value=${key} selected=${key === selected}>
+				html`<option
+					value=${key}
+					?selected=${key.toString() === selected.toString()}
+				>
 					${val}
 				</option>`
 		)}
@@ -64,7 +67,7 @@ const $info = (agentId: ID, gameState: GameState) => {
 						info: [
 							{
 								body: `${shortNumber(agent.exports)} products`,
-								accesory: new Array(Math.ceil(agent.exports))
+								accesory: new Array(Math.ceil(agent.exports) ?? 0)
 									.fill('📦')
 									.splice(0, 200),
 							},
@@ -109,10 +112,27 @@ const $info = (agentId: ID, gameState: GameState) => {
 			],
 		}),
 		$form({
+			label: 'Deliver from',
+			control: $select({
+				values: deliveries,
+				selected: agent.from[0] ?? '',
+				onChange: (from) => {
+					mutateAgent<MoverAgent>(
+						agent.id,
+						(prev, _, [from]) => ({
+							...prev,
+							from: [from],
+						}),
+						[from]
+					);
+				},
+			}),
+		}),
+		$form({
 			label: 'Deliver to',
 			control: $select({
 				values: deliveries,
-				selected: agent.to[0],
+				selected: agent.to[0] ?? '',
 				onChange: (to) => {
 					mutateAgent<MoverAgent>(
 						agent.id,

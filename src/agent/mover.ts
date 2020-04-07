@@ -11,6 +11,7 @@ import { addFunds, findAgent, mutateAgent } from '../loop/loop';
 import { UnitAgent } from '../helper/defs';
 import { addId, addPosition } from './helper/generate';
 import { HandlerFn } from '../loop/handlers';
+import { makeConsumerName } from '../helper/names';
 
 const isAtPos = (from: XY, to: XY) => {
 	return getDistanceToPoint(from, to) < 1;
@@ -152,7 +153,7 @@ export const MkMover = (from: ID[] = [], to: ID[] = []): MoverAgent => {
 	return {
 		...addId(),
 		...addPosition(xy([0, 0])),
-		name: 'Bus 1',
+		name: makeConsumerName() + `'s truck`,
 		color: 0,
 		emoji: '🚚',
 		held: 0,

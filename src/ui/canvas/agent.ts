@@ -1,7 +1,5 @@
 import { ID, Agent } from '../../helper/defs';
 
-const grass = 'red';
-
 const mkAgents = () => {
 	let canvases: { [key in string]: OffscreenCanvas } = {};
 
