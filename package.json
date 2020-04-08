@@ -16,9 +16,11 @@
 		"d3-polygon": "^1.0.6",
 		"hash-sum": "^2.0.0",
 		"lit-html": "^1.2.1",
+		"nanoid": "^3.0.2",
 		"parcel": "^2.0.0-alpha.3.2",
 		"postcss": "^7.0.27",
 		"postcss-nested": "^4.2.1",
+		"shortid": "^2.2.15",
 		"uniqid": "^5.2.0"
 	},
 	"browserslist": [

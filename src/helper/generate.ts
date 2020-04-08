@@ -1,19 +1,19 @@
 import { PlaceableEntity, Entity } from './defs';
 import { WithID } from './defs';
 import { XY } from './xy';
-const uniqid = require('uniqid');
+const shortid = require('shortid');
 
 export const appendWithId = <T, What>(
 	to: T,
 	object: Omit<What, keyof WithID>
 ): T => {
-	const id = uniqid();
+	const id = shortid.generate();
 	to[id] = { id, ...object };
 	return to;
 };
 
 export const addId = (): WithID => ({
-	id: uniqid(),
+	id: shortid.generate(),
 });
 
 export const addPosition = ({
