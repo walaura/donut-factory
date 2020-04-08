@@ -1,99 +1,20 @@
-import { html, render } from 'lit-html';
-import { styleMap } from 'lit-html/directives/style-map.js';
-import { MoverAgent } from '../agent/mover';
-import { Agent, AgentStateType, GameState, ID } from '../helper/defs';
+import { render } from 'lit-html';
+import { GameState } from '../helper/defs';
 import {
 	listenFromWindow,
 	LoopWorkerMessage,
 	MsgActions,
 	WorldWorkerMessage,
-	postFromWindow,
 } from '../helper/message';
 import { Target } from '../helper/pathfinding';
-import { findAgent, mutateAgent } from '../loop/loop';
-import './game.css';
-import { numberWithCommas, shortNumber } from './helper/format';
-import {
-	onStateUpdate,
-	UIStatePriority,
-	useGameState,
-} from './helper/useGameState';
-import { $agentWindow } from './window/agentWindow';
-import { $moneyWindow } from './window/moneyWindow';
-import { $pretty } from './window/rows/pretty';
-import { $window, $windowDock, addDynamicWindow } from './window/window';
-import { $agentsWindow } from './window/agentsWindow';
+import { $dock } from './$dock/$dock';
+import { $windowDock, generateWindowEv } from './$window/$window';
+import { onStateUpdate } from './helper/useGameState';
+import { agentInspector } from './inspector/agent-inspector';
 
-const Board = () => html`${$windowDock()}${Tools()} `;
+require('./game.css');
 
-const Tools = () => {
-	return html`<x-dock>
-		<button
-			as="x-dock-panel"
-			@click=${() => {
-				addDynamicWindow($moneyWindow());
-			}}
-		>
-			<xdp-emoji><span>💰</span></xdp-emoji>
-			<xdp-text>
-				${useGameState(
-					(state) =>
-						numberWithCommas(
-							state.ledger.map(({ tx }) => tx).reduce((a, b) => a + b)
-						),
-					UIStatePriority.Bunny
-				)}
-			</xdp-text>
-		</button>
-		<button
-			as="x-dock-panel"
-			@click=${() => {
-				addDynamicWindow($window('📅', 'Date', [12]));
-			}}
-		>
-			<xdp-emoji><span>📆</span></xdp-emoji>
-			${useGameState((state) => {
-				let date = new Date(state.date);
-				const dtf = new Intl.DateTimeFormat('en', {
-					year: 'numeric',
-					month: 'short',
-					day: '2-digit',
-				});
-				const clock = new Intl.DateTimeFormat('en', {
-					hour: 'numeric',
-					minute: 'numeric',
-				});
-				return html`<xdp-text>${dtf.format(date)}</xdp-text>
-					<xdp-text>${clock.format(date)}</xdp-text>`;
-			}, UIStatePriority.UI)}
-		</button>
-		<x-dock-panel>
-			<button
-				as="xdp-emoji"
-				@click=${() => {
-					addDynamicWindow($agentsWindow());
-				}}
-			>
-				<span>
-					🌈
-				</span>
-			</button>
-			<button
-				@click=${() => {
-					addDynamicWindow(
-						$window('🤓', 'All state', [
-							useGameState((state) => $pretty(state)),
-						])
-					);
-				}}
-				title="Show global state"
-				as="xdp-emoji"
-			>
-				<span>🤓</span>
-			</button>
-		</x-dock-panel>
-	</x-dock>`;
-};
+const Board = () => [$windowDock(), $dock()];
 
 const renderSetup = () => {
 	render(Board(), (window as any).game);
@@ -116,9 +37,9 @@ const renderSetup = () => {
 			pos: { x, y },
 		} as WorldWorkerMessage);
 	});
-	$canvas.addEventListener('click', () => {
+	$canvas.addEventListener('click', (ev) => {
 		if ('agentId' in selected) {
-			addDynamicWindow($agentWindow(selected.agentId));
+			generateWindowEv(ev)(agentInspector(selected.agentId));
 		}
 	});
 

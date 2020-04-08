@@ -1,6 +1,6 @@
 import { html } from 'lit-html';
-import { $emoji } from '../components/emoji';
-import { $heading } from '../components/type';
+import { $heading } from '../../components/type';
+import { $emoji } from '../../components/emoji';
 
 interface Info {
 	body: any;

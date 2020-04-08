@@ -10,10 +10,14 @@
 	"author": "walaura",
 	"license": "ISC",
 	"dependencies": {
+		"@types/css-tree": "^1.0.3",
 		"@types/node": "^13.11.0",
+		"css-tree": "^1.0.0-alpha.39",
 		"d3-polygon": "^1.0.6",
+		"hash-sum": "^2.0.0",
 		"lit-html": "^1.2.1",
-		"parcel": "^1.12.4",
+		"parcel": "^2.0.0-alpha.3.2",
+		"postcss": "^7.0.27",
 		"postcss-nested": "^4.2.1",
 		"uniqid": "^5.2.0"
 	},

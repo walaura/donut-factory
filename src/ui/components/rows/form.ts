@@ -1,5 +1,5 @@
 import { html } from 'lit-html';
-import { $heading } from '../components/type';
+import { $heading } from '../type';
 
 const $form = ({ label, control = null }: { label: any; control: any }) => html`
 	<style>

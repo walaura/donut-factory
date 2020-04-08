@@ -1,15 +1,15 @@
-import { MkMover } from './../../agent/mover';
+import { ListWindowProps } from './../$window/$window';
 import { html } from 'lit-html';
 import { MkConsumer } from '../../agent/consumer';
-import { Agent } from '../../helper/defs';
-import { useGameState } from '../helper/useGameState';
+import { MkMover } from '../../agent/mover';
+import { Agent, GameState } from '../../helper/defs';
+import { addAgent } from '../../loop/loop';
+import { $infoBig } from '../components/rows/info';
+import { $rows } from '../components/rows/row';
 import { getAgentStatus } from '../helper/status';
-import { GameState } from './../../helper/defs';
-import { addAgent } from './../../loop/loop';
-import { $agentWindow } from './agentWindow';
-import { $infoBig } from './rows/info';
-import { $window, addDynamicWindow } from './window';
-import { $rows } from './rows/row';
+import { useGameState } from '../helper/useGameState';
+import { agentInspector } from './agent-inspector';
+import { generateWindowEv } from '../$window/$window';
 
 let fairypos = { x: 45, y: 15 };
 
@@ -18,13 +18,13 @@ const $row = (agent: Agent, state: GameState) =>
 		icon: agent.emoji,
 		heading: agent.name,
 		accesories: [getAgentStatus(agent.id, state)],
-		onClick: () => {
-			addDynamicWindow($agentWindow(agent.id));
-		},
+		onClick: (ev) => generateWindowEv(ev)(agentInspector(agent.id)),
 	});
 
-const $agentsWindow = () =>
-	$window('🌈', 'All agents', [
+const allAgents = (): ListWindowProps => ({
+	emoji: '🌈',
+	title: 'All agents',
+	list: [
 		useGameState((state) =>
 			$rows(Object.values(state.agents).map((ag) => $row(ag, state)))
 		),
@@ -44,6 +44,7 @@ const $agentsWindow = () =>
 		>
 			add truck
 		</button>`,
-	]);
+	],
+});
 
-export { $agentsWindow };
+export { allAgents };

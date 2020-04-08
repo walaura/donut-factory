@@ -52,58 +52,6 @@ x-dock {
 	position: fixed;
 	top: calc(var(--space-h) * 2);
 	right: calc(var(--space-h) * 2);
-	display: grid;
-	grid-auto-flow: column;
-	grid-gap: calc(var(--space-h) * 2);
-	button {
-		&:hover {
-			background: var(--bg-tabbar);
-		}
-	}
-}
-
-x-dock-panel,
-[as='x-dock-panel'] {
-	background: var(--bg-light);
-	font-weight: var(--font-bold);
-	display: grid;
-	border-radius: 1000em;
-	height: var(--pressable);
-	grid-auto-flow: column;
-	grid-template-rows: 1fr;
-	align-items: stretch;
-	box-shadow: var(--shadow-1);
-	& > * + * {
-		border-left: 1px solid var(--bg);
-	}
-	& > *:first-child {
-		padding-left: calc(var(--pressable) / 3);
-		padding-right: calc(var(--pressable) / 6);
-	}
-	& > *:last-child {
-		padding-right: calc(var(--pressable) / 3);
-		padding-left: calc(var(--pressable) / 6);
-	}
-}
-
-xdp-text {
-	display: grid;
-	align-items: center;
-	justify-content: center;
-	padding: 0 var(--space-h);
-}
-
-xdp-emoji,
-[as='xdp-emoji'] {
-	min-width: calc(var(--pressable) * 1.25);
-	display: grid;
-	align-items: center;
-	justify-content: center;
-	text-align: center;
-	vertical-align: middle;
-	> span {
-		transform: translateX(10%) translateY(-10%) scale(1.5);
-	}
 }
 
 x-window x-table {
@@ -115,6 +63,7 @@ x-window button {
 	background: #fff;
 	padding: 0.5em;
 	box-shadow: var(--shadow-1);
+	border-radius: 9999em;
 }
 
 x-tabbar {
@@ -128,32 +77,15 @@ x-tabbar button {
 	width: var(--pressable);
 	height: var(--pressable);
 	background: var(--bg-tabbar);
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
 	border-top-left-radius: var(--radius-small);
 	border-top-right-radius: var(--radius-small);
 	box-shadow: none !important;
-	display: grid;
+	display: flex;
 	align-items: center;
 	justify-content: center;
 	&[data-active='true'] {
 		background: var(--bg);
 	}
-}
-
-x-emoji {
-	display: grid;
-	width: 1em;
-	height: 1em;
-	align-items: center;
-	justify-content: center;
-	line-height: 1em;
-	vertical-align: 1em;
-	transform: scale(1.33);
-}
-
-xe-glyph {
-	font-size: 1em;
-	display: inline;
-	line-height: 1em;
-	vertical-align: 1em;
-	transform: translate(10%, 5%);
 }

@@ -1,10 +1,10 @@
 import { html } from 'lit-html';
 import { LedgerRecord } from '../../helper/defs';
+import { $infoBig } from '../components/rows/info';
+import { $rows } from '../components/rows/row';
+import { clock, longDate, numberWithCommas } from '../helper/format';
 import { UIStatePriority, useGameState } from '../helper/useGameState';
-import { clock, longDate, numberWithCommas } from './../helper/format';
-import { $infoBig } from './rows/info';
-import { $window } from './window';
-import { $rows } from './rows/row';
+import { ListWindowProps } from './../$window/$window';
 
 const currency = '$';
 
@@ -17,8 +17,10 @@ const $row = (rc: LedgerRecord) =>
 		accesories: [rc.reason, `${longDate(rc.date)} ${clock(rc.date)}`],
 	});
 
-const $moneyWindow = () =>
-	$window('💰', 'Money', [
+const moneyInspector = (): ListWindowProps => ({
+	emoji: '💰',
+	title: 'Money',
+	list: [
 		useGameState((state) => {
 			return html`<h1 style="text-align: center">
 				${currency}${numberWithCommas(
@@ -27,6 +29,7 @@ const $moneyWindow = () =>
 			</h1>`;
 		}, UIStatePriority.Snail),
 		useGameState((state) => $rows([...state.ledger].reverse().map($row))),
-	]);
+	],
+});
 
-export { $moneyWindow };
+export { moneyInspector };

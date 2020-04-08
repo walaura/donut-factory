@@ -1,15 +1,15 @@
 import { html } from 'lit-html';
+import { TabbedWindowProps } from '../$window/$window';
 import { MoverAgent } from '../../agent/mover';
-import { AgentStateType, GameState, ID, Agent } from '../../helper/defs';
-import { findAgent, mutateAgent, addAgent, deleteAgent } from '../../loop/loop';
-import { UIStatePriority, useGameState } from '../helper/useGameState';
-import { getAgentStatus } from '../helper/status';
-import { $pretty } from './rows/pretty';
-import { $window, $tabbedWindow } from './window';
-import { $form } from './rows/form';
-import { $rows } from './rows/row';
-import { $infoSmall } from './rows/info';
+import { Agent, AgentStateType, GameState, ID } from '../../helper/defs';
+import { deleteAgent, findAgent, mutateAgent } from '../../loop/loop';
+import { $form } from '../components/rows/form';
+import { $infoSmall } from '../components/rows/info';
+import { $pretty } from '../components/rows/pretty';
+import { $rows } from '../components/rows/row';
 import { shortNumber } from '../helper/format';
+import { getAgentStatus } from '../helper/status';
+import { UIStatePriority, useGameState } from '../helper/useGameState';
 
 const $select = ({ values, selected, onChange }) => html`
 	<select
@@ -182,37 +182,34 @@ const $info = (agentId: ID, gameState: GameState) => {
 	]);
 };
 
-const $agentWindow = (agentId: ID) =>
-	$tabbedWindow(
-		useGameState((state) => findAgent(agentId, state)?.emoji),
-		'Agent info',
-		[
-			{
-				emoji: 'ℹ️',
-				name: 'Basic',
-				contents: [
-					useGameState((state) => $info(agentId, state), UIStatePriority.Sonic),
-					useGameState(
-						(state) => getAgentStatus(agentId, state),
-						UIStatePriority.Cat
-					),
-				],
-			},
-			{
-				emoji: '🔧',
-				name: 'System',
-				contents: [
-					useGameState((state) => $pretty(findAgent(agentId, state))),
-					html`<button
-						@click=${() => {
-							deleteAgent(agentId);
-						}}
-					>
-						Delete agent
-					</button>`,
-				],
-			},
-		]
-	);
-
-export { $agentWindow };
+export const agentInspector = (agentId: ID): TabbedWindowProps => ({
+	title: useGameState((state) => findAgent(agentId, state)?.name) ?? 'info',
+	emoji: useGameState((state) => findAgent(agentId, state)?.emoji),
+	tabs: [
+		{
+			emoji: 'ℹ️',
+			name: 'Basic',
+			contents: [
+				useGameState((state) => $info(agentId, state), UIStatePriority.Sonic),
+				useGameState(
+					(state) => getAgentStatus(agentId, state),
+					UIStatePriority.Cat
+				),
+			],
+		},
+		{
+			emoji: '🔧',
+			name: 'System',
+			contents: [
+				useGameState((state) => $pretty(findAgent(agentId, state))),
+				html`<button
+					@click=${() => {
+						deleteAgent(agentId);
+					}}
+				>
+					Delete agent
+				</button>`,
+			],
+		},
+	],
+});
