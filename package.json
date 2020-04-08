@@ -16,6 +16,7 @@
 		"d3-polygon": "^1.0.6",
 		"hash-sum": "^2.0.0",
 		"lit-html": "^1.2.1",
+		"merge-deep": "^3.0.2",
 		"nanoid": "^3.0.2",
 		"parcel": "^2.0.0-alpha.3.2",
 		"postcss": "^7.0.27",

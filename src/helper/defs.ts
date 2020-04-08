@@ -1,19 +1,37 @@
 import { HandlerName } from '../loop/handlers';
-import { MoverAgent } from '../agent/mover';
+import { Vehicle } from '../agent/vehicle';
 import { Road } from '../dressing/road';
 import { XY } from './xy';
 import { Product } from '../dressing/product';
+import { UnitAgent } from '../agent/factory';
+import { OrderQueue, Order } from '../agent/with-orders';
+import { Target } from './pathfinding';
 
 export type ID = string;
 
 export enum EntityType {
 	'Unit' = 'UNIT',
-	'Mover' = 'MOVER',
+	'Vehicle' = 'VEHICLE',
 	'Product' = 'PRODUCT',
+	'Road' = 'ROAD',
+	'Order' = 'Order',
 }
 
 export interface WithID {
 	id: ID;
+}
+
+export interface WithOrders {
+	orders: OrderQueue;
+}
+
+export interface WithCargo {
+	cargo: {
+		[key in Product['id']]: {
+			quantity: number;
+			productId: Product['id'];
+		};
+	};
 }
 
 export interface WithName {
@@ -25,30 +43,33 @@ export interface WithEmoji {
 export interface WithColor {
 	color: number;
 }
+export interface WithPath {
+	path: Target[];
+	pathHistory: Target[];
+}
 
-interface BaseEntity extends WithID, WithName {
+export interface BaseEntity extends WithID, WithEmoji, WithName {
 	type: EntityType;
 }
 
-export interface HandleableEntity extends BaseEntity {
+export interface WithHandler {
 	handler?: HandlerName;
 }
+export const entityHasHandler = (
+	entity: Entity
+): entity is Entity & Required<WithHandler> => {
+	return 'handler' in entity;
+};
 
-export interface PlaceableEntity extends BaseEntity, WithEmoji, XY {
-	placeable: true;
-}
+export interface WithXY extends BaseEntity, XY {}
 
-export interface UnitAgent
-	extends PlaceableEntity,
-		HandleableEntity,
-		WithName,
-		WithColor {
-	exports: number;
-	imports: number;
-	type: EntityType.Unit;
-}
+export const entityHasXY = (
+	entity: Entity
+): entity is Entity & Required<WithXY> => {
+	return 'x' in entity;
+};
 
-export type Entity = UnitAgent | MoverAgent | Product;
+export type Entity = UnitAgent | Vehicle | Product | Road | Order;
 
 export interface LedgerRecord {
 	tx: number;

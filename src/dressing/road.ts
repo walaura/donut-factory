@@ -1,4 +1,4 @@
-import { WithID, WithName } from '../helper/defs';
+import { BaseEntity, EntityType, Entity } from '../helper/defs';
 import { XY } from '../helper/xy';
 
 export enum RoadEnd {
@@ -6,10 +6,14 @@ export enum RoadEnd {
 	'end' = 'end',
 }
 
-export interface Road extends WithID, WithName {
+export interface Road extends BaseEntity {
 	[RoadEnd.start]: XY;
 	[RoadEnd.end]: XY;
+	type: EntityType.Road;
 }
+export const entityIsRoad = (entity: Entity): entity is Road => {
+	return entity.type === EntityType.Road;
+};
 
 const MkRoad = (
 	name = 'wah',
@@ -18,9 +22,11 @@ const MkRoad = (
 ): Road => {
 	return {
 		id: name + Date.now(),
+		emoji: '🛣',
 		name,
 		start,
 		end,
+		type: EntityType.Road,
 	};
 };
 

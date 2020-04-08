@@ -2,12 +2,12 @@ import { GameState, Entity } from './defs';
 import { ID } from './defs';
 import { RoadEnd, Road } from '../dressing/road';
 import { findEntity } from '../loop/loop';
-import { MoverAgent } from '../agent/mover';
+import { Vehicle } from '../agent/vehicle';
 import { XY } from './xy';
 
 type SharedTargets =
 	| {
-			roadId: ID;
+			entityId: ID;
 			roadEnd: RoadEnd;
 	  }
 	| {
@@ -72,28 +72,33 @@ export const targetFromXY = ({ x, y }: XY): Target => ({ xy: { x, y } });
 export const mkFindTarget = (gameState: GameState) => (
 	target: Target
 ): XY | null => {
-	if ('roadId' in target) {
-		return gameState.roads[target.roadId][target.roadEnd];
+	if ('xy' in target) {
+		return target.xy;
+	}
+	if ('roadEnd' in target) {
+		let entity = findEntity(target.entityId, gameState);
+		if (entity && target.roadEnd in entity) {
+			return entity[target.roadEnd];
+		}
 	}
 	if ('entityId' in target) {
 		let entity = findEntity(target.entityId, gameState);
 		if (entity && 'x' in entity) {
 			return entity;
 		}
-		return null;
 	}
-	return target.xy;
+	return null;
 };
 
 const getUsableRoadList = (roads: Road[], final: Entity): Target[] => {
 	let returnable: Target[] = roads
 		.map((road) => [
 			{
-				roadId: road.id,
+				entityId: road.id,
 				roadEnd: RoadEnd.end,
 			},
 			{
-				roadId: road.id,
+				entityId: road.id,
 				roadEnd: RoadEnd.start,
 			},
 		])
@@ -103,7 +108,7 @@ const getUsableRoadList = (roads: Road[], final: Entity): Target[] => {
 };
 
 export const mkFindPath = (gameState: GameState, roads: Road[]) => (
-	mover: MoverAgent,
+	mover: Vehicle,
 	to: Entity
 ): Target[] => {
 	const findTarget = mkFindTarget(gameState);
@@ -121,8 +126,8 @@ export const mkFindPath = (gameState: GameState, roads: Road[]) => (
 				xy ?? { x: Infinity, y: Infinity }
 			);
 			// prefer same road
-			if ('roadId' in from && 'roadId' in rd) {
-				if (from.roadId === rd.roadId) {
+			if ('roadEnd' in from && 'roadEnd' in rd) {
+				if (from.entityId === rd.entityId) {
 					score = score / mover.preferenceForRoads;
 				}
 			}

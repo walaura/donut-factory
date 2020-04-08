@@ -1,4 +1,4 @@
-import { PlaceableEntity, Entity } from './defs';
+import { WithXY, Entity, BaseEntity, WithEmoji } from './defs';
 import { WithID } from './defs';
 import { XY } from './xy';
 const shortid = require('shortid');
@@ -19,8 +19,7 @@ export const addId = (): WithID => ({
 export const addPosition = ({
 	x,
 	y,
-}: XY): Omit<PlaceableEntity, keyof Entity> => ({
-	placeable: true,
+}: XY): Omit<WithXY, keyof (BaseEntity & WithEmoji)> => ({
 	x,
 	y,
 });

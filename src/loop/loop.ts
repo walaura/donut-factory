@@ -1,17 +1,19 @@
+import { WithHandler, entityHasHandler, WithOrders } from './../helper/defs';
 import { Road } from '../dressing/road';
 import { MsgActions } from '../helper/message';
 import { Entity, GameState, ID, LedgerRecord } from '../helper/defs';
 import { postFromWindow } from './../helper/message';
 import { getHandlers } from './handlers';
 import { semiFlatten } from '../helper/ledger';
+const mergeDeep = require('merge-deep');
 
 let time = Date.now();
-let agentMutations: AgentMutation[] = [];
+let agentMutations: AgentMutation<any>[] = [];
 let gameMutations: GameMutation[] = [];
 
 interface AgentMutation<S extends Entity = Entity> {
 	entityId: string;
-	mutation: (prevState: S, gameState: GameState, context: any[]) => S;
+	mutation: (prevState: S, gameState: GameState, context: any[]) => Partial<S>;
 	context: any[];
 }
 
@@ -66,7 +68,7 @@ export const pauseGame = () => {
 	}));
 };
 
-export const deleteAgent = (entityId: ID) => {
+export const deleteEntity = (entityId: ID) => {
 	mutateGame(
 		(state, [entityId]: [ID]) => {
 			delete state.entities[entityId];
@@ -76,7 +78,7 @@ export const deleteAgent = (entityId: ID) => {
 	);
 };
 
-export const addAgent = (agent: Entity) => {
+export const addEntity = (agent: Entity) => {
 	mutateGame(
 		(state, [agent]: [Entity]) => ({
 			...state,
@@ -86,10 +88,26 @@ export const addAgent = (agent: Entity) => {
 	);
 };
 
-export const addRoad = (road: Road) => {
-	mutateGame((state) => ({
-		...state,
-		roads: { ...state.roads, [road.id]: road },
+export const linkOrder = (entityId: ID, orderId: ID) => {
+	mutateAgent<Entity & WithOrders>(
+		entityId,
+		(prev, _, [orderId]) => ({
+			...prev,
+			orders: {
+				...prev.orders,
+				list: [...prev.orders.list, orderId],
+			},
+		}),
+		[orderId]
+	);
+};
+export const clearOrders = (entityId: ID) => {
+	mutateAgent<Entity & WithOrders>(entityId, (prev, _) => ({
+		...prev,
+		orders: {
+			...prev.orders,
+			list: [],
+		},
 	}));
 };
 
@@ -114,20 +132,22 @@ export const gameLoop = (prevState: GameState) => {
 		if (!muta) continue;
 		gameState = muta.mutation(gameState, muta.context);
 	}
-
 	while (agentMutations.length) {
 		const muta = agentMutations.pop();
 		if (!muta) continue;
-		gameState.entities[muta.entityId] = muta.mutation(
-			gameState.entities[muta.entityId],
-			gameState,
-			muta.context
-		);
+		gameState.entities[muta.entityId] = {
+			...gameState.entities[muta.entityId],
+			...muta.mutation(
+				gameState.entities[muta.entityId],
+				gameState,
+				muta.context
+			),
+		};
 	}
 
-	for (let unit of Object.values(gameState.entities)) {
-		if (unit.handler) {
-			unit = getHandlers()[unit.handler](delta, unit as any, gameState);
+	for (let entity of Object.values(gameState.entities)) {
+		if (entityHasHandler(entity)) {
+			entity = getHandlers()[entity.handler](delta, entity as any, gameState);
 		}
 	}
 

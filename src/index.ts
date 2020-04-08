@@ -5,8 +5,7 @@ import {
 	postFromWindow,
 	registerBackgroundWorkers,
 } from './helper/message';
-
-import renderSetup from './ui/ui';
+import renderSetup from './ui-web/ui';
 
 let state: GameState | null;
 
@@ -20,6 +19,7 @@ listenFromWindow((data) => {
 });
 let initialState = null;
 try {
+	//@ts-ignore
 	initialState = JSON.parse(localStorage.getItem('autosave'));
 } catch {}
 postFromWindow({ action: MsgActions.START, initialState });

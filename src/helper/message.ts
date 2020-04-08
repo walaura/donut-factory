@@ -1,7 +1,7 @@
 import { ID } from './defs';
 import { GameState } from './defs';
 import { XY } from './xy';
-import { RendererState } from '../world.wk';
+import { RendererState } from '../ui-canvas/world.wk';
 
 export enum MsgActions {
 	'SEND_CANVAS' = 'SEND_CANVAS',
