@@ -1,12 +1,9 @@
 import {
-	WithID,
-	WithName,
-	PlaceableEntity,
-	HandleableEntity,
 	EntityType,
+	HandleableEntity,
 	WithEmoji,
+	WithName,
 } from '../helper/defs';
-import { XY } from '../helper/xy';
 import { addId } from '../helper/generate';
 
 export enum RoadEnd {

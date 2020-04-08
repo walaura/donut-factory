@@ -76,7 +76,7 @@ function draw(prevState: GameState, state: GameState): RendererState {
 	//agents
 	for (let agent of Object.values(state.entities)) {
 		if (!('x' in agent)) {
-			break;
+			continue;
 		}
 		if ('entityId' in selected) {
 			break;
@@ -91,7 +91,7 @@ function draw(prevState: GameState, state: GameState): RendererState {
 	}
 	for (let agent of Object.values(state.entities)) {
 		if (!('x' in agent)) {
-			break;
+			continue;
 		}
 		let fontSize = useBouncyValue({ value: 0 }, 'ag:' + agent.id);
 		let agentSize = 50;

@@ -6,14 +6,21 @@ import { makeRoadName } from '../helper/names';
 import { xy } from '../helper/xy';
 import { GameState } from '../helper/defs';
 import { addAgent, addRoad, addFunds } from './loop';
+import { MkProduct } from '../dressing/product';
 
 export const startGame = () => {
 	let factory = MkFactory(xy([10, 10]));
 	let consumer = MkConsumer(xy([40, 15]));
 	let mover = MkMover([factory.id], [consumer.id]);
-
 	let firstRoad = MkRoad(makeRoadName(), { x: 10, y: 10 }, { x: 15, y: 28 });
-	[factory, consumer, mover, mover].map(addAgent);
+	[
+		factory,
+		MkProduct('Mushrooms', '🍄'),
+		consumer,
+		mover,
+		MkProduct('Strawberries', '🍓'),
+		MkProduct('Waffles', '🥕'),
+	].map(addAgent);
 	[
 		firstRoad,
 		MkRoad(makeRoadName(), { x: 32, y: 15 }, { x: 15, y: 30 }),
