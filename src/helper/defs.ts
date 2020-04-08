@@ -2,16 +2,14 @@ import { HandlerName } from '../loop/handlers';
 import { MoverAgent } from '../agent/mover';
 import { Road } from '../dressing/road';
 import { XY } from './xy';
+import { Product } from '../dressing/product';
 
 export type ID = string;
 
-export enum AgentStateType {
-	'UNIT',
-	'MOVER',
-}
-
-export interface WithXY extends XY {
-	placeable: true;
+export enum EntityType {
+	'Unit' = 'UNIT',
+	'Mover' = 'MOVER',
+	'Product' = 'PRODUCT',
 }
 
 export interface WithID {
@@ -21,23 +19,36 @@ export interface WithID {
 export interface WithName {
 	name: string;
 }
-
-export interface BaseAgent extends WithID, WithName {
+export interface WithEmoji {
 	emoji: string;
+}
+export interface WithColor {
 	color: number;
-	type: AgentStateType;
+}
+
+interface BaseEntity extends WithID, WithName {
+	type: EntityType;
+}
+
+export interface HandleableEntity extends BaseEntity {
 	handler?: HandlerName;
 }
 
-export interface BasePlaceableAgent extends BaseAgent, WithXY {}
-
-export interface UnitAgent extends BasePlaceableAgent, XY {
-	exports: number;
-	imports: number;
-	type: AgentStateType.UNIT;
+export interface PlaceableEntity extends BaseEntity, WithEmoji, XY {
+	placeable: true;
 }
 
-export type Agent = UnitAgent | MoverAgent;
+export interface UnitAgent
+	extends PlaceableEntity,
+		HandleableEntity,
+		WithName,
+		WithColor {
+	exports: number;
+	imports: number;
+	type: EntityType.Unit;
+}
+
+export type Entity = UnitAgent | MoverAgent | Product;
 
 export interface LedgerRecord {
 	tx: number;
@@ -54,6 +65,6 @@ export interface GameState {
 	height: number;
 	date: number;
 	ledger: Ledger;
-	agents: { [key: string]: Agent };
+	entities: { [key: string]: Entity };
 	roads: { [key: string]: Road };
 }

@@ -38,8 +38,8 @@ const renderSetup = () => {
 		} as WorldWorkerMessage);
 	});
 	$canvas.addEventListener('click', (ev) => {
-		if ('agentId' in selected) {
-			generateWindowEv(ev)(agentInspector(selected.agentId));
+		if ('entityId' in selected) {
+			generateWindowEv(ev)(agentInspector(selected.entityId));
 		}
 	});
 

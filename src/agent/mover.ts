@@ -1,4 +1,10 @@
-import { AgentStateType, BasePlaceableAgent, ID } from '../helper/defs';
+import {
+	WithID,
+	WithColor,
+	PlaceableEntity,
+	HandleableEntity,
+} from './../helper/defs';
+import { EntityType, ID } from '../helper/defs';
 import { addSpeedToMovement, Movement } from '../helper/movement';
 import {
 	getDistanceToPoint,
@@ -7,9 +13,9 @@ import {
 	Target,
 } from '../helper/pathfinding';
 import { xy, XY } from '../helper/xy';
-import { addFunds, findAgent, mutateAgent } from '../loop/loop';
+import { addFunds, findEntity, mutateAgent } from '../loop/loop';
 import { UnitAgent } from '../helper/defs';
-import { addId, addPosition } from './helper/generate';
+import { addId, addPosition } from '../helper/generate';
 import { HandlerFn } from '../loop/handlers';
 import { makeConsumerName } from '../helper/names';
 
@@ -66,10 +72,10 @@ export const moverHandler: HandlerFn<MoverAgent> = (tick, state, gameState) => {
 		return true;
 	};
 
-	let moveFrom = findAgent(state.from[0], gameState);
-	let moveTo = findAgent(state.to[0], gameState);
+	let moveFrom = findEntity(state.from[0], gameState);
+	let moveTo = findEntity(state.to[0], gameState);
 
-	if (!moveFrom || !moveTo) {
+	if (!moveFrom || !moveTo || !('x' in moveFrom) || !('x' in moveTo)) {
 		console.error('TODO: lost/depot state??');
 		return state;
 	}
@@ -127,13 +133,16 @@ export const moverHandler: HandlerFn<MoverAgent> = (tick, state, gameState) => {
 	}
 
 	if (!state.gross.isLoadingOrUnloading && state.path.length === 0) {
-		state.path.push({ agentId: moveFrom.id });
+		state.path.push({ entityId: moveFrom.id });
 	}
 
 	return state;
 };
 
-export interface MoverAgent extends BasePlaceableAgent {
+export interface MoverAgent
+	extends PlaceableEntity,
+		HandleableEntity,
+		WithColor {
 	held: number;
 	loadSpeed: number;
 	preferenceForRoads: number;
@@ -141,7 +150,7 @@ export interface MoverAgent extends BasePlaceableAgent {
 	capacity: number;
 	from: ID[];
 	to: ID[];
-	type: AgentStateType.MOVER;
+	type: EntityType.Mover;
 	path: Target[];
 	gross: {
 		isLoadingOrUnloading: boolean;
@@ -161,7 +170,7 @@ export const MkMover = (from: ID[] = [], to: ID[] = []): MoverAgent => {
 		capacity: 4,
 		preferenceForRoads: 10,
 		offroadSpeed: 0.5,
-		type: AgentStateType.MOVER,
+		type: EntityType.Mover,
 		from,
 		to,
 		path: [],

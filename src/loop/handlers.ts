@@ -1,10 +1,10 @@
 import { factoryHandler } from './../agent/factory';
 import { moverHandler } from './../agent/mover';
-import { GameState, Agent } from '../helper/defs';
+import { GameState, Entity } from '../helper/defs';
 
 export type HandlerName = keyof ReturnType<typeof getHandlers>;
 
-export type HandlerFn<T extends Agent = Agent> = (
+export type HandlerFn<T extends Entity = Entity> = (
 	tick: number,
 	ownState: T,
 	gameState: GameState

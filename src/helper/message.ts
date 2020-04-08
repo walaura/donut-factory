@@ -48,7 +48,7 @@ export type LoopWorkerMessage =
 	  }
 	| {
 			action: MsgActions.MUTATE_AGENT;
-			agentId: ID;
+			entityId: ID;
 			context: any[];
 			mutation: string;
 	  }

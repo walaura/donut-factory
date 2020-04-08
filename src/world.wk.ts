@@ -1,5 +1,5 @@
-import { appendWithId } from './agent/helper/generate';
-import { GameState, WithID, AgentStateType } from './helper/defs';
+import { appendWithId } from './helper/generate';
+import { GameState, WithID, EntityType } from './helper/defs';
 import {
 	MsgActions,
 	postFromWorker,
@@ -7,7 +7,7 @@ import {
 } from './helper/message';
 import { getDistanceToPoint, Target } from './helper/pathfinding';
 import { scale as mkScale, XY, xy2arr } from './helper/xy';
-import { findAgent } from './loop/loop';
+import { findEntity } from './loop/loop';
 import {
 	animationTick,
 	useAnimatedValue,
@@ -74,28 +74,35 @@ function draw(prevState: GameState, state: GameState): RendererState {
 	}
 
 	//agents
-	for (let agent of Object.values(state.agents)) {
-		if ('agentId' in selected) {
+	for (let agent of Object.values(state.entities)) {
+		if (!('x' in agent)) {
+			break;
+		}
+		if ('entityId' in selected) {
 			break;
 		}
 		let scaled = scale(agent);
 		let distance = getDistanceToPoint(cursor, scaled) / zoom;
 		if (distance < 4) {
 			selected = {
-				agentId: agent.id,
+				entityId: agent.id,
 			};
 		}
 	}
-	for (let agent of Object.values(state.agents)) {
+	for (let agent of Object.values(state.entities)) {
+		if (!('x' in agent)) {
+			break;
+		}
 		let fontSize = useBouncyValue({ value: 0 }, 'ag:' + agent.id);
 		let agentSize = 50;
-		if ('agentId' in selected && selected.agentId === agent.id) {
+		if ('entityId' in selected && selected.entityId === agent.id) {
 			fontSize.up();
 		}
 		const { x, y } = scale(agent);
 		let flip = false;
-		if (agent.type === AgentStateType.MOVER && prevState.agents[agent.id]) {
-			if (agent.x - prevState.agents[agent.id].x > 0) {
+		let prevAgent = prevState.entities[agent.id];
+		if (agent.type === EntityType.Mover && prevAgent && 'x' in prevAgent) {
+			if (agent.x - prevAgent.x >= -0.01) {
 				flip = true;
 			}
 		}
@@ -114,7 +121,7 @@ function draw(prevState: GameState, state: GameState): RendererState {
 		prevState.ledger.length !== state.ledger.length &&
 		lastUpdate.relevantAgents
 	) {
-		const xy = findAgent(lastUpdate.relevantAgents[0], state);
+		const xy = findEntity(lastUpdate.relevantAgents[0], state);
 		if (xy) {
 			feedback = appendWithId(feedback, {
 				xy,

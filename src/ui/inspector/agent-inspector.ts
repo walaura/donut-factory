@@ -1,8 +1,9 @@
+import { UnitAgent, WithColor } from './../../helper/defs';
 import { html } from 'lit-html';
 import { TabbedWindowProps } from '../$window/$window';
 import { MoverAgent } from '../../agent/mover';
-import { Agent, AgentStateType, GameState, ID } from '../../helper/defs';
-import { deleteAgent, findAgent, mutateAgent } from '../../loop/loop';
+import { Entity, EntityType, GameState, ID } from '../../helper/defs';
+import { deleteAgent, findEntity, mutateAgent } from '../../loop/loop';
 import { $form } from '../components/rows/form';
 import { $infoSmall } from '../components/rows/info';
 import { $pretty } from '../components/rows/pretty';
@@ -29,7 +30,7 @@ const $select = ({ values, selected, onChange }) => html`
 	</select>
 `;
 
-const $colorRow = (agent: Agent) =>
+const $colorRow = (agent: Entity & WithColor) =>
 	$form({
 		label: `Color`,
 		control: html` <input
@@ -53,12 +54,12 @@ const $colorRow = (agent: Agent) =>
 		/>`,
 	});
 
-const $info = (agentId: ID, gameState: GameState) => {
-	const agent = findAgent(agentId, gameState);
+const $info = (entityId: ID, gameState: GameState) => {
+	const agent = findEntity(entityId, gameState);
 	if (!agent) {
 		return;
 	}
-	if (agent && agent.type !== AgentStateType.MOVER) {
+	if (agent.type === EntityType.Unit) {
 		return $rows(
 			[
 				agent.exports &&
@@ -90,109 +91,112 @@ const $info = (agentId: ID, gameState: GameState) => {
 			].filter(Boolean)
 		);
 	}
+	if (agent.type === EntityType.Mover) {
+		const tires = {
+			5: 'Nice n chill',
+			10: 'Balanced',
+			20: 'Bananas',
+		};
 
-	const tires = {
-		5: 'Nice n chill',
-		10: 'Balanced',
-		20: 'Bananas',
-	};
+		const deliveries = Object.fromEntries(
+			Object.entries(gameState.entities).map(([id, agent]) => [id, agent.name])
+		);
 
-	const deliveries = Object.fromEntries(
-		Object.entries(gameState.agents).map(([id, agent]) => [id, agent.name])
-	);
-
-	return $rows([
-		$infoSmall({
-			label: 'Held',
-			info: [
-				{
-					body: `${shortNumber(agent.held)} products`,
-					accesory: new Array(Math.ceil(agent.held)).fill('📦').splice(0, 200),
-				},
-			],
-		}),
-		$form({
-			label: 'Deliver from',
-			control: $select({
-				values: deliveries,
-				selected: agent.from[0] ?? '',
-				onChange: (from) => {
-					mutateAgent<MoverAgent>(
-						agent.id,
-						(prev, _, [from]) => ({
-							...prev,
-							from: [from],
-						}),
-						[from]
-					);
-				},
+		return $rows([
+			$infoSmall({
+				label: 'Held',
+				info: [
+					{
+						body: `${shortNumber(agent.held)} products`,
+						accesory: new Array(Math.ceil(agent.held))
+							.fill('📦')
+							.splice(0, 200),
+					},
+				],
 			}),
-		}),
-		$form({
-			label: 'Deliver to',
-			control: $select({
-				values: deliveries,
-				selected: agent.to[0] ?? '',
-				onChange: (to) => {
-					mutateAgent<MoverAgent>(
-						agent.id,
-						(prev, _, [to]) => ({
-							...prev,
-							to: [to],
-						}),
-						[to]
-					);
-				},
+			$form({
+				label: 'Deliver from',
+				control: $select({
+					values: deliveries,
+					selected: agent.from[0] ?? '',
+					onChange: (from) => {
+						mutateAgent<MoverAgent>(
+							agent.id,
+							(prev, _, [from]) => ({
+								...prev,
+								from: [from],
+							}),
+							[from]
+						);
+					},
+				}),
 			}),
-		}),
-		$form({
-			label: 'Tires',
-			control: $select({
-				values: tires,
-				selected: agent.offroadSpeed * 10,
-				onChange: (val) => {
-					const value = parseInt(val, 10) / 10;
-					mutateAgent<MoverAgent>(
-						agent.id,
-						(prev, _, [offroadSpeed]) => ({
-							...prev,
-							offroadSpeed,
-						}),
-						[value]
-					);
-				},
+			$form({
+				label: 'Deliver to',
+				control: $select({
+					values: deliveries,
+					selected: agent.to[0] ?? '',
+					onChange: (to) => {
+						mutateAgent<MoverAgent>(
+							agent.id,
+							(prev, _, [to]) => ({
+								...prev,
+								to: [to],
+							}),
+							[to]
+						);
+					},
+				}),
 			}),
-		}),
-		$form({
-			label: `This vehicle likes roads a ${agent.preferenceForRoads}/10`,
-			control: html`
-				<button
-					@click="${() => {
-						mutateAgent<MoverAgent>(agent.id, (prev) => ({
-							...prev,
-							preferenceForRoads: prev.preferenceForRoads - 5,
-						}));
-					}}"
-				>
-					I live on the edge
-				</button>
-			`,
-		}),
-		$colorRow(agent),
-	]);
+			$form({
+				label: 'Tires',
+				control: $select({
+					values: tires,
+					selected: agent.offroadSpeed * 10,
+					onChange: (val) => {
+						const value = parseInt(val, 10) / 10;
+						mutateAgent<MoverAgent>(
+							agent.id,
+							(prev, _, [offroadSpeed]) => ({
+								...prev,
+								offroadSpeed,
+							}),
+							[value]
+						);
+					},
+				}),
+			}),
+			$form({
+				label: `This vehicle likes roads a ${agent.preferenceForRoads}/10`,
+				control: html`
+					<button
+						@click="${() => {
+							mutateAgent<MoverAgent>(agent.id, (prev) => ({
+								...prev,
+								preferenceForRoads: prev.preferenceForRoads - 5,
+							}));
+						}}"
+					>
+						I live on the edge
+					</button>
+				`,
+			}),
+			$colorRow(agent),
+		]);
+	}
 };
 
-export const agentInspector = (agentId: ID): TabbedWindowProps => ({
-	title: useGameState((state) => findAgent(agentId, state)?.name) ?? 'info',
-	emoji: useGameState((state) => findAgent(agentId, state)?.emoji),
+export const agentInspector = (entityId: ID): TabbedWindowProps => ({
+	title: useGameState((state) => findEntity(entityId, state)?.name) ?? 'info',
+	emoji: useGameState((state) => findEntity(entityId, state)?.emoji),
 	tabs: [
 		{
 			emoji: 'ℹ️',
 			name: 'Basic',
 			contents: [
-				useGameState((state) => $info(agentId, state), UIStatePriority.Sonic),
+				useGameState((state) => $info(entityId, state), UIStatePriority.Sonic),
 				useGameState(
-					(state) => getAgentStatus(agentId, state),
+					(state) => getAgentStatus(entityId, state),
 					UIStatePriority.Cat
 				),
 			],
@@ -201,10 +205,10 @@ export const agentInspector = (agentId: ID): TabbedWindowProps => ({
 			emoji: '🔧',
 			name: 'System',
 			contents: [
-				useGameState((state) => $pretty(findAgent(agentId, state))),
+				useGameState((state) => $pretty(findEntity(entityId, state))),
 				html`<button
 					@click=${() => {
-						deleteAgent(agentId);
+						deleteAgent(entityId);
 					}}
 				>
 					Delete agent

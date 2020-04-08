@@ -1,7 +1,7 @@
-import { GameState, Agent } from './defs';
+import { GameState, Entity } from './defs';
 import { ID } from './defs';
 import { RoadEnd, Road } from '../dressing/road';
-import { findAgent } from '../loop/loop';
+import { findEntity } from '../loop/loop';
 import { MoverAgent } from '../agent/mover';
 import { XY } from './xy';
 
@@ -11,7 +11,7 @@ type SharedTargets =
 			roadEnd: RoadEnd;
 	  }
 	| {
-			agentId: ID;
+			entityId: ID;
 	  }
 	| { xy: XY };
 
@@ -75,13 +75,17 @@ export const mkFindTarget = (gameState: GameState) => (
 	if ('roadId' in target) {
 		return gameState.roads[target.roadId][target.roadEnd];
 	}
-	if ('agentId' in target) {
-		return findAgent(target.agentId, gameState) ?? null;
+	if ('entityId' in target) {
+		let entity = findEntity(target.entityId, gameState);
+		if (entity && 'x' in entity) {
+			return entity;
+		}
+		return null;
 	}
 	return target.xy;
 };
 
-const getUsableRoadList = (roads: Road[], final: Agent): Target[] => {
+const getUsableRoadList = (roads: Road[], final: Entity): Target[] => {
 	let returnable: Target[] = roads
 		.map((road) => [
 			{
@@ -94,13 +98,13 @@ const getUsableRoadList = (roads: Road[], final: Agent): Target[] => {
 			},
 		])
 		.flat();
-	returnable.push({ agentId: final.id, isFinal: true });
+	returnable.push({ entityId: final.id, isFinal: true });
 	return returnable;
 };
 
 export const mkFindPath = (gameState: GameState, roads: Road[]) => (
 	mover: MoverAgent,
-	to: Agent
+	to: Entity
 ): Target[] => {
 	const findTarget = mkFindTarget(gameState);
 	const usableRoads = getUsableRoadList(roads, mover);
@@ -142,7 +146,7 @@ export const mkFindPath = (gameState: GameState, roads: Road[]) => (
 		});
 	};
 
-	const toTarget = { agentId: to.id };
+	const toTarget = { entityId: to.id };
 	const journeys = calculateAllPaths([...usableRoads], toTarget);
 	const best = unnestTargets(journeys)[0].path;
 	const path = [...best.reverse(), toTarget];

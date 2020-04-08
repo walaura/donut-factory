@@ -1,6 +1,6 @@
-import { BasePlaceableAgent, BaseAgent } from '../../helper/defs';
-import { WithID } from '../../helper/defs';
-import { XY } from '../../helper/xy';
+import { PlaceableEntity, Entity } from './defs';
+import { WithID } from './defs';
+import { XY } from './xy';
 const uniqid = require('uniqid');
 
 export const appendWithId = <T, What>(
@@ -19,7 +19,7 @@ export const addId = (): WithID => ({
 export const addPosition = ({
 	x,
 	y,
-}: XY): Omit<BasePlaceableAgent, keyof BaseAgent> => ({
+}: XY): Omit<PlaceableEntity, keyof Entity> => ({
 	placeable: true,
 	x,
 	y,

@@ -1,8 +1,8 @@
-import { AgentStateType, UnitAgent } from '../helper/defs';
+import { EntityType, UnitAgent } from '../helper/defs';
 import { makeFactoryName } from '../helper/names';
 import { XY } from '../helper/xy';
 import { HandlerFn } from '../loop/handlers';
-import { addId, addPosition } from './helper/generate';
+import { addId, addPosition } from '../helper/generate';
 
 export const factoryHandler: HandlerFn<UnitAgent> = (
 	tick,
@@ -21,7 +21,7 @@ export const MkFactory = (xy: XY): UnitAgent => {
 		exports: 0,
 		imports: 0,
 		color: 0,
-		type: AgentStateType.UNIT,
+		type: EntityType.Unit,
 		emoji: '🏭',
 		placeable: true,
 		x: 10,

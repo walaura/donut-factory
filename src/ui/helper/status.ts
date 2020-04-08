@@ -1,25 +1,25 @@
-import { AgentStateType } from '../../helper/defs';
-import { findAgent } from '../../loop/loop';
+import { EntityType } from '../../helper/defs';
+import { findEntity } from '../../loop/loop';
 import { GameState, ID } from './../../helper/defs';
 import { shortNumber } from './format';
 
-export const getAgentStatus = (agentId: ID, gameState: GameState) => {
-	const agent = findAgent(agentId, gameState);
+export const getAgentStatus = (entityId: ID, gameState: GameState) => {
+	const agent = findEntity(entityId, gameState);
 	let txt = 'n/a';
 	if (!agent) {
 		return txt;
 	}
-	if (agent.type !== AgentStateType.MOVER) {
+	if (agent.type !== EntityType.Mover) {
 		return txt;
 	}
 	if (agent.path.length === 0) {
 		txt = `Stuck or loading/unloading`;
 	}
 	if (agent.held <= 0) {
-		const from = findAgent(agent.from[0], gameState);
+		const from = findEntity(agent.from[0], gameState);
 		from && (txt = `On their way to ${from.emoji} ${from.name}`);
 	} else {
-		const to = findAgent(agent.to[0], gameState);
+		const to = findEntity(agent.to[0], gameState);
 		to &&
 			(txt = `Delivering ${shortNumber(agent.held)} boxes to
 		${to.emoji} ${to.name}`);

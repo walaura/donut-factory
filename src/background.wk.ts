@@ -6,7 +6,7 @@ let state = getInitialState();
 listenFromWorker((message) => {
 	if (message.action === MsgActions.MUTATE_AGENT) {
 		mutateAgent(
-			message.agentId,
+			message.entityId,
 			new Function(`return ${message.mutation}`)(),
 			message.context
 		);

@@ -1,10 +1,10 @@
-import { ID, Agent } from '../../helper/defs';
+import { Entity } from '../../helper/defs';
 
 const mkAgents = () => {
 	let canvases: { [key in string]: OffscreenCanvas } = {};
 
 	const mkAgent = (
-		agent: Agent,
+		agent: Entity,
 		{ size = 50, scale = 1, flip = false } = {}
 	) => {
 		if (!canvases[agent.id]) {
@@ -24,7 +24,9 @@ const mkAgents = () => {
 			ctx.translate(size / -2, size / -2);
 		}
 
-		ctx.filter = `hue-rotate(${agent.color}deg)`;
+		if ('color' in agent) {
+			ctx.filter = `hue-rotate(${agent.color}deg)`;
+		}
 		ctx.font = size * 0.66 + 'px Arial';
 		ctx.fillText(agent.emoji, size * 0.17, size * 0.75);
 

@@ -1,6 +1,6 @@
 import { Road } from '../dressing/road';
 import { MsgActions } from '../helper/message';
-import { Agent, GameState, ID, LedgerRecord } from '../helper/defs';
+import { Entity, GameState, ID, LedgerRecord } from '../helper/defs';
 import { postFromWindow } from './../helper/message';
 import { getHandlers } from './handlers';
 import { semiFlatten } from '../helper/ledger';
@@ -9,8 +9,8 @@ let time = Date.now();
 let agentMutations: AgentMutation[] = [];
 let gameMutations: GameMutation[] = [];
 
-interface AgentMutation<S extends Agent = Agent> {
-	agentId: string;
+interface AgentMutation<S extends Entity = Entity> {
+	entityId: string;
 	mutation: (prevState: S, gameState: GameState, context: any[]) => S;
 	context: any[];
 }
@@ -20,20 +20,20 @@ interface GameMutation {
 	context: any[];
 }
 
-export const mutateAgent = <S extends Agent = Agent>(
-	agentId: AgentMutation['agentId'],
+export const mutateAgent = <S extends Entity = Entity>(
+	entityId: AgentMutation['entityId'],
 	mutation: AgentMutation<S>['mutation'],
 	context: any[] = []
 ) => {
 	if (self.document) {
 		postFromWindow({
 			action: MsgActions.MUTATE_AGENT,
-			agentId,
+			entityId,
 			context,
 			mutation: mutation.toString(),
 		});
 	} else {
-		agentMutations.push({ agentId, mutation, context });
+		agentMutations.push({ entityId, mutation, context });
 	}
 };
 
@@ -52,9 +52,9 @@ export const mutateGame = (
 	}
 };
 
-export const findAgent = (id: ID, gameState: GameState): Agent | null => {
-	if (gameState.agents[id]) {
-		return gameState.agents[id];
+export const findEntity = (id: ID, gameState: GameState): Entity | null => {
+	if (gameState.entities[id]) {
+		return gameState.entities[id];
 	}
 	return null;
 };
@@ -66,21 +66,21 @@ export const pauseGame = () => {
 	}));
 };
 
-export const deleteAgent = (agentId: ID) => {
+export const deleteAgent = (entityId: ID) => {
 	mutateGame(
-		(state, [agentId]: [ID]) => {
-			delete state.agents[agentId];
+		(state, [entityId]: [ID]) => {
+			delete state.entities[entityId];
 			return state;
 		},
-		[agentId]
+		[entityId]
 	);
 };
 
-export const addAgent = (agent: Agent) => {
+export const addAgent = (agent: Entity) => {
 	mutateGame(
-		(state, [agent]: [Agent]) => ({
+		(state, [agent]: [Entity]) => ({
 			...state,
-			agents: { ...state.agents, [agent.id]: agent },
+			entities: { ...state.entities, [agent.id]: agent },
 		}),
 		[agent]
 	);
@@ -118,14 +118,14 @@ export const gameLoop = (prevState: GameState) => {
 	while (agentMutations.length) {
 		const muta = agentMutations.pop();
 		if (!muta) continue;
-		gameState.agents[muta.agentId] = muta.mutation(
-			gameState.agents[muta.agentId],
+		gameState.entities[muta.entityId] = muta.mutation(
+			gameState.entities[muta.entityId],
 			gameState,
 			muta.context
 		);
 	}
 
-	for (let unit of Object.values(gameState.agents)) {
+	for (let unit of Object.values(gameState.entities)) {
 		if (unit.handler) {
 			unit = getHandlers()[unit.handler](delta, unit as any, gameState);
 		}

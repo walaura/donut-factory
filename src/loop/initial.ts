@@ -13,7 +13,7 @@ export const startGame = () => {
 	let mover = MkMover([factory.id], [consumer.id]);
 
 	let firstRoad = MkRoad(makeRoadName(), { x: 10, y: 10 }, { x: 15, y: 28 });
-	[factory, consumer, mover].map(addAgent);
+	[factory, consumer, mover, mover].map(addAgent);
 	[
 		firstRoad,
 		MkRoad(makeRoadName(), { x: 32, y: 15 }, { x: 15, y: 30 }),
@@ -33,7 +33,7 @@ export const getInitialState = () => {
 		width: 80,
 		height: 40,
 		date: 0,
-		agents: {},
+		entities: {},
 		roads: {},
 	};
 	return initialState;

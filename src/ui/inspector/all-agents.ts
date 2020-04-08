@@ -2,7 +2,7 @@ import { ListWindowProps } from './../$window/$window';
 import { html } from 'lit-html';
 import { MkConsumer } from '../../agent/consumer';
 import { MkMover } from '../../agent/mover';
-import { Agent, GameState } from '../../helper/defs';
+import { Entity, GameState } from '../../helper/defs';
 import { addAgent } from '../../loop/loop';
 import { $infoBig } from '../components/rows/info';
 import { $rows } from '../components/rows/row';
@@ -13,7 +13,7 @@ import { generateWindowEv } from '../$window/$window';
 
 let fairypos = { x: 45, y: 15 };
 
-const $row = (agent: Agent, state: GameState) =>
+const $row = (agent: Entity, state: GameState) =>
 	$infoBig({
 		icon: agent.emoji,
 		heading: agent.name,
@@ -26,7 +26,7 @@ const allAgents = (): ListWindowProps => ({
 	title: 'All agents',
 	list: [
 		useGameState((state) =>
-			$rows(Object.values(state.agents).map((ag) => $row(ag, state)))
+			$rows(Object.values(state.entities).map((ag) => $row(ag, state)))
 		),
 		html`<button
 			@click=${() => {
