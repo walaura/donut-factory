@@ -224,7 +224,7 @@ export interface Vehicle
 }
 
 export const MkMover = (transports?: ID, from?: ID, to?: ID): Vehicle => {
-	const orders = [
+	const orders: Order[] = [
 		from && mkMoveOrder(from),
 		transports &&
 			mkLoadOrder({
@@ -232,7 +232,7 @@ export const MkMover = (transports?: ID, from?: ID, to?: ID): Vehicle => {
 				quantity: 2,
 				wait: true,
 			}),
-		to && mkMoveOrder(to[0]),
+		to && mkMoveOrder(to),
 		transports &&
 			mkUnloadOrder({
 				product: transports,
@@ -259,7 +259,7 @@ export const MkMover = (transports?: ID, from?: ID, to?: ID): Vehicle => {
 				elapsed: 0,
 				cargoLoaded: 0,
 			},
-			list: [],
+			list: orders.map(({ id }) => id),
 		},
 		loadSpeed: 0.025,
 		capacity: 4,

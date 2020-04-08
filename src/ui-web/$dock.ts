@@ -178,7 +178,17 @@ const $dock = () => {
 						generateWindowEv(ev)({
 							emoji: '🤓',
 							title: 'All state',
-							list: [useGameState((state) => $pretty(state))],
+							list: [
+								html`<button
+									@click=${() => {
+										localStorage.removeItem('autosave');
+										window.location.reload();
+									}}
+								>
+									New game+
+								</button>`,
+								useGameState((state) => $pretty(state)),
+							],
 						});
 					},
 				}),
