@@ -5,7 +5,6 @@ import { Entity, GameState, ID, LedgerRecord } from '../helper/defs';
 import { postFromWindow } from './../helper/message';
 import { getHandlers } from './handlers';
 import { semiFlatten } from '../helper/ledger';
-const mergeDeep = require('merge-deep');
 
 let time = Date.now();
 let agentMutations: AgentMutation<any>[] = [];
