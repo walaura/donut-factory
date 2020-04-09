@@ -16,9 +16,8 @@ export const $insetRows = (children) => {
 		border: 1px solid rgba(0, 0, 0, 0.1);
 		border-radius: var(--radius-small);
 		margin: calc(2px + (var(--space-v) * -2)) calc(2px + (var(--space-h) * -1));
-		box-shadow: inset 0 0.2em 0.2em 0 rgba(0, 0, 0, 0.05);
 		& * {
-			--bg-light: rgba(0, 0, 0, 0.1);
+			--bg-light: rgb(255, 231, 238);
 		}
 	`;
 	return html` <x-inset class=${styles}>

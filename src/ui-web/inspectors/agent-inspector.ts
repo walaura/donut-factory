@@ -118,18 +118,11 @@ const $roadInfo = (road: Road, state: GameState) => [
 				/>
 				<input
 					@change=${(ev) => {
-						let y = parseInt(ev.target.value);
-						mutateAgent<Road>(
-							road.id,
-							(prevState, _, [y]) => ({
-								...prevState,
-								start: {
-									...prevState.start,
-									y,
-								},
-							}),
-							[y]
-						);
+						mutateAgent<Road>(road.id, {
+							start: {
+								y: parseInt(ev.target.value),
+							},
+						});
 					}}
 					type="number"
 					step="1"
@@ -142,8 +135,31 @@ const $roadInfo = (road: Road, state: GameState) => [
 		label: 'End',
 		control: html`
 			<div>
-				<input type="number" step="1" value=${road.end.x} />
-				<input type="number" step="1" value=${road.end.y} />
+				<input
+					@change=${(ev) => {
+						let x = parseInt(ev.target.value);
+						mutateAgent<Road>(road.id, {
+							end: {
+								x,
+							},
+						});
+					}}
+					type="number"
+					step="1"
+					value=${road.end.x}
+				/>
+				<input
+					@change=${(ev) => {
+						mutateAgent<Road>(road.id, {
+							end: {
+								y: parseInt(ev.target.value),
+							},
+						});
+					}}
+					type="number"
+					step="1"
+					value=${road.end.y}
+				/>
 			</div>
 		`,
 	}),
