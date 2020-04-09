@@ -17,11 +17,10 @@ export const $compatError = () => {
 		max-width: 20em;
 		text-align: center;
 	`;
-	return (
-		!('OffscreenCanvas' in self) &&
-		html`<div class=${styles}>
-			hey soz :( your browser wont let you see the game board (try
-			firefox/chrome) but you can still play from the ui???
-		</div>`
-	);
+	return !('OffscreenCanvas' in self)
+		? html`<div class=${styles}>
+				hey soz :( your browser wont let you see the game board (try
+				firefox/chrome) but you can still play from the ui???
+		  </div>`
+		: null;
 };

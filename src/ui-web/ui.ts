@@ -13,7 +13,7 @@ import { onStateUpdate } from './helper/useGameState';
 import { agentInspector } from './inspectors/agent-inspector';
 import { $compatError } from './$compaterror';
 
-const Board = () => [$windowDock(), $dock(), $compatError()];
+const Board = () => [$compatError(), $windowDock(), $dock()];
 
 let worker;
 const renderSetup = () => {
