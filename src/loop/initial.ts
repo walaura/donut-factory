@@ -10,9 +10,9 @@ import { MkProduct } from '../dressing/product';
 
 export const startGame = () => {
 	let products = [
-		MkProduct('Mushrooms', '🍄'),
-		MkProduct('Strawberries', '🍓'),
-		MkProduct('Waffles', '🥕'),
+		MkProduct('Mushroom', '🍄'),
+		MkProduct('Strawberry', '🍓'),
+		MkProduct('Waffle', '🥕'),
 	];
 
 	let factory = MkFactory(xy([10, 10]), [products[0].id, products[1].id]);

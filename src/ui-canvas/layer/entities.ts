@@ -47,8 +47,10 @@ const entityLayerRenderer = ({
 				continue;
 			}
 
+			const pixelRatio = 1.5;
+
 			let fontSize = useBouncyValue({ value: 0 }, 'ag:' + entity.id);
-			let agentSize = 50;
+			let agentSize = zoom * 2.5 * pixelRatio;
 			if ('entityId' in selected && selected.entityId === entity.id) {
 				fontSize.up();
 			}
@@ -61,11 +63,15 @@ const entityLayerRenderer = ({
 				}
 			}
 			ctx.drawImage(
-				mkAgent(entity, { size: agentSize * 4, flip, scale: fontSize.value }),
-				x - agentSize / 2,
-				y - agentSize / 2,
-				agentSize,
-				agentSize
+				mkAgent(entity, {
+					size: agentSize,
+					flip,
+					scale: lerp(0, 0.5, fontSize.value),
+				}),
+				x - (agentSize / pixelRatio - zoom) / 2,
+				y - (agentSize / pixelRatio - zoom) / 1,
+				agentSize / pixelRatio,
+				agentSize / pixelRatio
 			);
 		}
 

@@ -17,13 +17,14 @@ const bgLayerRenderer = ({
 				return { canvas };
 			}
 			drawn = true;
+			ctx.font = '16px sans-serif';
 			ctx.fillStyle = grass;
 			ctx.beginPath();
 			ctx.rect(0, 0, width, height);
 			ctx.fill();
-
 			let rows = new Array(Math.ceil(height / zoom)).fill(null);
 			let columns = new Array(Math.ceil(width / zoom)).fill(null);
+			ctx.fillStyle = 'black';
 			ctx.globalAlpha = 0.05;
 			rows.forEach((_, i) => {
 				ctx.beginPath();
@@ -36,8 +37,8 @@ const bgLayerRenderer = ({
 				ctx.moveTo(i * zoom - 1, 0);
 				ctx.lineTo(i * zoom - 1, height);
 				ctx.stroke();
+				ctx.fillText(i.toString(), i * zoom - 1, zoom / 2);
 			});
-			ctx.globalAlpha = 1;
 			return { canvas };
 		},
 	};

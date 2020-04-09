@@ -17,18 +17,16 @@ const roadLayerRenderer = ({
 	const drawSprite = mkDrawSprite(ctx);
 
 	const drawRoad = ({ start, end }: { start: XY; end: XY }, rotate) => {
-		const scale = (xy: XY) => mkScale(xy, zoom);
-
 		let i = 0;
 		let length = getDistanceToPoint(start, end);
 		let tiles = Math.ceil(length / (2 / (zoom / 10)));
-		start = scale(start);
-		end = scale(end);
-		drawSprite('cap', {}, start, 0.5);
-		drawSprite('cap', {}, end, 0.5);
+		start = start;
+		end = end;
+		drawSprite('cap', { scale: 1 }, start, zoom);
+		drawSprite('cap', { scale: 1 }, end, zoom);
 		while (i <= tiles) {
 			let rota = 1 % 2 === 0;
-			let capOffset = 1 - Math.max(length - 3 / (zoom / 10), 0) / length;
+			let capOffset = 1 - Math.max(length - 4.25 / (zoom / 10), 0) / length;
 			let trimmer = (i / tiles) * (1 - capOffset) + capOffset / 2;
 			var midX = start.x + (end.x - start.x) * trimmer;
 			var midY = start.y + (end.y - start.y) * trimmer;
@@ -36,7 +34,7 @@ const roadLayerRenderer = ({
 				'road',
 				{ rotate: rotate + Math.PI / 2 + (rota ? 0 : Math.PI) },
 				{ x: midX, y: midY },
-				0.5
+				zoom
 			);
 			i++;
 		}
@@ -44,6 +42,8 @@ const roadLayerRenderer = ({
 
 	return {
 		onFrame: (state) => {
+			ctx.clearRect(0, 0, width, height);
+
 			for (let entity of Object.values(state.entities)) {
 				if (entityIsRoad(entity)) {
 					drawRoad(entity, angle(entity.start, entity.end));

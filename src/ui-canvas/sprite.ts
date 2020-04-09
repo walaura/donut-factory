@@ -13,7 +13,7 @@ const Sprites = {
 };
 
 export type SpriteKey = keyof typeof Sprites;
-export type MkSpriteProps = { rotate?: number };
+export type MkSpriteProps = { rotate?: number; scale?: number };
 
 let spriteStore: {
 	[key in string]: { [key in number]: OffscreenCanvas };
@@ -30,7 +30,10 @@ for (let key of Object.keys(Sprites)) {
 		});
 }
 
-const mkSprite = (key: SpriteKey, { rotate = 0 }: MkSpriteProps = {}) => {
+const mkSprite = (
+	key: SpriteKey,
+	{ rotate = 0, scale = 0 }: MkSpriteProps = {}
+) => {
 	if (typeof Sprites[key] === 'string') {
 		return EMPTY;
 	}
@@ -48,9 +51,16 @@ const mkSprite = (key: SpriteKey, { rotate = 0 }: MkSpriteProps = {}) => {
 	ctx.clearRect(0, 0, SIZE, SIZE);
 
 	ctx.setTransform();
-	ctx.translate(SIZE / 2, SIZE / 2);
-	ctx.rotate(rotate);
-	ctx.translate(SIZE / -2, SIZE / -2);
+	if (rotate) {
+		ctx.translate(SIZE / 2, SIZE / 2);
+		ctx.rotate(rotate);
+		ctx.translate(SIZE / -2, SIZE / -2);
+	}
+	if (scale) {
+		ctx.translate(SIZE / 2, SIZE / 2);
+		ctx.scale(1 + scale / 2.5, 1 + scale / 2.5);
+		ctx.translate(SIZE / -2, SIZE / -2);
+	}
 
 	ctx.drawImage(Sprites[key], OFFSET, OFFSET);
 
@@ -63,16 +73,17 @@ const mkDrawSprite = (ctx: OffscreenCanvasRenderingContext2D) => (
 	key: SpriteKey,
 	props: MkSpriteProps,
 	pos: XY,
-	scale: number = 1
+	zoom: number
 ) => {
-	const offset = SIZE / (2 / scale);
-	const size = SIZE * scale;
+	const diff = SIZE / IMAGE_SIZE;
+	const paddedSize = zoom * diff;
+	const offset = (paddedSize - zoom) / 2;
 	ctx.drawImage(
 		mkSprite(key, props),
-		pos.x - offset,
-		pos.y - offset,
-		size,
-		size
+		pos.x * zoom - offset,
+		pos.y * zoom - offset,
+		paddedSize,
+		paddedSize
 	);
 };
 

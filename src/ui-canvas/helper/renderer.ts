@@ -16,6 +16,7 @@ export type Renderer = {
 
 export type RendererState = {
 	selected: Target;
+	zoom: number;
 };
 
 export type OffScreenCanvasProps = {
@@ -50,6 +51,7 @@ export const renderCanvasLayers = (
 	const onFrame = (previousGameState: GameState, state: GameState) => {
 		const rendererState: RendererState = {
 			selected: { xy: cursor },
+			zoom,
 		};
 
 		for (let agent of Object.values(state.entities)) {
@@ -70,7 +72,6 @@ export const renderCanvasLayers = (
 
 		// clear all
 		ctx.clearRect(0, 0, width, height);
-
 		const renderLayer = (onFrame: OnFrame) => {
 			ctx.drawImage(
 				onFrame(state, {
@@ -84,6 +85,17 @@ export const renderCanvasLayers = (
 		renderLayer(bgRenderer.onFrame);
 		renderLayer(roadRenderer.onFrame);
 		renderLayer(entityRenderer.onFrame);
+
+		// cursor
+		if (!('entityId' in rendererState.selected)) {
+			ctx.beginPath();
+			const x = Math.round((cursor.x - zoom / 2) / zoom) * zoom;
+			const y = Math.round((cursor.y - zoom / 2) / zoom) * zoom;
+			ctx.rect(x, y, zoom, zoom);
+			ctx.globalAlpha = 0.25;
+			ctx.stroke();
+			ctx.globalAlpha = 1;
+		}
 
 		return { canvas, rendererState };
 	};
