@@ -1,5 +1,6 @@
 import { ID, GameState, Entity, DeepPartial } from '../helper/defs';
-import { Reducer, dispatch } from '../global/actions';
+import { Reducer } from '../global/actions';
+import { dispatch } from '../global/dispatch';
 
 export const findEntity = (id: ID, gameState: GameState): Entity | null => {
 	if (gameState.entities[id]) {
@@ -58,4 +59,5 @@ export const entityReducer: Reducer<EntityAction> = (
 			return gameState;
 		}
 	}
+	return gameState;
 };

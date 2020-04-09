@@ -37,7 +37,7 @@ export type CargoAction = {
 	quantity: number;
 };
 
-export const cargoReducer: Reducer<Action & CargoAction> = (
+export const cargoReducer: Reducer<CargoAction> = (
 	action,
 	{ onEntity, gameState }
 ) => {

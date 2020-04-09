@@ -9,8 +9,8 @@ import { getAgentStatus } from '../helper/status';
 import { useGameState } from '../helper/useGameState';
 import { TabbedWindowProps } from '../$window';
 import { agentInspector } from './entity-inspector';
-import { addEntity } from '../../global/actions';
 import { MkConsumer } from '../../entity/consumer';
+import { addEntity } from '../../game/entities';
 
 let fairypos = { x: 45, y: 15 };
 

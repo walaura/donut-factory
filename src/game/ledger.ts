@@ -1,5 +1,6 @@
 import { LedgerRecord } from '../helper/defs';
-import { dispatch, Reducer } from '../global/actions';
+import { Reducer } from '../global/actions';
+import { dispatch } from '../global/dispatch';
 
 export type LedgerAction = {
 	type: 'ledger-add-funds';

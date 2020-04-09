@@ -3,13 +3,8 @@ import { OrderAction, orderReducer } from '../entity/composables/with-orders';
 import { EntityAction, entityReducer } from '../game/entities';
 import { LedgerAction, ledgerReducer } from '../game/ledger';
 import { DeepPartial, Entity, GameState, ID } from '../helper/defs';
-import {
-	listenFromWorker,
-	MsgActions,
-	postFromWindow,
-} from '../helper/message';
+import { listenFromWorker, MsgActions } from '../helper/message';
 import { expectWorkerMemory } from './global';
-
 const deepmerge = require('deepmerge');
 
 export type Action = OrderAction | EntityAction | LedgerAction | CargoAction;
@@ -28,21 +23,6 @@ export type Reducer<A extends Action> = (
 	}
 ) => GameState | undefined;
 
-export const dispatch = (action: Action) => {
-	if (self.memory.id === 'MAIN') {
-		postFromWindow({
-			action: MsgActions.COMMIT_ACTION,
-			value: action,
-		});
-		return;
-	}
-	if (self.memory.id === 'GAME-WK') {
-		self.memory.actionQueue.push(action);
-		return;
-	}
-	throw 'This scope cant commit yet :(';
-};
-
 const reducers = [orderReducer, ledgerReducer, cargoReducer, entityReducer];
 
 export const commitActions = (prevState: GameState): GameState => {
@@ -58,7 +38,6 @@ export const commitActions = (prevState: GameState): GameState => {
 		if (!action) {
 			return gameState;
 		}
-		console.log(reducers);
 		for (let reducer of reducers) {
 			//@ts-ignore
 			let gameStateMaybe = reducer(action, {

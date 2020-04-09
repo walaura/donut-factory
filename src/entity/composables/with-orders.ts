@@ -6,7 +6,8 @@ import {
 	WithOrders,
 } from '../../helper/defs';
 import { addId } from '../../helper/generate';
-import { Reducer, dispatch } from '../../global/actions';
+import { Reducer } from '../../global/actions';
+import { dispatch } from '../../global/dispatch';
 
 export enum OrderType {
 	Move = 'Move',
