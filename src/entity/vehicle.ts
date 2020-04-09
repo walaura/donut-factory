@@ -33,10 +33,10 @@ import {
 } from './composables/with-orders';
 import { popPath } from './composables/with-path';
 import { entityIsProduct } from './product';
-import { dispatch } from '../global/actions';
 import { addId, addPosition } from '../helper/generate';
 import { makeConsumerName } from '../helper/names';
 import { addFunds } from '../game/ledger';
+import { dispatch } from '../global/dispatch';
 
 const isAtPos = (from: XY, to: XY) => {
 	return getDistanceToPoint(from, to) < 1;

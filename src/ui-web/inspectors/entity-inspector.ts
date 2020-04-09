@@ -30,7 +30,7 @@ import { TemplateHole } from '../helper/defs';
 import { $select } from '../components/form/$select';
 import { useGameState, UIStatePriority } from '../helper/useGameState';
 import { $buttonGrid } from '../components/form/$buttonGrid';
-import { dispatch } from '../../global/actions';
+import { dispatch } from '../../global/dispatch';
 
 const $colorRow = (agent: Entity & WithColor) =>
 	$form({
