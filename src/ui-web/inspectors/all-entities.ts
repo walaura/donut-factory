@@ -1,16 +1,16 @@
-import { entityHasXY } from './../../helper/defs';
+import { entityHasXY } from '../../helper/defs';
 import { html } from 'lit-html';
 import { generateWindowEv } from '../$window';
-import { MkConsumer } from '../../agent/consumer';
-import { MkMover } from '../../agent/vehicle';
+import { MkMover } from '../../entity/vehicle';
 import { Entity, GameState, WithXY } from '../../helper/defs';
-import { addEntity } from '../../loop/loop';
 import { $infoBig } from '../components/rows/info';
 import { $rows } from '../components/rows/row';
 import { getAgentStatus } from '../helper/status';
 import { useGameState } from '../helper/useGameState';
 import { TabbedWindowProps } from '../$window';
-import { agentInspector } from './agent-inspector';
+import { agentInspector } from './entity-inspector';
+import { addEntity } from '../../global/actions';
+import { MkConsumer } from '../../entity/consumer';
 
 let fairypos = { x: 45, y: 15 };
 

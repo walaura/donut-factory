@@ -1,39 +1,41 @@
-import { addEntity } from './../loop/loop';
-import { entityHasXY, WithOrders, GameState, WithPath } from './../helper/defs';
+import { XY, xy } from '../helper/xy';
 import {
-	WithColor,
+	getDistanceToPoint,
+	Target,
+	mkFindTarget,
+	mkFindPath,
+} from '../helper/pathfinding';
+import { getCargoQuantity, buildCargoStore } from './composables/with-cargo';
+import {
+	GameState,
+	entityHasXY,
 	WithXY,
 	WithHandler,
 	WithCargo,
-	Entity,
-	BaseEntity,
+	WithColor,
+	WithPath,
+	WithOrders,
+	EntityType,
+	ID,
 } from '../helper/defs';
-import { EntityType, ID } from '../helper/defs';
-import { addSpeedToMovement, Movement } from '../helper/movement';
+import { Movement, addSpeedToMovement } from '../helper/movement';
+import { HandlerFn } from '../global/handlers';
+import { entityIsRoad } from './road';
+import { findEntity } from '../game/entity';
 import {
-	getDistanceToPoint,
-	mkFindPath,
-	mkFindTarget,
-	Target,
-} from '../helper/pathfinding';
-import { xy, XY } from '../helper/xy';
-import { addFunds, findEntity, mutateAgent } from '../loop/loop';
-import { addId, addPosition } from '../helper/generate';
-import { HandlerFn } from '../loop/handlers';
-import { makeConsumerName } from '../helper/names';
-import { entityIsRoad } from '../dressing/road';
-import { Product, entityIsProduct } from '../dressing/product';
-import { addCargo, getCargoQuantity, buildCargoStore } from './with-cargo';
-import {
-	OrderType,
 	cancelCurrentOrder,
+	OrderType,
 	deliverCurrentOrder,
-	Order,
 	mkMoveOrder,
 	mkLoadOrder,
 	mkUnloadOrder,
-} from './with-orders';
-import { popPath } from './with-path';
+	Order,
+} from './composables/with-orders';
+import { popPath } from './composables/with-path';
+import { entityIsProduct } from './product';
+import { addFunds, dispatch, addEntity } from '../global/actions';
+import { addId, addPosition } from '../helper/generate';
+import { makeConsumerName } from '../helper/names';
 
 const isAtPos = (from: XY, to: XY) => {
 	return getDistanceToPoint(from, to) < 1;
@@ -194,13 +196,18 @@ export const moverHandler: HandlerFn<Vehicle> = (tick, state, gameState) => {
 			/* else lets fill it up */
 			const speed = isUnloading ? state.loadSpeed * -1 : state.loadSpeed;
 			/* mutate both so they stay in sync */
-			mutateAgent<Entity & WithCargo>(depot.id, (prev) =>
-				addCargo(product.id, speed * -1, prev)
-			);
-			mutateAgent<Entity & WithCargo & WithOrders>(state.id, (prev) => {
-				prev = addCargo(product.id, speed, prev);
-				prev.orders.state.cargoLoaded += speed;
-				return prev;
+			state.orders.state.cargoLoaded += speed;
+			dispatch({
+				type: 'add-cargo',
+				entityId: depot.id,
+				productId: product.id,
+				quantity: speed * -1,
+			});
+			dispatch({
+				type: 'add-cargo',
+				entityId: state.id,
+				productId: product.id,
+				quantity: speed,
 			});
 			break;
 		}

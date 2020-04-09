@@ -1,18 +1,18 @@
-import { ID, WithCargo } from './../helper/defs';
-import { Product } from './../dressing/product';
 import {
-	EntityType,
 	WithXY,
 	WithHandler,
 	WithName,
+	WithCargo,
 	WithColor,
+	EntityType,
 } from '../helper/defs';
-import { makeFactoryName } from '../helper/names';
+import { HandlerFn } from '../global/handlers';
+import { findEntity } from '../game/entity';
+import { addCargo } from './composables/with-cargo';
+import { Product } from './product';
 import { XY } from '../helper/xy';
-import { HandlerFn } from '../loop/handlers';
 import { addId, addPosition } from '../helper/generate';
-import { findEntity } from '../loop/loop';
-import { addCargo } from './with-cargo';
+import { makeFactoryName } from '../helper/names';
 
 export const factoryHandler: HandlerFn<UnitAgent> = (
 	tick,

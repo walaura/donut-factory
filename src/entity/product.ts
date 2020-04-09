@@ -1,10 +1,10 @@
 import {
 	EntityType,
-	WithHandler,
-	WithEmoji,
-	WithName,
-	Entity,
 	BaseEntity,
+	WithHandler,
+	WithName,
+	WithEmoji,
+	Entity,
 } from '../helper/defs';
 import { addId } from '../helper/generate';
 

@@ -6,7 +6,7 @@ import { TemplateHole } from './helper/defs';
 import { numberWithCommas } from './helper/format';
 import { css } from './helper/style';
 import { UIStatePriority, useGameState } from './helper/useGameState';
-import { allAgents } from './inspectors/all-agents';
+import { allAgents } from './inspectors/all-entities';
 import { moneyInspector } from './inspectors/money-inspector';
 import { generateWindowEv } from './$window';
 
@@ -122,7 +122,7 @@ const $dock = () => {
 						useGameState(
 							(state) =>
 								numberWithCommas(
-									state.ledger.map(({ tx }) => tx).reduce((a, b) => a + b)
+									state.ledger.map(({ tx }) => tx).reduce((a, b) => a + b, 0)
 								),
 							UIStatePriority.Bunny
 						)

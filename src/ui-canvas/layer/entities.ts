@@ -1,12 +1,12 @@
-import { entityIsRoad } from '../../dressing/road';
 import { EntityType, WithID } from '../../helper/defs';
 import { appendWithId } from '../../helper/generate';
 import { scale as mkScale, XY, xy2arr } from '../../helper/xy';
-import { findEntity } from '../../loop/loop';
-import { mkAgents } from '../agent';
+import { mkAgents } from '../sprite/entity';
 import { OffScreenCanvasProps, OnFrame, Renderer } from '../helper/renderer';
 import { mkAnimations } from './../animation';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
+import { findEntity } from '../../game/entity';
+import { entityIsRoad } from '../../entity/road';
 
 const lerp = (start, end, t) => {
 	return start * (1 - t) + end * t;

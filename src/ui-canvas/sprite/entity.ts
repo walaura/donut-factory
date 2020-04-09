@@ -1,6 +1,7 @@
-import { Entity, WithXY } from '../helper/defs';
-import { makeCanvasOrOnScreenCanvas } from './helper/offscreen';
+import { Entity, WithXY } from '../../helper/defs';
+import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 
+//todo: unify w/ sprites
 const mkAgents = () => {
 	let canvases: { [key in string]: OffscreenCanvas } = {};
 

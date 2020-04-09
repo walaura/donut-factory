@@ -1,3 +1,9 @@
+self.memory = {
+	id: 'MAIN',
+	state: null,
+	workerState: undefined,
+};
+
 import { GameState } from './helper/defs';
 import {
 	listenFromWindow,

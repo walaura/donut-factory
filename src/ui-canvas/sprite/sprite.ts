@@ -1,5 +1,5 @@
-import { XY } from '../helper/xy';
-import { makeCanvasOrOnScreenCanvas } from './helper/offscreen';
+import { XY } from '../../helper/xy';
+import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 
 export const SIZE = 60;
 const IMAGE_SIZE = 40;
@@ -8,8 +8,8 @@ const OFFSET = (SIZE - IMAGE_SIZE) / 2;
 const EMPTY = makeCanvasOrOnScreenCanvas(SIZE, SIZE);
 
 const Sprites = {
-	road: require('./sprite/road.png'),
-	cap: require('./sprite/cap.png'),
+	road: require('./imgs/road.png'),
+	cap: require('./imgs/cap.png'),
 };
 
 export type SpriteKey = keyof typeof Sprites;

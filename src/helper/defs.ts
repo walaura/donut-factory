@@ -1,11 +1,11 @@
-import { HandlerName } from '../loop/handlers';
-import { Vehicle } from '../agent/vehicle';
-import { Road } from '../dressing/road';
-import { XY } from './xy';
-import { Product } from '../dressing/product';
-import { UnitAgent } from '../agent/factory';
-import { OrderQueue, Order } from '../agent/with-orders';
+import { Order, OrderQueue } from '../entity/composables/with-orders';
+import { UnitAgent } from '../entity/factory';
+import { Product } from '../entity/product';
+import { Road } from '../entity/road';
+import { Vehicle } from '../entity/vehicle';
+import { HandlerName } from '../global/handlers';
 import { Target } from './pathfinding';
+import { XY } from './xy';
 
 export type ID = string;
 
@@ -89,3 +89,7 @@ export interface GameState {
 	entities: { [key: string]: Entity };
 	roads: { [key: string]: Road };
 }
+
+export type DeepPartial<T> = T extends object
+	? { [K in keyof T]?: DeepPartial<T[K]> }
+	: T;

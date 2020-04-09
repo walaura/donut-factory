@@ -1,12 +1,12 @@
-import { MkConsumer } from '../agent/consumer';
-import { MkFactory } from '../agent/factory';
-import { MkMover } from '../agent/vehicle';
-import { MkRoad } from '../dressing/road';
 import { makeRoadName } from '../helper/names';
 import { xy } from '../helper/xy';
 import { GameState } from '../helper/defs';
-import { addEntity, addFunds } from './loop';
-import { MkProduct } from '../dressing/product';
+import { addEntity, addFunds } from '../global/actions';
+import { MkProduct } from '../entity/product';
+import { MkFactory } from '../entity/factory';
+import { MkConsumer } from '../entity/consumer';
+import { MkMover, Vehicle } from '../entity/vehicle';
+import { MkRoad } from '../entity/road';
 
 export const startGame = () => {
 	let products = [

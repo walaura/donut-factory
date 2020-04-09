@@ -1,28 +1,38 @@
-import { Road } from './../../dressing/road';
-import { Product } from './../../dressing/product';
-import { GameState } from './../../helper/defs';
-import { mkMoveOrder, Order, Load } from './../../agent/with-orders';
-import { addEntity, linkOrder, clearOrders } from './../../loop/loop';
-import { getCargoQuantity } from './../../agent/with-cargo';
-import { mkFindTarget } from '../../helper/pathfinding';
 import { html } from 'lit-html';
-import { TabbedWindowProps, generateWindowEv } from '../$window';
-import { Vehicle } from '../../agent/vehicle';
-import { Entity, EntityType, ID, WithCargo } from '../../helper/defs';
-import { deleteEntity, findEntity, mutateAgent } from '../../loop/loop';
+import { generateWindowEv, TabbedWindowProps } from '../$window';
+
+import {
+	addEntity,
+	clearOrders,
+	deleteEntity,
+	linkOrder,
+	mergeEntity,
+} from '../../global/actions';
+import {
+	Entity,
+	EntityType,
+	ID,
+	WithCargo,
+	WithColor,
+} from '../../helper/defs';
+import { findEntity } from '../../game/entity';
+import { $buttonGrid } from '../components/form/$buttonGrid';
+import { $select } from '../components/form/$select';
 import { $form } from '../components/rows/form';
-import { $infoSmall, $infoBig } from '../components/rows/info';
+import { $infoBig, $infoSmall } from '../components/rows/info';
 import { $pretty } from '../components/rows/pretty';
 import { $rows } from '../components/rows/row';
+import { $t } from '../components/type';
+import { TemplateHole } from '../helper/defs';
 import { shortNumber } from '../helper/format';
 import { getAgentStatus } from '../helper/status';
 import { UIStatePriority, useGameState } from '../helper/useGameState';
-import { WithColor } from '../../helper/defs';
-import { TemplateHole } from '../helper/defs';
-import { $t } from '../components/type';
-import { $select } from '../components/form/$select';
 import { attachWindow } from '../windows/attach';
-import { $buttonGrid } from '../components/form/$buttonGrid';
+
+import { GameState } from '../../helper/defs';
+import { Order, Load, mkMoveOrder } from '../../entity/composables/with-orders';
+import { Road } from '../../entity/road';
+import { Vehicle } from '../../entity/vehicle';
 
 const $colorRow = (agent: Entity & WithColor) =>
 	$form({
@@ -30,14 +40,9 @@ const $colorRow = (agent: Entity & WithColor) =>
 		control: html` <input
 			@change=${(ev) => {
 				const color = parseInt(ev.target.value, 10);
-				mutateAgent<Vehicle>(
-					agent.id,
-					(prev, _, [color]) => ({
-						...prev,
-						color,
-					}),
-					[color]
-				);
+				mergeEntity<Vehicle>(agent.id, {
+					color,
+				});
 			}}
 			type="range"
 			id="color"
@@ -57,16 +62,11 @@ const $orderInspector = (order: Order, state: GameState) => {
 					generateWindowEv(ev)(
 						attachWindow({
 							onAttach: (product) => {
-								mutateAgent<Order & { load: Load }>(
-									order.id,
-									(prev, _, [product]) => ({
-										load: {
-											...prev.load,
-											product,
-										},
-									}),
-									[product]
-								);
+								mergeEntity<Order & { load: Load }>(order.id, {
+									load: {
+										product,
+									},
+								});
 							},
 							filter: (agent) => {
 								return agent.type === EntityType.Product;
@@ -106,7 +106,7 @@ const $roadInfo = (road: Road, state: GameState) => [
 				<input
 					@change=${(ev) => {
 						let x = parseInt(ev.target.value);
-						mutateAgent<Road>(road.id, {
+						mergeEntity<Road>(road.id, {
 							start: {
 								x,
 							},
@@ -118,7 +118,7 @@ const $roadInfo = (road: Road, state: GameState) => [
 				/>
 				<input
 					@change=${(ev) => {
-						mutateAgent<Road>(road.id, {
+						mergeEntity<Road>(road.id, {
 							start: {
 								y: parseInt(ev.target.value),
 							},
@@ -138,7 +138,7 @@ const $roadInfo = (road: Road, state: GameState) => [
 				<input
 					@change=${(ev) => {
 						let x = parseInt(ev.target.value);
-						mutateAgent<Road>(road.id, {
+						mergeEntity<Road>(road.id, {
 							end: {
 								x,
 							},
@@ -150,7 +150,7 @@ const $roadInfo = (road: Road, state: GameState) => [
 				/>
 				<input
 					@change=${(ev) => {
-						mutateAgent<Road>(road.id, {
+						mergeEntity<Road>(road.id, {
 							end: {
 								y: parseInt(ev.target.value),
 							},
@@ -235,30 +235,28 @@ const $info = (entityId: ID, gameState: GameState) => {
 						values: tires,
 						selected: agent.offroadSpeed * 10,
 						onChange: (val) => {
-							const value = parseInt(val, 10) / 10;
-							mutateAgent<Vehicle>(
-								agent.id,
-								(prev, _, [offroadSpeed]) => ({
-									...prev,
-									offroadSpeed,
-								}),
-								[value]
-							);
+							const offroadSpeed = parseInt(val, 10) / 10;
+							mergeEntity<Vehicle>(agent.id, {
+								offroadSpeed,
+							});
 						},
 					}),
 				}),
 				$form({
 					label: `This vehicle likes roads a ${agent.preferenceForRoads}/10`,
 					control: html`
-						<button
-							@click="${() => {
-								mutateAgent<Vehicle>(agent.id, (prev) => ({
-									preferenceForRoads: prev.preferenceForRoads - 5,
-								}));
-							}}"
-						>
-							I live on the edge
-						</button>
+						<input
+							@change=${(ev) => {
+								const preferenceForRoads = parseInt(ev.target.value, 10);
+								mergeEntity<Vehicle>(agent.id, {
+									preferenceForRoads,
+								});
+							}}
+							type="range"
+							min="0"
+							max="10"
+							value=${agent.preferenceForRoads}
+						/>
 					`,
 				}),
 			]

@@ -24,7 +24,7 @@ const moneyInspector = (): ListWindowProps => ({
 		useGameState((state) => {
 			return html`<h1 style="text-align: center">
 				${currency}${numberWithCommas(
-					state.ledger.map(({ tx }) => tx).reduce((a, b) => a + b)
+					state.ledger.map(({ tx }) => tx).reduce((a, b) => a + b, 0)
 				)}
 			</h1>`;
 		}, UIStatePriority.Snail),

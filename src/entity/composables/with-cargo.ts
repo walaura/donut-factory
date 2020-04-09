@@ -1,4 +1,5 @@
-import { ID, WithCargo } from '../helper/defs';
+import { WithCargo, ID, Entity } from '../../helper/defs';
+import { Reducer, Action } from '../../global/actions';
 
 export const getCargoQuantity = (productId, state: WithCargo): number =>
 	state.cargo[productId]?.quantity ?? 0;
@@ -27,4 +28,25 @@ export const addCargo = <T extends WithCargo>(
 		0
 	);
 	return state;
+};
+
+export type CargoAction = {
+	type: 'add-cargo';
+	entityId: ID;
+	productId: ID;
+	quantity: number;
+};
+
+export const cargoReducer: Reducer<Action & CargoAction> = (
+	action,
+	{ onEntity, gameState }
+) => {
+	switch (action.type) {
+		case 'add-cargo': {
+			return onEntity<Entity & WithCargo>(action.entityId, (prev) =>
+				addCargo(action.productId, action.quantity, prev)
+			);
+		}
+	}
+	return gameState;
 };

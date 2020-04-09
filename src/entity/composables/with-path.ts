@@ -1,4 +1,5 @@
-import { WithPath, Entity } from './../helper/defs';
+import { WithPath } from '../../helper/defs';
+
 export const popPath = (state: WithPath): WithPath => {
 	let bit = state.path.shift();
 	if (bit) {

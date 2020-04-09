@@ -1,5 +1,5 @@
-import { factoryHandler } from './../agent/factory';
-import { moverHandler } from '../agent/vehicle';
+import { moverHandler } from './../entity/vehicle';
+import { factoryHandler } from './../entity/factory';
 import { GameState, Entity } from '../helper/defs';
 
 export type HandlerName = keyof ReturnType<typeof getHandlers>;

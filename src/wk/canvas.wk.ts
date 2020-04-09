@@ -4,8 +4,8 @@ import {
 	WorldWorkerMessage,
 } from '../helper/message';
 import { Target } from '../helper/pathfinding';
-import { renderCanvasLayers } from './helper/renderer';
-
+import { renderCanvasLayers } from '../ui-canvas/helper/renderer';
+typeof globalThis;
 export type RendererState = {
 	selected: Target;
 };

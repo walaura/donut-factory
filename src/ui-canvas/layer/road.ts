@@ -1,9 +1,9 @@
-import { entityIsRoad } from '../../dressing/road';
 import { getDistanceToPoint } from '../../helper/pathfinding';
 import { scale as mkScale, XY, xy2arr } from '../../helper/xy';
 import { OffScreenCanvasProps, Renderer } from '../helper/renderer';
-import { mkDrawSprite } from '../sprite';
+import { mkDrawSprite } from '../sprite/sprite';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
+import { entityIsRoad } from '../../entity/road';
 
 const angle = (p1: XY, p2: XY) => Math.atan2(p2.y - p1.y, p2.x - p1.x);
 
@@ -21,10 +21,6 @@ const roadLayerRenderer = ({
 		let length = getDistanceToPoint(start, end);
 		let tiles = Math.ceil(length / (2 / (zoom / 10)));
 
-		start = start;
-		end = end;
-		drawSprite('cap', { scale: 1 }, start, zoom);
-		drawSprite('cap', { scale: 1 }, end, zoom);
 		while (i <= tiles) {
 			let rota = 1 % 2 === 0;
 			let capOffset = 1 - Math.max(length - 4.25 / (zoom / 10), 0) / length;
@@ -44,6 +40,13 @@ const roadLayerRenderer = ({
 	return {
 		onFrame: (state) => {
 			ctx.clearRect(0, 0, width, height);
+
+			for (let entity of Object.values(state.entities)) {
+				if (entityIsRoad(entity)) {
+					drawSprite('cap', { scale: 1 }, entity.start, zoom);
+					drawSprite('cap', { scale: 1 }, entity.end, zoom);
+				}
+			}
 
 			for (let entity of Object.values(state.entities)) {
 				if (entityIsRoad(entity)) {

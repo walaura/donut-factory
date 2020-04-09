@@ -10,7 +10,7 @@ import { Target } from '../helper/pathfinding';
 import { $dock } from './$dock';
 import { $windowDock, generateWindowEv } from './$window';
 import { onStateUpdate } from './helper/useGameState';
-import { agentInspector } from './inspectors/agent-inspector';
+import { agentInspector } from './inspectors/entity-inspector';
 import { $compatError } from './$compaterror';
 
 const Board = () => [$compatError(), $windowDock(), $dock()];
@@ -50,7 +50,7 @@ const renderSetup = () => {
 		}
 	});
 
-	worker = new Worker('../ui-canvas/world.wk.ts');
+	worker = new Worker('../wk/canvas.wk.ts');
 	worker.postMessage(
 		{
 			action: MsgActions.SEND_CANVAS,

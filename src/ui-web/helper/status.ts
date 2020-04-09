@@ -1,10 +1,8 @@
 import { EntityType } from '../../helper/defs';
-import { findEntity } from '../../loop/loop';
-import { GameState, ID } from './../../helper/defs';
-import { shortNumber } from './format';
-import { mkHeldTotal } from '../../agent/vehicle';
-import { OrderType } from '../../agent/with-orders';
+import { findEntity } from '../../game/entity';
 import { $t } from '../components/type';
+import { GameState, ID } from './../../helper/defs';
+import { OrderType } from '../../entity/composables/with-orders';
 
 export const getAgentStatus = (entityId: ID, gameState: GameState) => {
 	const agent = findEntity(entityId, gameState);

@@ -1,9 +1,9 @@
 import { GameState, Entity } from './defs';
 import { ID } from './defs';
-import { RoadEnd, Road } from '../dressing/road';
-import { findEntity } from '../loop/loop';
-import { Vehicle } from '../agent/vehicle';
+import { Vehicle } from '../entity/vehicle';
 import { XY } from './xy';
+import { findEntity } from '../game/entity';
+import { RoadEnd, Road } from '../entity/road';
 
 type SharedTargets =
 	| {

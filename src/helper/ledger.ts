@@ -1,7 +1,7 @@
 import { LedgerRecord, Ledger } from './defs';
 
 const total = (ledger: Ledger) =>
-	ledger.map(({ tx }) => tx).reduce((a, b) => a + b);
+	ledger.map(({ tx }) => tx).reduce((a, b) => a + b, 0);
 
 const flatten = (records: LedgerRecord[]): LedgerRecord => {
 	const tx = total(records);

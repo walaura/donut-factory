@@ -1,4 +1,4 @@
-import { BaseEntity, EntityType, Entity } from '../helper/defs';
+import { EntityType, BaseEntity, Entity } from '../helper/defs';
 import { XY } from '../helper/xy';
 
 export enum RoadEnd {

@@ -1,7 +1,7 @@
-import { ID } from './defs';
-import { GameState } from './defs';
+import { Action } from '../global/actions';
+import { RendererState } from '../wk/canvas.wk';
+import { GameState, ID } from './defs';
 import { XY } from './xy';
-import { RendererState } from '../ui-canvas/world.wk';
 
 export enum MsgActions {
 	'SEND_CANVAS' = 'SEND_CANVAS',
@@ -11,8 +11,7 @@ export enum MsgActions {
 	'TICK' = 'TICK',
 	'PAUSE' = 'PAUSE',
 	'START' = 'START',
-	'MUTATE_AGENT' = 'MUTATE_AGENT',
-	'MUTATE_GAME' = 'MUTATE_GAME',
+	'COMMIT_ACTION' = 'COMMIT_ACTION',
 }
 
 export type WorldWorkerMessage =
@@ -41,21 +40,15 @@ export type LoopWorkerMessage =
 	  }
 	| {
 			action: MsgActions.TICK;
+			state: GameState;
 	  }
 	| {
 			action: MsgActions.START;
 			initialState: GameState;
 	  }
 	| {
-			action: MsgActions.MUTATE_AGENT;
-			entityId: ID;
-			context: any[];
-			mutation: string;
-	  }
-	| {
-			action: MsgActions.MUTATE_GAME;
-			context: any[];
-			mutation: string;
+			action: MsgActions.COMMIT_ACTION;
+			value: Action;
 	  };
 
 export type WorkerMessage = LoopWorkerMessage | WorldWorkerMessage;
@@ -83,7 +76,7 @@ export const postFromWorker = <
 
 let wk: Worker;
 export const registerBackgroundWorkers = () => {
-	wk = new Worker('./../background.wk.ts');
+	wk = new Worker('./../wk/game.wk.ts');
 };
 export const postFromWindow = <M = WorkerMessage>(
 	msg: M,

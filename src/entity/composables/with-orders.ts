@@ -1,7 +1,12 @@
-import { WithOrders, Entity } from '../helper/defs';
-import { ID, BaseEntity, EntityType } from '../helper/defs';
-import { Vehicle } from './vehicle';
-import { addId } from '../helper/generate';
+import {
+	ID,
+	BaseEntity,
+	EntityType,
+	Entity,
+	WithOrders,
+} from '../../helper/defs';
+import { addId } from '../../helper/generate';
+import { Reducer } from '../../global/actions';
 
 export enum OrderType {
 	Move = 'Move',
@@ -89,3 +94,21 @@ export const mkUnloadOrder = (load: Load): Order => ({
 	order: OrderType.Unload,
 	load,
 });
+
+export type OrderAction = {
+	type: 'link-order';
+	entityId: ID;
+	orderId: ID;
+};
+
+export const orderReducer: Reducer<OrderAction> = (action, { onEntity }) => {
+	switch (action.type) {
+		case 'link-order': {
+			return onEntity<Entity & WithOrders>(action.entityId, (prev) => ({
+				orders: {
+					list: [...prev.orders.list, action.orderId],
+				},
+			}));
+		}
+	}
+};
