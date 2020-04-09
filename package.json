@@ -4,8 +4,9 @@
 	"description": "",
 	"main": "dist/index.html",
 	"scripts": {
-		"start": "parcel ./src/index.html",
-		"make": "parcel build ./src/index.html"
+		"OH-SO-PARCEL-IS-BEING-A-LITTLE-PRINCESS-HERE-I-SEE": "node ./lol.js",
+		"start": "npm run OH-SO-PARCEL-IS-BEING-A-LITTLE-PRINCESS-HERE-I-SEE && parcel ./src/index.html",
+		"make": "npm run OH-SO-PARCEL-IS-BEING-A-LITTLE-PRINCESS-HERE-I-SEE && parcel build ./src/index.html"
 	},
 	"author": "walaura",
 	"license": "ISC",
@@ -15,9 +16,10 @@
 		"css-tree": "^1.0.0-alpha.39",
 		"d3-polygon": "^1.0.6",
 		"hash-sum": "^2.0.0",
+		"line-replace": "^1.0.3",
 		"lit-html": "^1.2.1",
 		"nanoid": "^3.0.2",
-		"parcel": "^2.0.0-alpha.3.2",
+		"parcel": "@^1.12.4",
 		"postcss": "^7.0.27",
 		"postcss-nested": "^4.2.1",
 		"shortid": "^2.2.15",
