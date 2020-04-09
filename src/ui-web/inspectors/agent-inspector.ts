@@ -1,3 +1,4 @@
+import { Road } from './../../dressing/road';
 import { Product } from './../../dressing/product';
 import { GameState } from './../../helper/defs';
 import { mkMoveOrder, Order, Load } from './../../agent/with-orders';
@@ -97,6 +98,57 @@ const $orderInfo = (vehicle: Vehicle, state: GameState) =>
 		$pretty(vehicle.orders.state),
 	]);
 
+const $roadInfo = (road: Road, state: GameState) => [
+	$form({
+		label: 'Start',
+		control: html`
+			<div>
+				<input
+					@change=${(ev) => {
+						let x = parseInt(ev.target.value);
+						mutateAgent<Road>(road.id, {
+							start: {
+								x,
+							},
+						});
+					}}
+					type="number"
+					step="1"
+					value=${road.start.x}
+				/>
+				<input
+					@change=${(ev) => {
+						let y = parseInt(ev.target.value);
+						mutateAgent<Road>(
+							road.id,
+							(prevState, _, [y]) => ({
+								...prevState,
+								start: {
+									...prevState.start,
+									y,
+								},
+							}),
+							[y]
+						);
+					}}
+					type="number"
+					step="1"
+					value=${road.start.y}
+				/>
+			</div>
+		`,
+	}),
+	$form({
+		label: 'End',
+		control: html`
+			<div>
+				<input type="number" step="1" value=${road.end.x} />
+				<input type="number" step="1" value=${road.end.y} />
+			</div>
+		`,
+	}),
+];
+
 const $pathInfo = (vehicle: Vehicle, state: GameState) =>
 	$rows(
 		vehicle.path.map((t) => {
@@ -139,6 +191,9 @@ const $info = (entityId: ID, gameState: GameState) => {
 	let rows: TemplateHole[] = [];
 	if ('cargo' in agent) {
 		rows.push(...$cargoRows(agent.cargo, gameState));
+	}
+	if ('start' in agent) {
+		rows.push($roadInfo(agent, gameState));
 	}
 
 	if ('color' in agent) {

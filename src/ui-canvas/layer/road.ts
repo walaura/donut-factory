@@ -20,6 +20,7 @@ const roadLayerRenderer = ({
 		let i = 0;
 		let length = getDistanceToPoint(start, end);
 		let tiles = Math.ceil(length / (2 / (zoom / 10)));
+
 		start = start;
 		end = end;
 		drawSprite('cap', { scale: 1 }, start, zoom);

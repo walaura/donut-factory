@@ -224,6 +224,7 @@ export interface Vehicle
 }
 
 export const MkMover = (transports?: ID, from?: ID, to?: ID): Vehicle => {
+	//@ts-ignore
 	const orders: Order[] = [
 		from && mkMoveOrder(from),
 		transports &&

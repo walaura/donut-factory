@@ -5,14 +5,21 @@ import { Entity, GameState, ID, LedgerRecord } from '../helper/defs';
 import { postFromWindow } from './../helper/message';
 import { getHandlers } from './handlers';
 import { semiFlatten } from '../helper/ledger';
+const deepmerge = require('deepmerge');
 
 let time = Date.now();
 let agentMutations: AgentMutation<any>[] = [];
 let gameMutations: GameMutation[] = [];
 
+type DeepPartial<T> = T extends object
+	? { [K in keyof T]?: DeepPartial<T[K]> }
+	: T;
+
 interface AgentMutation<S extends Entity = Entity> {
 	entityId: string;
-	mutation: (prevState: S, gameState: GameState, context: any[]) => Partial<S>;
+	mutation:
+		| DeepPartial<S>
+		| ((prevState: S, gameState: GameState, context: any[]) => DeepPartial<S>);
 	context: any[];
 }
 
@@ -31,7 +38,7 @@ export const mutateAgent = <S extends Entity = Entity>(
 			action: MsgActions.MUTATE_AGENT,
 			entityId,
 			context,
-			mutation: mutation.toString(),
+			mutation: mutation instanceof Function ? mutation.toString() : mutation,
 		});
 	} else {
 		agentMutations.push({ entityId, mutation, context });
@@ -134,14 +141,20 @@ export const gameLoop = (prevState: GameState) => {
 	while (agentMutations.length) {
 		const muta = agentMutations.pop();
 		if (!muta) continue;
-		gameState.entities[muta.entityId] = {
-			...gameState.entities[muta.entityId],
-			...muta.mutation(
+
+		let mutation = muta.mutation;
+		if (typeof muta.mutation === 'function') {
+			mutation = muta.mutation(
 				gameState.entities[muta.entityId],
 				gameState,
 				muta.context
-			),
-		};
+			);
+		}
+		gameState.entities[muta.entityId] = deepmerge(
+			gameState.entities[muta.entityId],
+			mutation,
+			{ arrayMerge: (destinationArray, sourceArray, options) => sourceArray }
+		);
 	}
 
 	for (let entity of Object.values(gameState.entities)) {

@@ -15,6 +15,7 @@
 		"@types/node": "^13.11.0",
 		"css-tree": "^1.0.0-alpha.39",
 		"d3-polygon": "^1.0.6",
+		"deepmerge": "^4.2.2",
 		"hash-sum": "^2.0.0",
 		"line-replace": "^1.0.3",
 		"lit-html": "^1.2.1",

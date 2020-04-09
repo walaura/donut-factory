@@ -7,7 +7,9 @@ listenFromWorker((message) => {
 	if (message.action === MsgActions.MUTATE_AGENT) {
 		mutateAgent(
 			message.entityId,
-			new Function(`return ${message.mutation}`)(),
+			typeof message.mutation === 'string'
+				? new Function(`return ${message.mutation}`)()
+				: message.mutation,
 			message.context
 		);
 	}

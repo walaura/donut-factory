@@ -1,4 +1,4 @@
-import { WithOrders } from '../helper/defs';
+import { WithOrders, Entity } from '../helper/defs';
 import { ID, BaseEntity, EntityType } from '../helper/defs';
 import { Vehicle } from './vehicle';
 import { addId } from '../helper/generate';
@@ -35,6 +35,10 @@ export type Order = BaseEntity &
 		type: EntityType.Order;
 	};
 
+export const entityIsOrder = (entity: Entity): entity is Order => {
+	return entity.type === EntityType.Order;
+};
+
 export interface OrderQueue {
 	position: number;
 	list: ID[];
@@ -64,6 +68,7 @@ const addOrder = (): Omit<Order, 'order' | 'id'> => ({
 	emoji: '📥',
 	type: EntityType.Order,
 });
+
 export const mkMoveOrder = (target: ID): Order => ({
 	...addId(),
 	...addOrder(),
