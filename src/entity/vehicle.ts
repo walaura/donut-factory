@@ -21,7 +21,7 @@ import {
 import { Movement, addSpeedToMovement } from '../helper/movement';
 import { HandlerFn } from '../global/handlers';
 import { entityIsRoad } from './road';
-import { findEntity } from '../game/entity';
+import { findEntity, addEntity } from '../game/entities';
 import {
 	cancelCurrentOrder,
 	OrderType,
@@ -33,9 +33,10 @@ import {
 } from './composables/with-orders';
 import { popPath } from './composables/with-path';
 import { entityIsProduct } from './product';
-import { addFunds, dispatch, addEntity } from '../global/actions';
+import { dispatch } from '../global/actions';
 import { addId, addPosition } from '../helper/generate';
 import { makeConsumerName } from '../helper/names';
+import { addFunds } from '../game/ledger';
 
 const isAtPos = (from: XY, to: XY) => {
 	return getDistanceToPoint(from, to) < 1;

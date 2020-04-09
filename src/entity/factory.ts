@@ -7,7 +7,7 @@ import {
 	EntityType,
 } from '../helper/defs';
 import { HandlerFn } from '../global/handlers';
-import { findEntity } from '../game/entity';
+import { findEntity } from '../game/entities';
 import { addCargo } from './composables/with-cargo';
 import { Product } from './product';
 import { XY } from '../helper/xy';

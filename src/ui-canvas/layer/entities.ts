@@ -5,7 +5,7 @@ import { mkAgents } from '../sprite/entity';
 import { OffScreenCanvasProps, OnFrame, Renderer } from '../helper/renderer';
 import { mkAnimations } from './../animation';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
-import { findEntity } from '../../game/entity';
+import { findEntity } from '../../game/entities';
 import { entityIsRoad } from '../../entity/road';
 
 const lerp = (start, end, t) => {

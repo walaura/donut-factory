@@ -1,3 +1,8 @@
+self.memory = {
+	id: 'CANVAS-WK',
+	state: null,
+};
+
 import {
 	MsgActions,
 	postFromWorker,

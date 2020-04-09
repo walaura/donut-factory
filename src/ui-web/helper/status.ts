@@ -1,5 +1,5 @@
 import { EntityType } from '../../helper/defs';
-import { findEntity } from '../../game/entity';
+import { findEntity } from '../../game/entities';
 import { $t } from '../components/type';
 import { GameState, ID } from './../../helper/defs';
 import { OrderType } from '../../entity/composables/with-orders';

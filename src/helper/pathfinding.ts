@@ -2,7 +2,7 @@ import { GameState, Entity } from './defs';
 import { ID } from './defs';
 import { Vehicle } from '../entity/vehicle';
 import { XY } from './xy';
-import { findEntity } from '../game/entity';
+import { findEntity } from '../game/entities';
 import { RoadEnd, Road } from '../entity/road';
 
 type SharedTargets =

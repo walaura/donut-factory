@@ -1,20 +1,15 @@
-import {
-	Entity,
-	GameState,
-	ID,
-	LedgerRecord,
-	DeepPartial,
-} from '../helper/defs';
+import { CargoAction, cargoReducer } from '../entity/composables/with-cargo';
+import { OrderAction, orderReducer } from '../entity/composables/with-orders';
+import { EntityAction, entityReducer } from '../game/entities';
+import { LedgerAction, ledgerReducer } from '../game/ledger';
+import { DeepPartial, Entity, GameState, ID } from '../helper/defs';
 import {
 	listenFromWorker,
 	MsgActions,
 	postFromWindow,
 } from '../helper/message';
-
 import { expectWorkerMemory } from './global';
-import { OrderAction, orderReducer } from '../entity/composables/with-orders';
-import { CargoAction, cargoReducer } from '../entity/composables/with-cargo';
-import { EntityAction, entityReducer } from '../game/entity';
+
 const deepmerge = require('deepmerge');
 
 export type Action = OrderAction | EntityAction | LedgerAction | CargoAction;
@@ -48,78 +43,7 @@ export const dispatch = (action: Action) => {
 	throw 'This scope cant commit yet :(';
 };
 
-export const mergeEntity = <S extends Entity = Entity>(
-	entityId: ID,
-	mergeable: DeepPartial<S>
-) => {
-	dispatch({
-		type: 'merge-entity',
-		entityId,
-		mergeable,
-	});
-};
-
-const deleteEntity = (entityId: ID) => {
-	dispatch({
-		type: 'delete-entity',
-		entityId,
-	});
-};
-
-export const addEntity = (entity: Entity) => {
-	dispatch({
-		type: 'add-entity',
-		entity,
-	});
-};
-
-const linkOrder = (entityId: ID, orderId: ID) => {
-	dispatch({
-		type: 'link-order',
-		entityId,
-		orderId,
-	});
-};
-
-const clearOrders = (entityId: ID) => {
-	dispatch({
-		type: 'merge-entity',
-		entityId,
-		mergeable: {
-			orders: {
-				list: [],
-			},
-		},
-	});
-};
-
-export type LedgerAction = {
-	type: 'ledger-add-funds';
-	record: Omit<LedgerRecord, 'date'>;
-};
-
-const addFunds = (record: Omit<LedgerRecord, 'date'>) => {
-	dispatch({
-		type: 'ledger-add-funds',
-		record,
-	});
-};
-
-const ledgerReducer: Reducer<LedgerAction> = (action, { gameState }) => {
-	switch (action.type) {
-		case 'ledger-add-funds': {
-			return {
-				...gameState,
-				ledger: [
-					...gameState.ledger,
-					{ ...action.record, date: gameState.date },
-				],
-			};
-		}
-	}
-};
-
-const reducers = [orderReducer, entityReducer, ledgerReducer, cargoReducer];
+const reducers = [orderReducer, ledgerReducer, cargoReducer, entityReducer];
 
 export const commitActions = (prevState: GameState): GameState => {
 	expectWorkerMemory();
@@ -134,6 +58,7 @@ export const commitActions = (prevState: GameState): GameState => {
 		if (!action) {
 			return gameState;
 		}
+		console.log(reducers);
 		for (let reducer of reducers) {
 			//@ts-ignore
 			let gameStateMaybe = reducer(action, {
@@ -158,14 +83,14 @@ export const commitActions = (prevState: GameState): GameState => {
 	return gameState;
 };
 
-listenFromWorker((message) => {
-	if (self.memory.id === 'GAME-WK') {
-		if (message.action === MsgActions.COMMIT_ACTION) {
-			self.memory.actionQueue.push(message.value);
+if (self.memory.id === 'GAME-WK') {
+	listenFromWorker((message) => {
+		if (self.memory.id === 'GAME-WK') {
+			if (message.action === MsgActions.COMMIT_ACTION) {
+				self.memory.actionQueue.push(message.value);
+			}
+		} else {
+			throw 'Listening from wrong place';
 		}
-	} else {
-		throw 'Listening from wrong place';
-	}
-});
-
-export { addFunds, clearOrders, linkOrder, deleteEntity };
+	});
+}

@@ -1,38 +1,36 @@
-import { html } from 'lit-html';
-import { generateWindowEv, TabbedWindowProps } from '../$window';
-
-import {
-	addEntity,
-	clearOrders,
-	deleteEntity,
-	linkOrder,
-	mergeEntity,
-} from '../../global/actions';
 import {
 	Entity,
-	EntityType,
-	ID,
-	WithCargo,
 	WithColor,
+	GameState,
+	EntityType,
+	WithCargo,
+	ID,
 } from '../../helper/defs';
-import { findEntity } from '../../game/entity';
-import { $buttonGrid } from '../components/form/$buttonGrid';
-import { $select } from '../components/form/$select';
 import { $form } from '../components/rows/form';
-import { $infoBig, $infoSmall } from '../components/rows/info';
-import { $pretty } from '../components/rows/pretty';
-import { $rows } from '../components/rows/row';
-import { $t } from '../components/type';
-import { TemplateHole } from '../helper/defs';
-import { shortNumber } from '../helper/format';
-import { getAgentStatus } from '../helper/status';
-import { UIStatePriority, useGameState } from '../helper/useGameState';
-import { attachWindow } from '../windows/attach';
-
-import { GameState } from '../../helper/defs';
-import { Order, Load, mkMoveOrder } from '../../entity/composables/with-orders';
-import { Road } from '../../entity/road';
+import { html } from 'lit-html';
 import { Vehicle } from '../../entity/vehicle';
+import {
+	Order,
+	Load,
+	mkMoveOrder,
+	linkOrder,
+	clearOrders,
+} from '../../entity/composables/with-orders';
+import { $t } from '../components/type';
+import { findEntity, addEntity, mergeEntity } from '../../game/entities';
+import { generateWindowEv, TabbedWindowProps } from '../$window';
+import { attachWindow } from '../windows/attach';
+import { $rows } from '../components/rows/row';
+import { $infoSmall, $infoBig } from '../components/rows/info';
+import { getAgentStatus } from '../helper/status';
+import { $pretty } from '../components/rows/pretty';
+import { Road } from '../../entity/road';
+import { shortNumber } from '../helper/format';
+import { TemplateHole } from '../helper/defs';
+import { $select } from '../components/form/$select';
+import { useGameState, UIStatePriority } from '../helper/useGameState';
+import { $buttonGrid } from '../components/form/$buttonGrid';
+import { dispatch } from '../../global/actions';
 
 const $colorRow = (agent: Entity & WithColor) =>
 	$form({
@@ -361,7 +359,10 @@ export const agentInspector = (entityId: ID): TabbedWindowProps => ({
 				useGameState((state) => $pretty(findEntity(entityId, state))),
 				html`<button
 					@click=${() => {
-						deleteEntity(entityId);
+						dispatch({
+							type: 'delete-entity',
+							entityId,
+						});
 					}}
 				>
 					Delete agent

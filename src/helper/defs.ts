@@ -1,11 +1,11 @@
-import { Order, OrderQueue } from '../entity/composables/with-orders';
-import { UnitAgent } from '../entity/factory';
-import { Product } from '../entity/product';
-import { Road } from '../entity/road';
 import { Vehicle } from '../entity/vehicle';
 import { HandlerName } from '../global/handlers';
 import { Target } from './pathfinding';
 import { XY } from './xy';
+import { OrderQueue, Order } from '../entity/composables/with-orders';
+import { Product } from '../entity/product';
+import { UnitAgent } from '../entity/factory';
+import { Road } from '../entity/road';
 
 export type ID = string;
 

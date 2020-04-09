@@ -1,11 +1,29 @@
 import { ID, GameState, Entity, DeepPartial } from '../helper/defs';
-import { Reducer } from '../global/actions';
+import { Reducer, dispatch } from '../global/actions';
 
 export const findEntity = (id: ID, gameState: GameState): Entity | null => {
 	if (gameState.entities[id]) {
 		return gameState.entities[id];
 	}
 	return null;
+};
+
+export const mergeEntity = <S extends Entity = Entity>(
+	entityId: ID,
+	mergeable: DeepPartial<S>
+) => {
+	dispatch({
+		type: 'merge-entity',
+		entityId,
+		mergeable,
+	});
+};
+
+export const addEntity = (entity: Entity) => {
+	dispatch({
+		type: 'add-entity',
+		entity,
+	});
 };
 
 export type EntityAction =

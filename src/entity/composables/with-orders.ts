@@ -6,7 +6,7 @@ import {
 	WithOrders,
 } from '../../helper/defs';
 import { addId } from '../../helper/generate';
-import { Reducer } from '../../global/actions';
+import { Reducer, dispatch } from '../../global/actions';
 
 export enum OrderType {
 	Move = 'Move',
@@ -94,6 +94,26 @@ export const mkUnloadOrder = (load: Load): Order => ({
 	order: OrderType.Unload,
 	load,
 });
+
+export const linkOrder = (entityId: ID, orderId: ID) => {
+	dispatch({
+		type: 'link-order',
+		entityId,
+		orderId,
+	});
+};
+
+export const clearOrders = (entityId: ID) => {
+	dispatch({
+		type: 'merge-entity',
+		entityId,
+		mergeable: {
+			orders: {
+				list: [],
+			},
+		},
+	});
+};
 
 export type OrderAction = {
 	type: 'link-order';
