@@ -1,9 +1,11 @@
 import { XY } from '../helper/xy';
+import { makeCanvasOrOnScreenCanvas } from './helper/offscreen';
 
 export const SIZE = 60;
 const IMAGE_SIZE = 40;
 const OFFSET = (SIZE - IMAGE_SIZE) / 2;
-const EMPTY = new OffscreenCanvas(SIZE, SIZE);
+
+const EMPTY = makeCanvasOrOnScreenCanvas(SIZE, SIZE);
 
 const Sprites = {
 	road: require('./sprite/road.png'),
@@ -22,6 +24,9 @@ for (let key of Object.keys(Sprites)) {
 		.then((b) => createImageBitmap(b))
 		.then((bitmap) => {
 			Sprites[key] = bitmap;
+		})
+		.catch((err) => {
+			console.error(err);
 		});
 }
 

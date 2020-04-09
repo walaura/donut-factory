@@ -19,7 +19,7 @@
 	line-height: 1.2;
 	font-size: 0.85em;
 	color: var(--text-dim);
-
+	background: #dcedc8;
 	--bg: rgb(255, 231, 238);
 	--bg-tabbar: rgb(250, 242, 244);
 	--bg-dark: #e91e63;

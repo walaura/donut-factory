@@ -1,4 +1,5 @@
 import { Entity, WithXY } from '../helper/defs';
+import { makeCanvasOrOnScreenCanvas } from './helper/offscreen';
 
 const mkAgents = () => {
 	let canvases: { [key in string]: OffscreenCanvas } = {};
@@ -8,7 +9,7 @@ const mkAgents = () => {
 		{ size = 50, scale = 1, flip = false } = {}
 	) => {
 		if (!canvases[agent.id]) {
-			canvases[agent.id] = new OffscreenCanvas(size, size);
+			canvases[agent.id] = makeCanvasOrOnScreenCanvas(size, size);
 		}
 		const ctx = canvases[agent.id].getContext(
 			'2d'

@@ -1,4 +1,5 @@
 import { OffScreenCanvasProps, Renderer } from '../helper/renderer';
+import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 
 const grass = '#dcedc8';
 
@@ -7,7 +8,7 @@ const bgLayerRenderer = ({
 	height,
 	zoom,
 }: OffScreenCanvasProps): Renderer => {
-	const canvas = new OffscreenCanvas(width, height);
+	const canvas = makeCanvasOrOnScreenCanvas(width, height);
 	const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
 	let drawn = false;
 	return {

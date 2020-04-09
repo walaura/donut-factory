@@ -1,10 +1,9 @@
-import { GameState } from './../../helper/defs';
-import { getDistanceToPoint } from '../../helper/pathfinding';
-
-import { mkDrawSprite } from '../sprite';
-import { XY, scale as mkScale, xy2arr } from '../../helper/xy';
 import { entityIsRoad } from '../../dressing/road';
+import { getDistanceToPoint } from '../../helper/pathfinding';
+import { scale as mkScale, XY, xy2arr } from '../../helper/xy';
 import { OffScreenCanvasProps, Renderer } from '../helper/renderer';
+import { mkDrawSprite } from '../sprite';
+import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 
 const angle = (p1: XY, p2: XY) => Math.atan2(p2.y - p1.y, p2.x - p1.x);
 
@@ -13,11 +12,10 @@ const roadLayerRenderer = ({
 	height,
 	zoom,
 }: OffScreenCanvasProps): Renderer => {
-	const canvas = new OffscreenCanvas(width, height);
+	const canvas = makeCanvasOrOnScreenCanvas(width, height);
 	const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
 	const drawSprite = mkDrawSprite(ctx);
 
-	const scaleArr = (xy: XY) => xy2arr(mkScale(xy, zoom));
 	const drawRoad = ({ start, end }: { start: XY; end: XY }, rotate) => {
 		const scale = (xy: XY) => mkScale(xy, zoom);
 
@@ -45,25 +43,13 @@ const roadLayerRenderer = ({
 	};
 
 	return {
-		onFrame: (prevState, state) => {
+		onFrame: (state) => {
 			for (let entity of Object.values(state.entities)) {
 				if (entityIsRoad(entity)) {
-					ctx.beginPath();
-					ctx.moveTo(...scaleArr(entity.start));
-					ctx.lineTo(...scaleArr(entity.end));
-					ctx.stroke();
-					ctx.beginPath();
-					//@ts-ignore
-					ctx.arc(...scaleArr(entity.start), 3, 0, 2 * Math.PI);
-					//@ts-ignore
-					ctx.arc(...scaleArr(entity.end), 3, 0, 2 * Math.PI);
-					ctx.fill();
-
 					drawRoad(entity, angle(entity.start, entity.end));
-					continue;
 				}
 			}
-			return { canvas, state: undefined };
+			return { canvas };
 		},
 	};
 };

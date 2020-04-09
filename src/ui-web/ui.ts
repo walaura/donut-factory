@@ -1,4 +1,4 @@
-import { render } from 'lit-html';
+import { render, html } from 'lit-html';
 import { GameState } from '../helper/defs';
 import {
 	listenFromWindow,
@@ -11,14 +11,18 @@ import { $dock } from './$dock';
 import { $windowDock, generateWindowEv } from './$window';
 import { onStateUpdate } from './helper/useGameState';
 import { agentInspector } from './inspectors/agent-inspector';
+import { $compatError } from './$compaterror';
 
-const Board = () => [$windowDock(), $dock()];
+const Board = () => [$windowDock(), $dock(), $compatError()];
 
+let worker;
 const renderSetup = () => {
 	render(Board(), (window as any).game);
-	const onTick = (state: GameState) => {
+	let onTick = (state: GameState) => {
 		onStateUpdate(state);
-		worker.postMessage({ action: 'TOCK', state } as LoopWorkerMessage);
+		if (worker) {
+			worker.postMessage({ action: 'TOCK', state } as LoopWorkerMessage);
+		}
 	};
 	let selected: Target;
 
@@ -28,6 +32,11 @@ const renderSetup = () => {
 	$canvas.height = window.innerHeight * pixelRatio;
 	$canvas.style.width = window.innerWidth + 'px';
 	$canvas.style.height = window.innerHeight + 'px';
+
+	if (!('transferControlToOffscreen' in $canvas)) {
+		return onTick;
+	}
+
 	const offscreenCanvas = $canvas.transferControlToOffscreen();
 	$canvas.addEventListener('mousemove', ({ clientX: x, clientY: y }) => {
 		worker.postMessage({
@@ -41,7 +50,7 @@ const renderSetup = () => {
 		}
 	});
 
-	const worker = new Worker('../ui-canvas/world.wk.ts');
+	worker = new Worker('../ui-canvas/world.wk.ts');
 	worker.postMessage(
 		{
 			action: MsgActions.SEND_CANVAS,
