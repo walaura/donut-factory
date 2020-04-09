@@ -7,4 +7,4 @@ type TemplateUnit =
 	| HTMLElement
 	| Part
 	| ((part: Part) => void);
-export type TemplateHole = TemplateUnit | (TemplateUnit | null)[] | null;
+export type TemplateHole = TemplateUnit | null | TemplateHole[];

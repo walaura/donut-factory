@@ -1,3 +1,4 @@
+import { Tabset, $tabset } from './components/$tabset';
 import { html, render, TemplateResult } from 'lit-html';
 import { draggable } from './helper/draggable';
 import { useState } from './helper/useState';
@@ -41,9 +42,7 @@ export interface ListWindowProps extends BaseWindowProps {
 	list: TemplateHole[];
 }
 
-export interface TabbedWindowProps extends BaseWindowProps {
-	tabs: WindowTab[];
-}
+export interface TabbedWindowProps extends BaseWindowProps, Tabset {}
 
 type WindowProps = ListWindowProps | TabbedWindowProps;
 
@@ -79,18 +78,30 @@ export const $windowDock = () => {
 	return html`${$dockRef}`;
 };
 
-const $xwBody = (items: TemplateHole) => {
+const $body = (items: TemplateHole) => {
 	const styles = css`
-		border-radius: var(--radius-small);
-		overflow: scroll;
-		background: var(--bg);
-		display: grid;
+		overflow: hidden;
+		display: flex;
 		height: 100%;
-		grid-template-columns: 1fr;
+		width: 100%;
+		justify-content: stretch;
+		align-items: stretch;
+		flex: 1 1 0;
 	`;
 	return html`<xw-body class=${styles}>
-		${$rows(items as any, { breakout: false })}
+		${items}
 	</xw-body>`;
+};
+
+export const $windowWash = (items: TemplateHole) => {
+	const styles = css`
+		border-radius: var(--radius-small);
+		background: var(--bg);
+		width: 100%;
+	`;
+	return html`<div class=${styles}>
+		${items}
+	</div>`;
 };
 
 const $xwHeader = ({ dragHandle, emoji, title, onClose }) => {
@@ -137,7 +148,7 @@ const $xwHeader = ({ dragHandle, emoji, title, onClose }) => {
 	</xw-header>`;
 };
 
-const $windowBase = ({
+export const $windowBase = ({
 	emoji,
 	title,
 	modal,
@@ -173,17 +184,14 @@ const $windowBase = ({
 		z-index: 9999999;
 		border-radius: var(--radius);
 		padding: 2px;
-		display: flex;
-		flex-direction: column;
+		display: grid;
+
+		grid-template-rows: min-content 1fr;
 		box-shadow: var(--shadow-1);
 		overflow: hidden;
 		width: ${width}px;
-		max-height: 30em;
-		height: 100%;
+		height: 30em;
 		background: var(--bg-light);
-		x-tabbar {
-			grid-row: min-content;
-		}
 	`;
 	if (modal) {
 		$dockRef.dataset.withModal = 'true';
@@ -196,7 +204,7 @@ const $windowBase = ({
 			emoji,
 			onClose,
 		})}
-		${children}
+		${$body(children)}
 	</x-window>`);
 };
 
@@ -204,42 +212,11 @@ const $tabbedWindow = (
 	{ tabs, ...windowProps }: TabbedWindowProps,
 	{ x, y }: Partial<XY> = {}
 ): TemplateHole => {
-	const useTabState = useState(0);
-
 	return $windowBase({
 		...windowProps,
 		x,
 		y,
-		children: useTabState((activeTab, setActiveTab) => {
-			return html`
-				<x-tabbar>
-					${tabs.map((t, i) => {
-						if (!t.shows) {
-							t.shows = true;
-						}
-						return html` <button
-							class=${css`
-								&[data-show='false'] {
-									display: none;
-								}
-							`}
-							data-show=${t.shows}
-							data-active=${i === activeTab}
-							@click=${() => setActiveTab(i)}
-							title=${t.name}
-						>
-							${$emoji(t.emoji)}
-						</button>`;
-					})}
-				</x-tabbar>
-				${tabs.map((tab, index) => {
-					if (index === activeTab) {
-						return $xwBody(tab.contents);
-					}
-					return null;
-				})}
-			`;
-		}),
+		children: $tabset({ tabs }),
 	});
 };
 
@@ -251,6 +228,6 @@ const $listWindow = (
 		x,
 		y,
 		...windowProps,
-		children: $xwBody(list as any),
+		children: $body($rows(list as any, { breakout: false })),
 	});
 };

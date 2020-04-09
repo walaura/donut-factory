@@ -3,7 +3,7 @@ import { TemplateHole } from '../../helper/defs';
 import { css } from '../../helper/style';
 
 const $row = (children) => html`
-	<xr-row class="x-window-breakout-padding">
+	<xr-row>
 		${children}
 	</xr-row>
 `;
@@ -28,10 +28,15 @@ export const $insetRows = (children) => {
 const $rows = (children: any[], { breakout = true } = {}) => {
 	const styles = css`
 		display: grid !important;
-		grid-auto-rows: minmax(1fr, min-content);
+		grid-auto-rows: min-content;
+		overflow: scroll;
+		width: 100%;
+		height: 100%;
+		flex: 1 1 0;
 
 		x-rows[data-breakout='true'] {
 			margin: calc(var(--space-v) * -2) calc(var(--space-h) * -1);
+			overflow: scroll;
 		}
 		x-rows > xr-row {
 			border-bottom: 1px solid var(--bg-light);
