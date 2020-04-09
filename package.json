@@ -5,7 +5,7 @@
 	"main": "dist/index.html",
 	"scripts": {
 		"start": "parcel ./src/index.html",
-		"make": "parcel build ./src/index.html --no-minify"
+		"make": "parcel build ./src/index.html"
 	},
 	"author": "walaura",
 	"license": "ISC",
