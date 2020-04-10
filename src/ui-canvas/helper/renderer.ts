@@ -1,3 +1,4 @@
+import { entityIsRoad, RoadEnd } from './../../entity/road';
 import { Target, getDistanceToPoint } from '../../helper/pathfinding';
 import { GameState } from './../../helper/defs';
 import { XY, scale as mkScale } from '../../helper/xy';
@@ -16,8 +17,10 @@ export type Renderer = {
 
 export type RendererState = {
 	selected: Target;
+	cursor: XY;
 	zoom: number;
 	editMode: boolean;
+	editingTarget: Target;
 };
 
 export type OffScreenCanvasProps = {
@@ -39,6 +42,7 @@ export const renderCanvasLayers = (
 } => {
 	let cursor: XY = { x: 20, y: 40 };
 	let editMode = false;
+	let editingTarget: Target;
 	const bgRenderer = bgLayerRenderer({ width, height, zoom });
 	const entityRenderer = entityLayerRenderer({ width, height, zoom });
 	const roadRenderer = roadLayerRenderer({ width, height, zoom });
@@ -49,16 +53,24 @@ export const renderCanvasLayers = (
 	const setCursor = (newCursor: XY) => {
 		cursor = newCursor;
 	};
-
+	let dirt: GameState;
 	const enterEditMode = () => {
 		editMode = true;
+		let rd = Object.values(dirt.entities).filter(entityIsRoad)[0];
+		editingTarget = {
+			entityId: rd.id,
+			roadEnd: RoadEnd.end,
+		};
 	};
 
 	const onFrame = (previousGameState: GameState, state: GameState) => {
+		dirt = previousGameState;
 		const rendererState: RendererState = {
 			selected: { xy: cursor },
 			zoom,
+			cursor,
 			editMode,
+			editingTarget,
 		};
 
 		for (let agent of Object.values(state.entities)) {

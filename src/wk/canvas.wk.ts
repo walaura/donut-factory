@@ -39,7 +39,6 @@ self.onmessage = function (ev) {
 		self.memory.prevState = msg.state;
 		return;
 	}
-	console.log(msg);
 	if (msg.action === MsgActions.SEND_CANVAS) {
 		const { canvas } = msg;
 		let ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
