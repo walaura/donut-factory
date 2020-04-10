@@ -1,10 +1,14 @@
 import { html } from 'lit-html';
 import { Entity, GameState, ID } from '../../helper/defs';
 import { $infoBig } from '../components/rows/info';
-import { $insetRows } from '../components/rows/row';
+import { $rows } from '../components/rows/row';
 import { getAgentStatus } from '../helper/status';
 import { useGameState } from '../helper/useGameState';
-import { ListWindowProps, WindowCallbacks } from './../$window';
+import { CallableWindowRoute, WindowCallbacks } from '../$window/$window';
+import { $wash } from '../components/$wash';
+import { $flex } from '../components/$flex';
+import { $scroll } from '../components/$scroll';
+import { $padding } from '../components/$padding';
 
 const $row = (agent: Entity, onAttach: any, state: GameState) =>
 	$infoBig({
@@ -22,29 +26,39 @@ const attachWindow = ({
 }: {
 	onAttach: (id: ID) => void;
 	filter: (entity: Entity) => boolean;
-}) => ({ onClose }: WindowCallbacks): ListWindowProps => ({
+}): CallableWindowRoute => ({
 	emoji: '➕',
-	title: 'Attach entity',
+	path: ['ONEOFF'],
+	name: 'Attach entity',
 	modal: true,
-	list: [
-		html`Pick one`,
-		useGameState((state) =>
-			$insetRows(
-				Object.values(state.entities)
-					.filter(filter)
-					.map((ag) =>
-						$row(
-							ag,
-							(id) => {
-								onAttach(id);
-								onClose();
-							},
-							state
+	render: ({ onClose }: WindowCallbacks) =>
+		$flex(
+			[
+				html`Pick one`,
+				useGameState((state) =>
+					$wash(
+						$scroll(
+							$rows(
+								Object.values(state.entities)
+									.filter(filter)
+									.map((ag) =>
+										$row(
+											ag,
+											(id) => {
+												onAttach(id);
+												onClose();
+											},
+											state
+										)
+									),
+								{ breakout: false }
+							)
 						)
 					)
-			)
+				),
+			],
+			{ distribute: ['squish', 'grow'] }
 		),
-	],
 });
 
 export { attachWindow };

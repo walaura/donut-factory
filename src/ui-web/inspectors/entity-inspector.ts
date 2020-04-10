@@ -1,36 +1,37 @@
-import {
-	Entity,
-	WithColor,
-	GameState,
-	EntityType,
-	WithCargo,
-	ID,
-} from '../../helper/defs';
-import { $form } from '../components/rows/form';
 import { html } from 'lit-html';
-import { Vehicle } from '../../entity/vehicle';
+import { CallableWindowRoute, WindowCallbacks } from '../$window/$window';
 import {
-	Order,
+	clearOrders,
+	linkOrder,
 	Load,
 	mkMoveOrder,
-	linkOrder,
-	clearOrders,
+	Order,
 } from '../../entity/composables/with-orders';
-import { $t } from '../components/type';
-import { findEntity, addEntity, mergeEntity } from '../../game/entities';
-import { generateWindowEv, TabbedWindowProps } from '../$window';
-import { attachWindow } from '../windows/attach';
-import { $rows } from '../components/rows/row';
-import { $infoSmall, $infoBig } from '../components/rows/info';
-import { getAgentStatus } from '../helper/status';
-import { $pretty } from '../components/rows/pretty';
 import { Road } from '../../entity/road';
-import { shortNumber } from '../helper/format';
-import { TemplateHole } from '../helper/defs';
-import { $select } from '../components/form/$select';
-import { useGameState, UIStatePriority } from '../helper/useGameState';
-import { $buttonGrid } from '../components/form/$buttonGrid';
+import { Vehicle } from '../../entity/vehicle';
+import { addEntity, findEntity, mergeEntity } from '../../game/entities';
 import { dispatch } from '../../global/dispatch';
+import {
+	Entity,
+	EntityType,
+	GameState,
+	ID,
+	WithCargo,
+	WithColor,
+} from '../../helper/defs';
+import { $tabset } from '../components/$tabset';
+import { $buttonGrid } from '../components/form/$buttonGrid';
+import { $select } from '../components/form/$select';
+import { $form } from '../components/rows/form';
+import { $infoBig, $infoSmall } from '../components/rows/info';
+import { $pretty } from '../components/rows/pretty';
+import { $rows } from '../components/rows/row';
+import { $t } from '../components/type';
+import { TemplateHole } from '../helper/defs';
+import { shortNumber } from '../helper/format';
+import { getAgentStatus } from '../helper/status';
+import { UIStatePriority, useGameState } from '../helper/useGameState';
+import { attachWindow } from '../windows/attach';
 
 const $colorRow = (agent: Entity & WithColor) =>
 	$form({
@@ -51,13 +52,17 @@ const $colorRow = (agent: Entity & WithColor) =>
 		/>`,
 	});
 
-const $orderInspector = (order: Order, state: GameState) => {
+const $orderInspector = (
+	order: Order,
+	state: GameState,
+	{ onNavigate }: Pick<WindowCallbacks, 'onNavigate'>
+) => {
 	if ('load' in order) {
 		return $form({
 			label: $t(findEntity(order.load.product, state)),
 			control: html`<button
 				@click=${(ev) => {
-					generateWindowEv(ev)(
+					onNavigate(ev)(
 						attachWindow({
 							onAttach: (product) => {
 								mergeEntity<Order & { load: Load }>(order.id, {
@@ -80,7 +85,11 @@ const $orderInspector = (order: Order, state: GameState) => {
 	return null;
 };
 
-const $orderInfo = (vehicle: Vehicle, state: GameState) =>
+const $orderInfo = (
+	vehicle: Vehicle,
+	state: GameState,
+	{ onNavigate }: Pick<WindowCallbacks, 'onNavigate'>
+) =>
 	$rows([
 		...Object.values(vehicle.orders.list).map((orderId, index) => {
 			const order = findEntity(orderId, state);
@@ -88,7 +97,7 @@ const $orderInfo = (vehicle: Vehicle, state: GameState) =>
 				return 'Things messed up yo';
 			}
 			return $infoSmall({
-				onClick: (ev) => generateWindowEv(ev)(agentInspector(orderId)),
+				onClick: (ev) => onNavigate(ev)(entityInspector(orderId)),
 				label: vehicle.orders.position === index ? '🚦<HERE>' : '💤',
 				info: [{ body: getAgentStatus(order.id, state) }],
 			});
@@ -197,7 +206,11 @@ const $cargoRows = (cargo: WithCargo['cargo'], gameState: GameState) =>
 			],
 		});
 	});
-const $info = (entityId: ID, gameState: GameState) => {
+const $info = (
+	entityId: ID,
+	gameState: GameState,
+	{ onNavigate }: Pick<WindowCallbacks, 'onNavigate'>
+) => {
 	const agent = findEntity(entityId, gameState);
 	if (!agent) {
 		return;
@@ -215,7 +228,7 @@ const $info = (entityId: ID, gameState: GameState) => {
 	}
 
 	if ('load' in agent) {
-		rows.push($orderInspector(agent, gameState));
+		rows.push($orderInspector(agent, gameState, { onNavigate }));
 	}
 
 	if (agent.type === EntityType.Vehicle) {
@@ -264,110 +277,113 @@ const $info = (entityId: ID, gameState: GameState) => {
 	return $rows(rows.filter(Boolean));
 };
 
-export const agentInspector = (entityId: ID): TabbedWindowProps => ({
-	title: useGameState((state) => findEntity(entityId, state)?.name) ?? 'info',
+export const entityInspector = (entityId: ID): CallableWindowRoute => ({
+	path: ['inspect-entity', entityId],
+	name: useGameState((state) => findEntity(entityId, state)?.name) ?? 'info',
 	emoji: useGameState((state) => findEntity(entityId, state)?.emoji),
-	tabs: [
-		{
-			emoji: 'ℹ️',
-			name: 'Basic',
-			contents: [
-				useGameState((state) => $info(entityId, state), UIStatePriority.Sonic),
-				useGameState(
-					(state) => getAgentStatus(entityId, state),
-					UIStatePriority.Cat
-				),
+	render: ({ onNavigate }) =>
+		$tabset({
+			tabs: [
+				{
+					emoji: 'ℹ️',
+					name: 'Basic',
+					contents: [
+						useGameState(
+							(state) => $info(entityId, state, { onNavigate }),
+							UIStatePriority.Sonic
+						),
+						useGameState(
+							(state) => getAgentStatus(entityId, state),
+							UIStatePriority.Cat
+						),
+					],
+				},
+				{
+					emoji: '🛣',
+					name: 'Paths',
+					shows: (state) =>
+						findEntity(entityId, state)?.type === EntityType.Vehicle,
+					contents: [
+						useGameState((state) => {
+							let entity = findEntity(entityId, state);
+							if (entity && entity.type === EntityType.Vehicle) {
+								return $pathInfo(entity, state);
+							}
+						}, UIStatePriority.UI),
+					],
+				},
+				{
+					emoji: '📥',
+					name: 'Orders',
+					shows: (state) =>
+						findEntity(entityId, state)?.type === EntityType.Vehicle,
+					contents: [
+						useGameState((state) => {
+							let entity = findEntity(entityId, state);
+							if (entity && entity.type === EntityType.Vehicle) {
+								return $orderInfo(entity, state, { onNavigate });
+							}
+						}, UIStatePriority.Snail),
+						$buttonGrid(html`<button
+								@click=${(ev) => {
+									onNavigate(ev)(
+										attachWindow({
+											onAttach: (newId) => {
+												const order = mkMoveOrder(newId);
+												addEntity(order);
+												linkOrder(entityId, order.id);
+											},
+											filter: (agent) => {
+												return agent.type !== EntityType.Order;
+											},
+										})
+									);
+								}}
+							>
+								add new order
+							</button>
+							<button
+								@click=${() => {
+									clearOrders(entityId);
+								}}
+							>
+								clear orders
+							</button>
+							<button
+								@click=${(ev) => {
+									onNavigate(ev)(
+										attachWindow({
+											onAttach: (newId) => {
+												linkOrder(entityId, newId);
+											},
+											filter: (agent) => {
+												return agent.type === EntityType.Order;
+											},
+										})
+									);
+								}}
+							>
+								add existing order
+							</button>`),
+					],
+				},
+				{
+					emoji: '🔧',
+					name: 'System',
+					contents: [
+						useGameState((state) => $pretty(findEntity(entityId, state))),
+						html`<button
+							@click=${() => {
+								dispatch({
+									type: 'delete-entity',
+									entityId,
+								});
+							}}
+						>
+							Delete agent
+						</button>`,
+					],
+				},
 			],
-		},
-		{
-			emoji: '🛣',
-			name: 'Paths',
-			shows: useGameState(
-				(state) => findEntity(entityId, state)?.type === EntityType.Vehicle,
-				UIStatePriority.Snail
-			),
-			contents: [
-				useGameState((state) => {
-					let entity = findEntity(entityId, state);
-					if (entity && entity.type === EntityType.Vehicle) {
-						return $pathInfo(entity, state);
-					}
-				}, UIStatePriority.Snail),
-			],
-		},
-		{
-			emoji: '📥',
-			name: 'Orders',
-			shows: useGameState(
-				(state) => findEntity(entityId, state)?.type === EntityType.Vehicle,
-				UIStatePriority.Snail
-			),
-			contents: [
-				useGameState((state) => {
-					let entity = findEntity(entityId, state);
-					if (entity && entity.type === EntityType.Vehicle) {
-						return $orderInfo(entity, state);
-					}
-				}, UIStatePriority.Snail),
-				$buttonGrid(html`<button
-						@click=${(ev) => {
-							generateWindowEv(ev)(
-								attachWindow({
-									onAttach: (newId) => {
-										const order = mkMoveOrder(newId);
-										addEntity(order);
-										linkOrder(entityId, order.id);
-									},
-									filter: (agent) => {
-										return agent.type !== EntityType.Order;
-									},
-								})
-							);
-						}}
-					>
-						add new order
-					</button>
-					<button
-						@click=${() => {
-							clearOrders(entityId);
-						}}
-					>
-						clear orders
-					</button>
-					<button
-						@click=${(ev) => {
-							generateWindowEv(ev)(
-								attachWindow({
-									onAttach: (newId) => {
-										linkOrder(entityId, newId);
-									},
-									filter: (agent) => {
-										return agent.type === EntityType.Order;
-									},
-								})
-							);
-						}}
-					>
-						add existing order
-					</button>`),
-			],
-		},
-		{
-			emoji: '🔧',
-			name: 'System',
-			contents: [
-				useGameState((state) => $pretty(findEntity(entityId, state))),
-				html`<button
-					@click=${() => {
-						dispatch({
-							type: 'delete-entity',
-							entityId,
-						});
-					}}
-				>
-					Delete agent
-				</button>`,
-			],
-		},
-	],
+		}),
 });

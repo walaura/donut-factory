@@ -1,5 +1,9 @@
 import { html } from 'lit-html';
 import { styleMap } from 'lit-html/directives/style-map';
+import { generateCallableWindowFromEv } from './$window/$window';
+import { $flex } from './components/$flex';
+import { $padding } from './components/$padding';
+import { $wash } from './components/$wash';
 import { $emoji } from './components/emoji';
 import { $pretty } from './components/rows/pretty';
 import { TemplateHole } from './helper/defs';
@@ -8,7 +12,6 @@ import { css } from './helper/style';
 import { UIStatePriority, useGameState } from './helper/useGameState';
 import { allAgents } from './inspectors/all-entities';
 import { moneyInspector } from './inspectors/money-inspector';
-import { generateWindowEv } from './$window';
 
 const $pressable = (
 	children: TemplateHole,
@@ -81,7 +84,7 @@ const $dockPanel = (
 			padding-right: var(--space-h);
 		}
 		& > * + * {
-			border-left: 1px solid var(--bg);
+			border-left: 1px solid var(--bg-wash);
 		}
 		& > *:first-child {
 			padding-left: calc(var(--space-h) * 1.5);
@@ -108,6 +111,7 @@ const $dock = () => {
 		right: 0;
 		grid-auto-flow: column;
 		grid-gap: calc(var(--space-h) * 2);
+		transition: 0.1s ease-in-out;
 		& button:active x-emoji {
 			transform: scale(1.5);
 		}
@@ -130,12 +134,16 @@ const $dock = () => {
 				],
 				{
 					onClick: (ev) => {
-						generateWindowEv(ev)(moneyInspector());
+						generateCallableWindowFromEv(ev)(moneyInspector());
 					},
 				}
 			),
-			$dockPanel(
-				useGameState((state) => {
+			html`<div
+				class=${css`
+					position: relative;
+				`}
+			>
+				${useGameState((state) => {
 					let date = new Date(state.date);
 					const dtf = new Intl.DateTimeFormat('en', {
 						year: 'numeric',
@@ -146,7 +154,7 @@ const $dock = () => {
 						hour: 'numeric',
 						minute: 'numeric',
 					});
-					return [
+					return $dockPanel([
 						$dockEmoji({ emoji: '📆', title: 'Calendar' }),
 						$dockText(dtf.format(date)),
 						$dockText(
@@ -160,35 +168,42 @@ const $dock = () => {
 								${clock.format(date)}
 							</div>`
 						),
-					];
-				}, UIStatePriority.UI)
-			),
+					]);
+				}, UIStatePriority.UI)}
+			</div>`,
 			$dockPanel([
 				$dockEmoji({
 					emoji: '🌈',
 					title: 'Manage agents',
 					onClick: (ev) => {
-						generateWindowEv(ev)(allAgents());
+						generateCallableWindowFromEv(ev)(allAgents());
 					},
 				}),
 				$dockEmoji({
 					emoji: '🤓',
 					title: 'Show global state',
 					onClick: (ev) => {
-						generateWindowEv(ev)({
+						generateCallableWindowFromEv(ev)({
 							emoji: '🤓',
-							title: 'All state',
-							list: [
-								html`<button
-									@click=${() => {
-										localStorage.removeItem('autosave');
-										window.location.reload();
-									}}
-								>
-									New game+
-								</button>`,
-								useGameState((state) => $pretty(state)),
-							],
+							path: ['ONEOFF'],
+							name: 'All state',
+							render: () =>
+								$wash(
+									$flex(
+										[
+											useGameState((state) => [$pretty(state)]),
+											$padding(html`<button
+												@click=${() => {
+													localStorage.removeItem('autosave');
+													window.location.reload();
+												}}
+											>
+												New game+
+											</button>`),
+										],
+										{ distribute: ['scroll', 'squish'], dividers: true }
+									)
+								),
 						});
 					},
 				}),

@@ -1,12 +1,11 @@
-import { Tabset, $tabset } from './components/$tabset';
-import { html, render, TemplateResult } from 'lit-html';
-import { draggable } from './helper/draggable';
-import { useState } from './helper/useState';
-import { $emoji } from './components/emoji';
-import { $rows } from './components/rows/row';
-import { css, keyframes } from './helper/style';
-import { TemplateHole } from './helper/defs';
-import { XY } from '../helper/xy';
+import { html, render } from 'lit-html';
+import { ID } from '../../helper/defs';
+import { $emoji } from '../components/emoji';
+import { TemplateHole } from '../helper/defs';
+import { draggable } from '../helper/draggable';
+import { css, keyframes } from '../helper/style';
+import { $basicWindow } from './$basic-window';
+import { $detailViewWindow } from './$detail-view-window';
 
 let windows = [];
 
@@ -20,60 +19,52 @@ $dockRef.className = css`
 	}
 `;
 
-interface WindowTab {
-	name: string;
-	emoji: string;
-	contents: TemplateHole;
-	shows?: boolean | any;
-}
-
-interface BaseWindowProps {
-	emoji: TemplateHole;
-	title: TemplateHole;
-	modal?: boolean;
-	onClose?: () => void;
-}
-
-export interface WindowCallbacks {
-	onClose: () => void;
-}
-
-export interface ListWindowProps extends BaseWindowProps {
-	list: TemplateHole[];
-}
-
-export interface TabbedWindowProps extends BaseWindowProps, Tabset {}
-
-type WindowProps = ListWindowProps | TabbedWindowProps;
-
 const addDynamicWindow = (handle: (ref: HTMLElement) => TemplateHole) => {
 	let $holder = document.createElement('no-op');
 	$dockRef.appendChild($holder);
 	render(handle($holder), $holder);
 };
 
-export const generateWindowEv = ({ clientX: x, clientY: y }: MouseEvent) => (
-	windowProps: WindowProps | ((cbs: WindowCallbacks) => WindowProps)
-) => {
+export interface BaseWindowProps {
+	emoji: TemplateHole;
+	name: TemplateHole;
+	modal?: boolean;
+	onClose?: () => void;
+}
+
+export interface WindowCallbacks {
+	onClose: () => void;
+	onNavigate: (ev: MouseEvent) => (wndw: CallableWindowRoute) => void;
+	selectedNavigator?: CallableWindowRoute;
+}
+export enum CallableWindowTypes {
+	'Simple',
+	'MasterDetail',
+}
+
+type Path = ['inspect-entity', ID] | ['all-entities'] | ['ledger'] | ['ONEOFF'];
+
+export type CallableWindowRoute = BaseWindowProps & {
+	type?: CallableWindowTypes;
+	path: Path;
+	render: (cb: WindowCallbacks) => TemplateHole;
+};
+
+export const generateCallableWindowFromEv = ({
+	clientX: x,
+	clientY: y,
+}: MouseEvent) => (props: CallableWindowRoute) => {
 	addDynamicWindow((parentRef) => {
 		const onClose = () => {
 			$dockRef.dataset.withModal = undefined;
 			parentRef.remove();
 		};
-
-		if (typeof windowProps === 'function') {
-			windowProps = windowProps({
-				onClose,
-			});
+		if (props.type === CallableWindowTypes.MasterDetail) {
+			return $detailViewWindow(props, { onClose, x, y });
 		}
-
-		if ('tabs' in windowProps) {
-			return $tabbedWindow({ ...windowProps, onClose }, { x, y });
-		}
-		return $listWindow({ ...windowProps, onClose }, { x, y });
+		return $basicWindow(props, { onClose, x, y });
 	});
 };
-
 export const $windowDock = () => {
 	return html`${$dockRef}`;
 };
@@ -86,29 +77,19 @@ const $body = (items: TemplateHole) => {
 		width: 100%;
 		justify-content: stretch;
 		align-items: stretch;
-		flex: 1 1 0;
+		flex: 1 0 0;
+		position: relative;
 	`;
 	return html`<xw-body class=${styles}>
 		${items}
 	</xw-body>`;
 };
 
-export const $windowWash = (items: TemplateHole) => {
-	const styles = css`
-		border-radius: var(--radius-small);
-		background: var(--bg);
-		width: 100%;
-	`;
-	return html`<div class=${styles}>
-		${items}
-	</div>`;
-};
-
 const $xwHeader = ({ dragHandle, emoji, title, onClose }) => {
 	const styles = css`
 		font-weight: var(--font-bold);
 		transform: lowercase;
-		color: var(--bg-dark);
+		color: var(--text-title);
 		padding: var(--space-v) 0;
 		min-height: var(--pressable);
 		display: grid;
@@ -150,18 +131,20 @@ const $xwHeader = ({ dragHandle, emoji, title, onClose }) => {
 
 export const $windowBase = ({
 	emoji,
-	title,
+	name: title,
 	modal,
 	onClose,
 	children,
 	x = 20,
 	y = 20,
+	width = 1,
 }: BaseWindowProps & {
 	children: TemplateHole;
+	width?: number;
 	x?: number;
 	y?: number;
 }): TemplateHole => {
-	const width = 260;
+	width = width * 260;
 	x = x + Math.min(0, document.body.clientWidth - x - width - 40);
 	if (x > document.body.clientWidth / 2) {
 		y = Math.max(y, 100);
@@ -206,28 +189,4 @@ export const $windowBase = ({
 		})}
 		${$body(children)}
 	</x-window>`);
-};
-
-const $tabbedWindow = (
-	{ tabs, ...windowProps }: TabbedWindowProps,
-	{ x, y }: Partial<XY> = {}
-): TemplateHole => {
-	return $windowBase({
-		...windowProps,
-		x,
-		y,
-		children: $tabset({ tabs }),
-	});
-};
-
-const $listWindow = (
-	{ list, ...windowProps }: ListWindowProps,
-	{ x, y }: Partial<XY> = {}
-) => {
-	return $windowBase({
-		x,
-		y,
-		...windowProps,
-		children: $body($rows(list as any, { breakout: false })),
-	});
 };

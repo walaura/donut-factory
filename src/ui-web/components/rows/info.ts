@@ -1,6 +1,8 @@
 import { html } from 'lit-html';
 import { $emoji } from '../emoji';
 import { $heading } from '../type';
+import { css } from '../../helper/style';
+import { $padding } from '../$padding';
 
 interface Info {
 	body: any;
@@ -13,7 +15,6 @@ const $infoSmall = ({
 }: {
 	label: any;
 	onClick?: ((any) => void) | null;
-
 	info: Info[];
 }) => html`
 	<xi-row @click=${onClick}>
@@ -29,43 +30,75 @@ const $infoSmall = ({
 	</xi-row>
 `;
 
+const styles = {
+	base: css`
+		&[data-selected] {
+			background-color: rgba(255, 255, 255, 0.25);
+			box-shadow: var(--shadow-1);
+		}
+		transition: 0.1s ease-in-out;
+		&:active {
+			transform: scale(1.05);
+		}
+	`,
+	flex: css`
+		display: flex;
+	`,
+	icon: css`
+		width: 2em;
+		margin-top: 0;
+		display: grid;
+		justify-content: flex-end;
+		padding-right: var(--space-h);
+		flex: 0 0 auto;
+		line-height: 1;
+	`,
+	body: css`
+		& > *:not(style):not(:last-child) {
+			display: block;
+			margin-bottom: 0.25em;
+		}
+	`,
+};
+
 const $infoBig = ({
 	icon,
 	onClick = null,
 	centered = false,
+	selected = false,
 	heading,
 	accesories,
 }: {
 	icon: any;
 	onClick?: ((any) => void) | null;
 	centered?: boolean;
+	selected?: boolean;
 	heading: any;
 	accesories: any[];
-}) => html`
-	<style>
-		table-row {
-			display: flex;
-		}
-		tr-icon {
-			width: calc(var(--pressable) - var(--space-h));
-			margin-top: 0;
-			display: grid;
-			justify-content: flex-end;
-			padding-right: var(--space-h);
-			flex: 0 0 auto;
-			line-height: 1;
-		}
-		tr-body > *:not(style) {
-			display: block;
-			margin-bottom: 0.25em;
-		}
-	</style>
-	<table-row data-centered=${centered} @click=${onClick}>
-		<tr-icon>${$emoji(icon)}</tr-icon>
-		<tr-body>
-			${$heading(heading)} ${accesories.map((a) => html`<p>${a}</p>`)}
-		</tr-body>
-	</table-row>
-`;
+}) =>
+	$padding(
+		$padding(
+			html`
+			<div
+				class=${styles.base}
+				data-centered=${centered}
+				?data-selected=${selected}
+				@click=${onClick}
+			>
+				${$padding(
+					html`<div class=${styles.flex}>
+						<div class=${styles.icon}>${$emoji(icon)}</div>
+						<div class=${styles.body}>
+							${$heading(heading)} ${accesories.map((a) => html`<p>${a}</p>`)}
+						</div>
+					</div>`,
+					{ size: 'small' }
+				)}
+			</div></div>
+		`,
+			{ type: 'antiPadding' }
+		),
+		{ size: 'small' }
+	);
 
 export { $infoBig, $infoSmall };

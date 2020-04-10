@@ -1,4 +1,4 @@
-import { render, html } from 'lit-html';
+import { render } from 'lit-html';
 import { GameState } from '../helper/defs';
 import {
 	listenFromWindow,
@@ -7,11 +7,11 @@ import {
 	WorldWorkerMessage,
 } from '../helper/message';
 import { Target } from '../helper/pathfinding';
-import { $dock } from './$dock';
-import { $windowDock, generateWindowEv } from './$window';
-import { onStateUpdate } from './helper/useGameState';
-import { agentInspector } from './inspectors/entity-inspector';
 import { $compatError } from './$compaterror';
+import { $dock } from './$dock';
+import { $windowDock, generateCallableWindowFromEv } from './$window/$window';
+import { onStateUpdate } from './helper/useGameState';
+import { entityInspector } from './inspectors/entity-inspector';
 
 const Board = () => [$compatError(), $windowDock(), $dock()];
 
@@ -46,7 +46,7 @@ const renderSetup = () => {
 	});
 	$canvas.addEventListener('click', (ev) => {
 		if ('entityId' in selected) {
-			generateWindowEv(ev)(agentInspector(selected.entityId));
+			generateCallableWindowFromEv(ev)(entityInspector(selected.entityId));
 		}
 	});
 

@@ -1,48 +1,26 @@
 import { html } from 'lit-html';
-import { TemplateHole } from '../../helper/defs';
 import { css } from '../../helper/style';
+import { $padding } from '../$padding';
 
-const $row = (children) => html`
-	<xr-row>
-		${children}
-	</xr-row>
-`;
-
-export const $insetRows = (children) => {
-	const styles = css`
-		background: var(--bg-light);
-		overflow: scroll;
-		display: block;
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		border-radius: var(--radius-small);
-		margin: calc(2px + (var(--space-v) * -2)) calc(2px + (var(--space-h) * -1));
-		& * {
-			--bg-light: rgb(255, 231, 238);
-		}
-	`;
-	return html` <x-inset class=${styles}>
-		${$rows(children, { breakout: false })}
-	</x-inset>`;
-};
+const $row = (children) =>
+	$padding(children, { type: 'padding', size: 'normal' });
 
 const $rows = (children: any[], { breakout = true } = {}) => {
 	const styles = css`
-		display: grid !important;
-		grid-auto-rows: min-content;
-		overflow: scroll;
-		width: 100%;
-		height: 100%;
-		flex: 1 1 0;
-
-		x-rows[data-breakout='true'] {
-			margin: calc(var(--space-v) * -2) calc(var(--space-h) * -1);
-			overflow: scroll;
-		}
-		x-rows > xr-row {
-			border-bottom: 1px solid var(--bg-light);
-			padding: calc(var(--space-v) * 2) var(--space-h);
+		& > * {
+			box-shadow: 0 1px 0 0 var(--divider);
 		}
 	`;
+
+	if (breakout) {
+		return $padding(
+			html` <x-rows class=${styles}>
+				${children.map($row)}
+			</x-rows>`,
+			{ type: 'antiPadding', size: 'normal' }
+		);
+	}
+
 	return html` <x-rows class=${styles} data-breakout=${breakout}>
 		${children.map($row)}
 	</x-rows>`;

@@ -20,6 +20,16 @@ pre {
 	font-family: monospace;
 }
 
+[data-alt-colors] {
+	--bg-wash: rgba(42, 42, 124, 0.15);
+	--bg-counter-wash: hsla(240, 50%, 96%, 0.9);
+}
+
+[data-light-colors] {
+	--bg-wash: rgba(#fff);
+	--bg-counter-wash: hsla(240, 50%, 96%, 0.9);
+}
+
 :root {
 	font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
 		Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -27,17 +37,20 @@ pre {
 	font-weight: var(--font-normal);
 	color: var(--text-dim);
 	background: #dcedc8;
-	--bg: rgb(255, 231, 238);
-	--bg-tabbar: rgb(250, 242, 244);
-	--bg-dark: #e91e63;
+	--main: hsl(340, 82%, 52%);
+	--alt: hsl(241, 53%, 18%);
+	--bg-wash: hsl(340, 80%, 82%, 0.35);
+	--bg-counter-wash: hsla(340, 100%, 97%, 0.9);
+	--text-title: hsl(340, 82%, 52%);
 	--bg-light: #fff;
+	--divider: hsla(243, 33%, 17%, 0.1);
 	--radius: 0.66em;
 	--radius-small: 0.46em;
 	--space-h: 0.66em;
 	--space-v: 0.33em;
 	--pressable: 3em;
-	--text-dim: rgb(50, 50, 50);
-	--text-bold: rgb(10, 10, 10);
+	--text-dim: hsla(242, 33%, 17%, 0.815);
+	--text-bold: hsl(242, 56%, 17%);
 	--shadow-1: 0 0 0 1px rgba(255, 255, 255, 0.5),
 		0 0.25em 0.25em 0.25em rgba(0, 0, 0, 0.05);
 	--shadow-2: 0 0 0 1px rgba(255, 255, 255, 0.5);
@@ -59,10 +72,6 @@ x-dock {
 	right: calc(var(--space-h) * 2);
 }
 
-x-window x-table {
-	display: block;
-}
-
 x-window select,
 x-window button,
 x-window input {
@@ -71,28 +80,4 @@ x-window input {
 	box-shadow: var(--shadow-1);
 	border-radius: var(--radius-small);
 	overflow: hidden;
-}
-
-x-tabbar {
-	display: grid;
-	grid-auto-columns: min-content;
-	grid-auto-flow: column;
-	justify-content: center;
-	grid-gap: calc(var(--space-h) / 4);
-}
-x-tabbar button {
-	width: var(--pressable);
-	height: var(--pressable);
-	background: var(--bg-tabbar);
-	border-bottom-left-radius: 0;
-	border-bottom-right-radius: 0;
-	border-top-left-radius: var(--radius-small);
-	border-top-right-radius: var(--radius-small);
-	box-shadow: none !important;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	&[data-active='true'] {
-		background: var(--bg);
-	}
 }

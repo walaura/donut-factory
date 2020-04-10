@@ -48,7 +48,29 @@ export const keyframes = parseNSaveRawCss(
 );
 
 export const css = parseNSaveRawCss(
-	(r) => '💅' + sum(r),
+	(r) => {
+		if (process.env.NODE_ENV === 'production') {
+			return '💅' + sum(r);
+		} else {
+			try {
+				let stack =
+					Error()
+						.stack?.split('\n')
+						.map((line) => line.trim())
+						.filter((line) => line.startsWith('at')) ?? [];
+
+				let firstRelevantLine =
+					(stack?.findIndex((line) => line.includes('.css')) ?? 1) + 1;
+				return (
+					'😎' +
+					stack[firstRelevantLine].split(' ')[1].replace(/\W/g, '') +
+					sum(r)
+				);
+			} catch {
+				return '💅' + sum(r);
+			}
+		}
+	},
 	(className, raw) => {
 		//@ts-ignore
 		let cssRaw = String.raw(...raw);

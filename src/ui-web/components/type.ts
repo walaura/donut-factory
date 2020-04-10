@@ -11,5 +11,5 @@ export const $heading = (txt) => html`
 	<x-heading><h3>${txt}</h3></x-heading>
 `;
 
-export const $t = (entity: Entity | null) =>
+export const $t = (entity: Pick<Entity, 'name' | 'emoji'> | null) =>
 	entity ? `${entity.emoji}${entity.name}` : 'Unknown';

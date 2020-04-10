@@ -1,5 +1,7 @@
+import { render } from 'lit-html';
 import { GameState } from '../../helper/defs';
-import { directive, TemplateResult, Part } from 'lit-html';
+import { css } from './style';
+import { request } from 'http';
 
 export enum UIStatePriority {
 	Snail = 1250,
@@ -34,20 +36,24 @@ const subscribeToStateUpdate = (
 	};
 };
 
-export const useGameState = directive(
-	(callback: (state: GameState) => any, priority = UIStatePriority.Snail) => (
-		part: Part
-	) => {
-		const cleanup = subscribeToStateUpdate((state) => {
-			part.setValue(callback(state));
-			part.commit();
-			//@ts-ignore
-			if (!part.endNode?.isConnected) {
-				cleanup();
-			}
-		}, priority);
-	}
-);
+export const useGameState = (
+	callback: (state: GameState) => any,
+	priority = UIStatePriority.Snail
+) => {
+	let $ref = document.createElement('div');
+	$ref.className = css`
+		display: contents;
+	`;
+	const cleanup = subscribeToStateUpdate((state) => {
+		if (!$ref.isConnected) {
+			//debugger;
+			//cleanup();
+		} else {
+			render(callback(state), $ref);
+		}
+	}, priority);
+	return $ref;
+};
 
 export const onStateUpdate = (newState) => {
 	lastKnownState = newState;
