@@ -7,7 +7,6 @@ import { XY } from './xy';
 export enum MsgActions {
 	'SEND_CANVAS' = 'SEND_CANVAS',
 	'CANVAS_RESPONSE' = 'CANVAS_RESPONSE',
-	'SEND_CURSOR' = 'SEND_CURSOR',
 	'TOCK' = 'TOCK',
 	'TICK' = 'TICK',
 	'PAUSE' = 'PAUSE',
@@ -30,10 +29,6 @@ export type CanvasRendererMessage =
 	| {
 			action: MsgActions.CANVAS_RESPONSE;
 			rendererState: LastKnownCanvasRendererState;
-	  }
-	| {
-			action: MsgActions.SEND_CURSOR;
-			pos: XY;
 	  }
 	| {
 			action: MsgActions.TOCK;

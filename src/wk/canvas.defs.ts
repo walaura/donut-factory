@@ -7,13 +7,13 @@ type CanvasEditModes =
 			editModeTarget: null;
 	  }
 	| {
-			editMode: true;
+			editMode: boolean;
 			editModeTarget: Target | null;
 	  };
 
 export type CanvasRendererState = {
 	selected: Target;
-	cursor: XY;
+	screenCursor: XY;
 	gameCursor: XY;
 	zoom: number;
 } & CanvasEditModes;

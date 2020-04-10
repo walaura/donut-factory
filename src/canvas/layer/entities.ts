@@ -1,12 +1,12 @@
+import { entityIsRoad } from '../../entity/road';
+import { findEntity } from '../../game/entities';
 import { EntityType, WithID } from '../../helper/defs';
 import { appendWithId } from '../../helper/generate';
 import { scale as mkScale, XY, xy2arr } from '../../helper/xy';
-import { mkAgents } from '../sprite/entity';
-import { OffScreenCanvasProps, OnFrame, Renderer } from '../canvas';
+import { OffscreenCanvasRenderer } from '../canvas.df';
 import { mkAnimations } from '../helper/animation';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
-import { findEntity } from '../../game/entities';
-import { entityIsRoad } from '../../entity/road';
+import { mkAgents } from '../sprite/entity';
 
 const lerp = (start, end, t) => {
 	return start * (1 - t) + end * t;
@@ -17,21 +17,18 @@ interface Feedback extends WithID {
 	xy: XY;
 }
 
-const entityLayerRenderer = ({
-	width,
-	height,
-	zoom,
-}: OffScreenCanvasProps): Renderer => {
+const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 	let feedback: { [key in string]: Feedback } = {};
 	let mkAgent = mkAgents().mkAgent;
 
 	const canvas = makeCanvasOrOnScreenCanvas(width, height);
 	const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
 
-	const scale = (xy: XY) => mkScale(xy, zoom);
 	const { animationTick, useBouncyValue, useAnimatedValue } = mkAnimations();
-	const onFrame: OnFrame = (state, { previousGameState, rendererState }) => {
-		const { selected } = rendererState;
+
+	return ({ state, prevState, rendererState }) => {
+		const { selected, zoom } = rendererState;
+		const scale = (xy: XY) => mkScale(xy, zoom);
 
 		ctx.clearRect(0, 0, width, height);
 		ctx.fillStyle = 'black';
@@ -56,7 +53,7 @@ const entityLayerRenderer = ({
 			}
 			const { x, y } = scale(entity);
 			let flip = false;
-			let prevAgent = previousGameState.entities[entity.id];
+			let prevAgent = prevState.entities[entity.id];
 			if (entity.type === EntityType.Vehicle && prevAgent && 'x' in prevAgent) {
 				if (entity.x - prevAgent.x >= -0.01) {
 					flip = true;
@@ -78,7 +75,7 @@ const entityLayerRenderer = ({
 		// pop cool text
 		let lastUpdate = state.ledger[state.ledger.length - 1];
 		if (
-			previousGameState.ledger.length !== state.ledger.length &&
+			prevState.ledger.length !== state.ledger.length &&
 			lastUpdate.relevantAgents
 		) {
 			const xy = findEntity(lastUpdate.relevantAgents[0], state);
@@ -119,10 +116,8 @@ const entityLayerRenderer = ({
 			ctx.globalAlpha = 1;
 		}
 
-		return { canvas };
+		return canvas;
 	};
-
-	return { onFrame };
 };
 
 export { entityLayerRenderer };

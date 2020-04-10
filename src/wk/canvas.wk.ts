@@ -40,11 +40,11 @@ listenFromWorker<CanvasRendererMessage>((message) => {
 			}
 			let state = message.state;
 			let prevState = self.memory.prevKnownGameState || state;
-			self.memory.state = self.memory.canvasHandle.onFrame(
-				prevState,
+			self.memory.state = self.memory.canvasHandle.onFrame({
 				state,
-				self.memory.state as CanvasRendererState
-			).rendererState;
+				prevState,
+				rendererState: self.memory.state as CanvasRendererState,
+			});
 			fireTock();
 			self.memory.prevKnownGameState = state;
 			return;
@@ -56,7 +56,6 @@ listenFromWorker<CanvasRendererMessage>((message) => {
 			self.memory.canvasHandle = renderCanvasLayers(canvas, {
 				width: canvas.width / pixelRatio,
 				height: canvas.height / pixelRatio,
-				zoom: ZOOM,
 			});
 			self.memory.state = self.memory.canvasHandle.rendererState;
 			fireTock();
@@ -64,16 +63,3 @@ listenFromWorker<CanvasRendererMessage>((message) => {
 		}
 	}
 });
-
-self.onmessage = function (ev) {
-	let msg = ev.data as CanvasRendererMessage;
-	if (self.memory.id !== 'CANVAS-WK') {
-		throw 'what';
-	}
-	if (msg.action === MsgActions.SEND_CURSOR) {
-		if (!self.memory.canvasHandle) {
-			return;
-		}
-		self.memory.canvasHandle.setCursor({ ...msg.pos });
-	}
-};

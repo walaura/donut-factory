@@ -1,26 +1,21 @@
-import { getDistanceToPoint } from '../../helper/pathfinding';
-import { scale as mkScale, XY, xy2arr } from '../../helper/xy';
-import { OffScreenCanvasProps, Renderer } from '../canvas';
-import { mkDrawSprite } from '../sprite/sprite';
-import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 import { entityIsRoad, RoadEnd } from '../../entity/road';
-import { mkAnimations } from '../helper/animation';
+import { getDistanceToPoint } from '../../helper/pathfinding';
+import { XY } from '../../helper/xy';
+import { OffscreenCanvasRenderer } from '../canvas.df';
+import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
+import { mkDrawSprite } from '../sprite/sprite';
 
 const angle = (p1: XY, p2: XY) => Math.atan2(p2.y - p1.y, p2.x - p1.x);
 
-const roadLayerRenderer = ({
-	width,
-	height,
-	zoom,
-}: OffScreenCanvasProps): Renderer => {
+const roadLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 	const canvas = makeCanvasOrOnScreenCanvas(width, height);
 	const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
 	const drawSprite = mkDrawSprite(ctx);
-	const { animationTick, useBouncyValue } = mkAnimations();
 
 	const drawRoad = (
 		{ start, end }: { start: XY; end: XY },
 		rotate,
+		zoom: number,
 		alpha = 1
 	) => {
 		let i = 0;
@@ -44,54 +39,52 @@ const roadLayerRenderer = ({
 		ctx.globalAlpha = 1;
 	};
 
-	return {
-		onFrame: (state, { rendererState }) => {
-			ctx.clearRect(0, 0, width, height);
-
-			for (let entity of Object.values(state.entities)) {
-				if (entityIsRoad(entity)) {
-					if (
-						rendererState.editMode &&
-						rendererState.editModeTarget &&
-						'entityId' in rendererState.editModeTarget &&
-						rendererState.editModeTarget.entityId === entity.id
-					) {
-					} else {
-						drawSprite('cap', { scale: 1 }, entity.start, zoom);
-						drawSprite('cap', { scale: 1 }, entity.end, zoom);
-					}
+	return ({ state, rendererState }) => {
+		ctx.clearRect(0, 0, width, height);
+		const { zoom } = rendererState;
+		for (let entity of Object.values(state.entities)) {
+			if (entityIsRoad(entity)) {
+				if (
+					rendererState.editMode &&
+					rendererState.editModeTarget &&
+					'entityId' in rendererState.editModeTarget &&
+					rendererState.editModeTarget.entityId === entity.id
+				) {
+				} else {
+					drawSprite('cap', { scale: 1 }, entity.start, zoom);
+					drawSprite('cap', { scale: 1 }, entity.end, zoom);
 				}
 			}
+		}
 
-			for (let entity of Object.values(state.entities)) {
-				if (entityIsRoad(entity)) {
-					if (
-						rendererState.editMode &&
-						rendererState.editModeTarget &&
-						'entityId' in rendererState.editModeTarget &&
-						'roadEnd' in rendererState.editModeTarget &&
-						rendererState.editModeTarget.entityId === entity.id
-					) {
-						let end = rendererState.editModeTarget.roadEnd;
-						let to = rendererState.gameCursor;
+		for (let entity of Object.values(state.entities)) {
+			if (entityIsRoad(entity)) {
+				if (
+					rendererState.editMode &&
+					rendererState.editModeTarget &&
+					'entityId' in rendererState.editModeTarget &&
+					'roadEnd' in rendererState.editModeTarget &&
+					rendererState.editModeTarget.entityId === entity.id
+				) {
+					let end = rendererState.editModeTarget.roadEnd;
+					let to = rendererState.gameCursor;
 
-						let ghostRoad = { ...entity, [end]: to };
-						drawRoad(ghostRoad, angle(ghostRoad.start, ghostRoad.end), 1);
-						[RoadEnd.end, RoadEnd.start].forEach((thisEnd) => {
-							let scale = 1;
-							if (thisEnd === end) {
-								scale = 1.75;
-							}
-							drawSprite('cap', { scale }, ghostRoad[thisEnd], zoom);
-						});
-						drawRoad(entity, angle(entity.start, entity.end), 0.5);
-					} else {
-						drawRoad(entity, angle(entity.start, entity.end));
-					}
+					let ghostRoad = { ...entity, [end]: to };
+					drawRoad(ghostRoad, angle(ghostRoad.start, ghostRoad.end), zoom);
+					[RoadEnd.end, RoadEnd.start].forEach((thisEnd) => {
+						let scale = 1;
+						if (thisEnd === end) {
+							scale = 1.75;
+						}
+						drawSprite('cap', { scale }, ghostRoad[thisEnd], zoom);
+					});
+					drawRoad(entity, angle(entity.start, entity.end), zoom, 0.25);
+				} else {
+					drawRoad(entity, angle(entity.start, entity.end), zoom);
 				}
 			}
-			return { canvas };
-		},
+		}
+		return canvas;
 	};
 };
 

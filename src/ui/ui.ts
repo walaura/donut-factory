@@ -50,10 +50,10 @@ const renderSetup = () => {
 
 	const offscreenCanvas = $canvas.transferControlToOffscreen();
 	$canvas.addEventListener('mousemove', ({ clientX: x, clientY: y }) => {
-		worker.postMessage({
-			action: MsgActions.SEND_CURSOR,
+		dispatchToCanvas({
+			type: 'set-screen-cursor',
 			pos: { x, y },
-		} as CanvasRendererMessage);
+		});
 	});
 	$canvas.addEventListener('click', (ev) => {
 		if (self.memory.id !== 'MAIN') {

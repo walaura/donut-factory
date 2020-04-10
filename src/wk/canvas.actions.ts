@@ -1,6 +1,7 @@
 import { listenFromWorker, MsgActions } from '../helper/message';
 import { CanvasRendererState } from './canvas.defs';
 import { Target } from '../helper/target';
+import { XY } from '../helper/xy';
 
 export type CanvasAction =
 	| {
@@ -8,11 +9,15 @@ export type CanvasAction =
 			to: boolean;
 	  }
 	| {
+			type: 'set-screen-cursor';
+			pos: XY;
+	  }
+	| {
 			type: 'toggle-edit-mode';
 	  }
 	| {
 			type: 'set-edit-mode-target';
-			to: Target;
+			to: Target | null;
 	  };
 
 export type CanvasReducer<A extends CanvasAction> = (
@@ -23,10 +28,17 @@ export type CanvasReducer<A extends CanvasAction> = (
 const editModeReducer: CanvasReducer<CanvasAction> = (action, state) => {
 	switch (action.type) {
 		case 'toggle-edit-mode': {
+			if (state.editMode) {
+				return {
+					...state,
+					editMode: false,
+					editModeTarget: null,
+				};
+			}
 			return {
 				...state,
-				editMode: !state.editMode,
-				editModeTarget: state.editMode ? null : state.editModeTarget,
+				editMode: true,
+				editModeTarget: null,
 			};
 		}
 		case 'set-edit-mode-target': {
@@ -47,8 +59,9 @@ const editModeReducer: CanvasReducer<CanvasAction> = (action, state) => {
 						...state,
 						editMode: false,
 				  };
+		case 'set-screen-cursor':
+			return { ...state, screenCursor: action.pos };
 	}
-	return state;
 };
 
 const reducers: CanvasReducer<CanvasAction>[] = [editModeReducer];
