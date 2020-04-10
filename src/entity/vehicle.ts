@@ -36,7 +36,7 @@ import { entityIsProduct } from './product';
 import { addId, addPosition } from '../helper/generate';
 import { makeConsumerName } from '../helper/names';
 import { addFunds } from '../game/ledger';
-import { dispatch } from '../global/dispatch';
+import { dispatchToGame } from '../global/dispatch';
 
 const isAtPos = (from: XY, to: XY) => {
 	return getDistanceToPoint(from, to) < 1;
@@ -198,13 +198,13 @@ export const moverHandler: HandlerFn<Vehicle> = (tick, state, gameState) => {
 			const speed = isUnloading ? state.loadSpeed * -1 : state.loadSpeed;
 			/* mutate both so they stay in sync */
 			state.orders.state.cargoLoaded += speed;
-			dispatch({
+			dispatchToGame({
 				type: 'add-cargo',
 				entityId: depot.id,
 				productId: product.id,
 				quantity: speed * -1,
 			});
-			dispatch({
+			dispatchToGame({
 				type: 'add-cargo',
 				entityId: state.id,
 				productId: product.id,

@@ -1,12 +1,12 @@
-import { GameState } from './../../helper/defs';
-import { useGameState } from './../helper/useGameState';
+import { GameState } from '../../helper/defs';
+import { useGameState } from '../helper/useGameState';
 import { TemplateHole } from '../helper/defs';
 import { useState } from '../helper/useState';
 import { html } from 'lit-html';
 import { css } from '../helper/style';
 import { $emoji } from './emoji';
 import { $rows } from './rows/row';
-import { $wash } from '../components/$wash';
+import { $wash } from './$wash';
 
 import { $flex } from './$flex';
 import { $scroll } from './$scroll';

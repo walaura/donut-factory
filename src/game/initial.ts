@@ -4,7 +4,7 @@ import { GameState } from '../helper/defs';
 import { MkProduct } from '../entity/product';
 import { MkFactory } from '../entity/factory';
 import { MkConsumer } from '../entity/consumer';
-import { MkMover, Vehicle } from '../entity/vehicle';
+import { MkMover } from '../entity/vehicle';
 import { MkRoad } from '../entity/road';
 import { addEntity } from './entities';
 import { addFunds } from './ledger';

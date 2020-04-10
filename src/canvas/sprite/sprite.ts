@@ -1,5 +1,6 @@
 import { XY } from '../../helper/xy';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
+import sum from 'hash-sum';
 
 export const SIZE = 60;
 const IMAGE_SIZE = 40;
@@ -16,7 +17,7 @@ export type SpriteKey = keyof typeof Sprites;
 export type MkSpriteProps = { rotate?: number; scale?: number };
 
 let spriteStore: {
-	[key in string]: { [key in number]: OffscreenCanvas };
+	[key in number]: OffscreenCanvas;
 } = {};
 for (let key of Object.keys(Sprites)) {
 	fetch(Sprites[key])
@@ -37,14 +38,12 @@ const mkSprite = (
 	if (typeof Sprites[key] === 'string') {
 		return EMPTY;
 	}
-	if (!spriteStore[key]) {
-		spriteStore[key] = {};
+	let memo = sum({ key, rotate, scale });
+	if (spriteStore[memo]) {
+		return spriteStore[memo];
 	}
-	if (spriteStore[key][rotate]) {
-		return spriteStore[key][rotate];
-	}
-	spriteStore[key][rotate] = new OffscreenCanvas(SIZE, SIZE);
-	const ctx = spriteStore[key][rotate].getContext(
+	spriteStore[memo] = new OffscreenCanvas(SIZE, SIZE);
+	const ctx = spriteStore[memo].getContext(
 		'2d'
 	) as OffscreenCanvasRenderingContext2D;
 
@@ -66,7 +65,7 @@ const mkSprite = (
 
 	ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-	return spriteStore[key][rotate];
+	return spriteStore[memo];
 };
 
 const mkDrawSprite = (ctx: OffscreenCanvasRenderingContext2D) => (

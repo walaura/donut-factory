@@ -1,26 +1,20 @@
-import { entityIsRoad, RoadEnd } from './../../entity/road';
-import { Target, getDistanceToPoint } from '../../helper/pathfinding';
-import { GameState } from './../../helper/defs';
-import { XY, scale as mkScale } from '../../helper/xy';
-import { bgLayerRenderer } from '../layer/bg';
-import { entityLayerRenderer } from '../layer/entities';
-import { roadLayerRenderer } from '../layer/road';
+import { entityIsRoad, RoadEnd } from '../entity/road';
+import { Target, getDistanceToPoint } from '../helper/pathfinding';
+import { GameState } from '../helper/defs';
+import { XY, scale as mkScale } from '../helper/xy';
+import { bgLayerRenderer } from './layer/bg';
+import { entityLayerRenderer } from './layer/entities';
+import { roadLayerRenderer } from './layer/road';
+import { CanvasRendererState } from '../wk/canvas.wk';
+import { commitActions } from '../wk/canvas.actions';
 
 export type OnFrame = (
 	gameState: GameState,
-	bag: { rendererState: RendererState; previousGameState: GameState }
+	bag: { rendererState: CanvasRendererState; previousGameState: GameState }
 ) => { canvas: OffscreenCanvas };
 
 export type Renderer = {
 	onFrame: OnFrame;
-};
-
-export type RendererState = {
-	selected: Target;
-	cursor: XY;
-	zoom: number;
-	editMode: boolean;
-	editingTarget: Target;
 };
 
 export type OffScreenCanvasProps = {
@@ -36,7 +30,7 @@ export const renderCanvasLayers = (
 	onFrame: (
 		previousGameState: GameState,
 		state: GameState
-	) => { canvas: OffscreenCanvas; rendererState: RendererState };
+	) => { canvas: OffscreenCanvas; rendererState: CanvasRendererState };
 	setCursor: (xy: XY) => void;
 	enterEditMode: () => void;
 } => {
@@ -65,9 +59,15 @@ export const renderCanvasLayers = (
 
 	const onFrame = (previousGameState: GameState, state: GameState) => {
 		dirt = previousGameState;
-		const rendererState: RendererState = {
+
+		const gameCursor = {
+			x: Math.round((cursor.x - zoom / 2) / zoom),
+			y: Math.round((cursor.y - zoom / 2) / zoom),
+		};
+		let rendererState: CanvasRendererState = {
 			selected: { xy: cursor },
 			zoom,
+			gameCursor,
 			cursor,
 			editMode,
 			editingTarget,
@@ -115,6 +115,9 @@ export const renderCanvasLayers = (
 			ctx.stroke();
 			ctx.globalAlpha = 1;
 		}
+
+		// mutations
+		rendererState = commitActions(rendererState);
 
 		return { canvas, rendererState };
 	};

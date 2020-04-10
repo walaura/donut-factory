@@ -1,7 +1,7 @@
 import { entityHasHandler, GameState } from '../helper/defs';
 import { semiFlatten } from '../helper/ledger';
 import { getHandlers } from '../global/handlers';
-import { commitActions } from '../global/actions';
+import { commitActions } from '../wk/game.actions';
 
 let time = Date.now();
 

@@ -1,6 +1,7 @@
-import { Action } from '../global/actions';
-import { RendererState } from '../wk/canvas.wk';
-import { GameState, ID } from './defs';
+import { getWorker } from '../global/worker';
+import { CanvasAction } from '../wk/canvas.actions';
+import { GameAction } from '../wk/game.actions';
+import { GameState, LastKnownCanvasRendererState } from './defs';
 import { XY } from './xy';
 
 export enum MsgActions {
@@ -11,19 +12,24 @@ export enum MsgActions {
 	'TICK' = 'TICK',
 	'PAUSE' = 'PAUSE',
 	'START' = 'START',
-	'COMMIT_ACTION' = 'COMMIT_ACTION',
+	'PushGameAction' = 'COMMIT_ACTION',
+	'PushCanvasAction' = 'COMMIT_CV_ACTION',
 	'ENTER_EDIT_MODE' = 'ENTER_EDIT_MODE',
 }
 
-export type WorldWorkerMessage =
+export type CanvasRendererMessage =
 	| {
 			action: MsgActions.SEND_CANVAS;
 			canvas: OffscreenCanvas;
 			pixelRatio: number;
 	  }
 	| {
+			action: MsgActions.PushCanvasAction;
+			value: CanvasAction;
+	  }
+	| {
 			action: MsgActions.CANVAS_RESPONSE;
-			rendererState: RendererState;
+			rendererState: LastKnownCanvasRendererState;
 	  }
 	| {
 			action: MsgActions.SEND_CURSOR;
@@ -51,11 +57,11 @@ export type LoopWorkerMessage =
 			initialState: GameState;
 	  }
 	| {
-			action: MsgActions.COMMIT_ACTION;
-			value: Action;
+			action: MsgActions.PushGameAction;
+			value: GameAction;
 	  };
 
-export type WorkerMessage = LoopWorkerMessage | WorldWorkerMessage;
+export type WorkerMessage = LoopWorkerMessage | CanvasRendererMessage;
 
 export const isMessage = <M = WorkerMessage>(data): data is M => true;
 
@@ -71,7 +77,7 @@ export const listenFromWorker = <M = WorkerMessage>(
 };
 
 export const postFromWorker = <
-	M extends LoopWorkerMessage | WorldWorkerMessage = LoopWorkerMessage
+	M extends LoopWorkerMessage | CanvasRendererMessage = LoopWorkerMessage
 >(
 	msg: M
 ) => {
@@ -80,7 +86,7 @@ export const postFromWorker = <
 
 let wk: Worker;
 export const registerBackgroundWorkers = () => {
-	wk = new Worker('./../wk/game.wk.ts');
+	wk = getWorker('game');
 };
 export const postFromWindow = <M = WorkerMessage>(
 	msg: M,

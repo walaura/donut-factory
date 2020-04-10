@@ -1,32 +1,43 @@
-import { GameState } from '../helper/defs';
-import { Action } from './actions';
-import { renderCanvasLayers } from '../ui-canvas/helper/renderer';
+import {
+	GameState,
+	LastKnownGameState,
+	LastKnownCanvasRendererState,
+} from '../helper/defs';
+import { GameAction } from '../wk/game.actions';
+import { renderCanvasLayers } from '../canvas/canvas';
+import { CanvasRendererState } from '../wk/CanvasRendererState';
+import { CanvasAction } from '../wk/canvas.actions';
+
+export type Workers = {
+	game: Worker;
+	canvas: Worker;
+};
+
+export type MainThreadMemory = {
+	id: 'MAIN';
+	lastKnownGameState: LastKnownGameState | null;
+	lastKnownCanvasState: LastKnownCanvasRendererState | null;
+	workers: Workers | null;
+};
 
 export type WorkerMemory =
-	| {
-			id: 'MAIN';
-			state: GameState | null;
-	  }
+	| MainThreadMemory
 	| {
 			id: 'CANVAS-WK';
 			canvasHandle: ReturnType<typeof renderCanvasLayers> | undefined;
-			state: GameState | null;
-			prevState: GameState | null;
+			lastKnownGameState: LastKnownGameState | null;
+			prevKnownGameState: LastKnownGameState | null;
+			state: CanvasRendererState | null;
+			actionQueue: CanvasAction[];
 	  }
 	| {
 			id: 'GAME-WK';
 			state: GameState | null;
-			actionQueue: Action[];
+			actionQueue: GameAction[];
 	  };
 
 export const expectWorkerMemory = () => {
 	if (!self.memory) {
 		throw 'Must be registered';
-	}
-};
-
-export const expectGameState = () => {
-	if (!self.memory.state) {
-		throw 'Game is not started yet??';
 	}
 };

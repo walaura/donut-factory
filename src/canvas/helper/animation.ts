@@ -1,5 +1,4 @@
-import { useBouncyValue } from './animation';
-import { WithID, ID } from '../helper/defs';
+import { WithID, ID } from '../../helper/defs';
 
 const clamp = ({ min = 0, max = 1 }, number = 0) =>
 	Math.min(Math.max(number, min), max);

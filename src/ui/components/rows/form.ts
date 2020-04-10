@@ -1,6 +1,6 @@
 import { html } from 'lit-html';
-import { css } from '../../../ui-web/helper/style';
-import { $heading } from '../../../ui-web/components/type';
+import { css } from '../../helper/style';
+import { $heading } from '../type';
 
 const styles = css`
 	display: grid;

@@ -4,12 +4,16 @@ import { EntityAction, entityReducer } from '../game/entities';
 import { LedgerAction, ledgerReducer } from '../game/ledger';
 import { DeepPartial, Entity, GameState, ID } from '../helper/defs';
 import { listenFromWorker, MsgActions } from '../helper/message';
-import { expectWorkerMemory } from './global';
+import { expectWorkerMemory } from '../global/global';
 const deepmerge = require('deepmerge');
 
-export type Action = OrderAction | EntityAction | LedgerAction | CargoAction;
+export type GameAction =
+	| OrderAction
+	| EntityAction
+	| LedgerAction
+	| CargoAction;
 
-export type Reducer<A extends Action> = (
+export type GameReducer<A extends GameAction> = (
 	action: A,
 	{
 		gameState,
@@ -23,7 +27,12 @@ export type Reducer<A extends Action> = (
 	}
 ) => GameState | undefined;
 
-const reducers = [orderReducer, ledgerReducer, cargoReducer, entityReducer];
+const reducers: GameReducer<GameAction>[] = [
+	orderReducer,
+	ledgerReducer,
+	cargoReducer,
+	entityReducer,
+];
 
 export const commitActions = (prevState: GameState): GameState => {
 	expectWorkerMemory();
@@ -39,10 +48,8 @@ export const commitActions = (prevState: GameState): GameState => {
 			return gameState;
 		}
 		for (let reducer of reducers) {
-			//@ts-ignore
 			let gameStateMaybe = reducer(action, {
 				gameState,
-				//@ts-ignore
 				onEntity: (id, callback) => {
 					gameState.entities[id] = deepmerge(
 						gameState.entities[id],
@@ -51,6 +58,7 @@ export const commitActions = (prevState: GameState): GameState => {
 							arrayMerge: (dest, source) => source,
 						}
 					);
+					return gameState;
 				},
 			});
 			if (gameStateMaybe) {
@@ -65,7 +73,7 @@ export const commitActions = (prevState: GameState): GameState => {
 if (self.memory.id === 'GAME-WK') {
 	listenFromWorker((message) => {
 		if (self.memory.id === 'GAME-WK') {
-			if (message.action === MsgActions.COMMIT_ACTION) {
+			if (message.action === MsgActions.PushGameAction) {
 				self.memory.actionQueue.push(message.value);
 			}
 		} else {

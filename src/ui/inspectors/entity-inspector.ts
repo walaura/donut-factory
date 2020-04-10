@@ -10,7 +10,7 @@ import {
 import { Road } from '../../entity/road';
 import { Vehicle } from '../../entity/vehicle';
 import { addEntity, findEntity, mergeEntity } from '../../game/entities';
-import { dispatch } from '../../global/dispatch';
+import { dispatchToGame } from '../../global/dispatch';
 import {
 	Entity,
 	EntityType,
@@ -374,7 +374,7 @@ export const entityInspector = (entityId: ID): CallableWindowRoute => ({
 						useGameState((state) => $pretty(findEntity(entityId, state))),
 						html`<button
 							@click=${() => {
-								dispatch({
+								dispatchToGame({
 									type: 'delete-entity',
 									entityId,
 								});

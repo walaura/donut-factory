@@ -1,6 +1,6 @@
 import { ID, GameState, Entity, DeepPartial } from '../helper/defs';
-import { Reducer } from '../global/actions';
-import { dispatch } from '../global/dispatch';
+import { GameReducer } from '../wk/game.actions';
+import { dispatchToGame } from '../global/dispatch';
 
 export const findEntity = (id: ID, gameState: GameState): Entity | null => {
 	if (gameState.entities[id]) {
@@ -13,7 +13,7 @@ export const mergeEntity = <S extends Entity = Entity>(
 	entityId: ID,
 	mergeable: DeepPartial<S>
 ) => {
-	dispatch({
+	dispatchToGame({
 		type: 'merge-entity',
 		entityId,
 		mergeable,
@@ -21,7 +21,7 @@ export const mergeEntity = <S extends Entity = Entity>(
 };
 
 export const addEntity = (entity: Entity) => {
-	dispatch({
+	dispatchToGame({
 		type: 'add-entity',
 		entity,
 	});
@@ -42,7 +42,7 @@ export type EntityAction =
 			entity: Entity;
 	  };
 
-export const entityReducer: Reducer<EntityAction> = (
+export const entityReducer: GameReducer<EntityAction> = (
 	action,
 	{ gameState, onEntity }
 ) => {
@@ -59,5 +59,4 @@ export const entityReducer: Reducer<EntityAction> = (
 			return gameState;
 		}
 	}
-	return gameState;
 };

@@ -6,8 +6,8 @@ import {
 	WithOrders,
 } from '../../helper/defs';
 import { addId } from '../../helper/generate';
-import { Reducer } from '../../global/actions';
-import { dispatch } from '../../global/dispatch';
+import { GameReducer } from '../../wk/game.actions';
+import { dispatchToGame } from '../../global/dispatch';
 
 export enum OrderType {
 	Move = 'Move',
@@ -97,7 +97,7 @@ export const mkUnloadOrder = (load: Load): Order => ({
 });
 
 export const linkOrder = (entityId: ID, orderId: ID) => {
-	dispatch({
+	dispatchToGame({
 		type: 'link-order',
 		entityId,
 		orderId,
@@ -105,7 +105,7 @@ export const linkOrder = (entityId: ID, orderId: ID) => {
 };
 
 export const clearOrders = (entityId: ID) => {
-	dispatch({
+	dispatchToGame({
 		type: 'merge-entity',
 		entityId,
 		mergeable: {
@@ -122,7 +122,10 @@ export type OrderAction = {
 	orderId: ID;
 };
 
-export const orderReducer: Reducer<OrderAction> = (action, { onEntity }) => {
+export const orderReducer: GameReducer<OrderAction> = (
+	action,
+	{ onEntity }
+) => {
 	switch (action.type) {
 		case 'link-order': {
 			return onEntity<Entity & WithOrders>(action.entityId, (prev) => ({

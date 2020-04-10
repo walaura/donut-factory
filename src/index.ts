@@ -1,25 +1,27 @@
 self.memory = {
 	id: 'MAIN',
-	state: null,
-	workerState: undefined,
+	lastKnownGameState: null,
+	lastKnownCanvasState: null,
+	workers: null,
 };
 
-import { GameState } from './helper/defs';
 import {
 	listenFromWindow,
-	MsgActions,
 	postFromWindow,
 	registerBackgroundWorkers,
 } from './helper/message';
-import renderSetup from './ui-web/ui';
-
-let state: GameState | null;
+import { MsgActions } from './helper/message';
+import renderSetup from './ui/ui';
+import { GameState } from './helper/defs';
 
 registerBackgroundWorkers();
 listenFromWindow((data) => {
 	switch (data.action) {
 		case MsgActions.TOCK:
-			state = data.state;
+			if (self.memory.id !== 'MAIN') {
+				throw 'no';
+			}
+			self.memory.lastKnownGameState = data.state;
 			return;
 	}
 });
@@ -43,8 +45,11 @@ const loopWithState = (state: GameState) => {
 	}
 };
 const loop = () => {
-	if (state) {
-		loopWithState(state);
+	if (self.memory.id !== 'MAIN') {
+		throw 'no';
+	}
+	if (self.memory.lastKnownGameState) {
+		loopWithState(self.memory.lastKnownGameState);
 	}
 	requestAnimationFrame(loop);
 };

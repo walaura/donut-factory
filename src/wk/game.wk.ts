@@ -4,17 +4,18 @@ self.memory = {
 	actionQueue: [],
 };
 
-import { GameState } from './../helper/defs';
+import { getInitialState, startGame } from '../game/initial';
+import { gameLoop } from '../game/loop';
 import {
 	listenFromWorker,
 	MsgActions,
 	postFromWorker,
 } from '../helper/message';
-import { getInitialState, startGame } from '../game/initial';
-import { gameLoop } from '../game/loop';
-import { expectGameState } from '../global/global';
 
 const fireTock = () => {
+	if (self.memory.id !== 'GAME-WK') {
+		throw 'no';
+	}
 	postFromWorker({
 		action: MsgActions.TOCK,
 		state: JSON.parse(JSON.stringify(self.memory.state)),
@@ -22,10 +23,16 @@ const fireTock = () => {
 };
 
 listenFromWorker((message) => {
+	if (self.memory.id !== 'GAME-WK') {
+		throw 'no';
+	}
+
 	switch (message.action) {
 		case MsgActions.TICK: {
-			expectGameState();
-			self.memory.state = gameLoop(self.memory.state as GameState);
+			if (self.memory.id !== 'GAME-WK' || !self.memory.state) {
+				throw 'Game is not started yet??';
+			}
+			self.memory.state = gameLoop(self.memory.state);
 			fireTock();
 			return;
 		}

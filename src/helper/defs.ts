@@ -6,6 +6,7 @@ import { OrderQueue, Order } from '../entity/composables/with-orders';
 import { Product } from '../entity/product';
 import { UnitAgent } from '../entity/factory';
 import { Road } from '../entity/road';
+import { CanvasRendererState } from '../wk/CanvasRendererState';
 
 export type ID = string;
 
@@ -89,6 +90,9 @@ export interface GameState {
 	entities: { [key: string]: Entity };
 	roads: { [key: string]: Road };
 }
+
+export type LastKnownGameState = Readonly<GameState>;
+export type LastKnownCanvasRendererState = Readonly<CanvasRendererState>;
 
 export type DeepPartial<T> = T extends object
 	? { [K in keyof T]?: DeepPartial<T[K]> }

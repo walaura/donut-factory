@@ -1,4 +1,4 @@
-import { OffScreenCanvasProps, Renderer } from '../helper/renderer';
+import { OffScreenCanvasProps, Renderer } from '../canvas';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 
 const grass = '#dcedc8';

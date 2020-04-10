@@ -1,10 +1,7 @@
-import { Action } from './actions';
-import { postFromWindow, MsgActions } from '../helper/message';
-
-export const dispatch = (action: Action) => {
+export const dispatchToGame = (action: GameAction) => {
 	if (self.memory.id === 'MAIN') {
 		postFromWindow({
-			action: MsgActions.COMMIT_ACTION,
+			action: MsgActions.PushGameAction,
 			value: action,
 		});
 		return;
@@ -13,5 +10,20 @@ export const dispatch = (action: Action) => {
 		self.memory.actionQueue.push(action);
 		return;
 	}
-	throw 'This scope cant commit yet :(';
+	throw 'This scope cant commit :(';
+};
+
+export const dispatchToCanvas = (action: CanvasAction) => {
+	if (self.memory.id === 'MAIN') {
+		postFromWindow<CanvasRendererMessage>({
+			action: MsgActions.PushCanvasAction,
+			value: action,
+		});
+		return;
+	}
+	if (self.memory.id === 'CANVAS-WK') {
+		self.memory.actionQueue.push(action);
+		return;
+	}
+	throw 'This scope cant commit :(';
 };

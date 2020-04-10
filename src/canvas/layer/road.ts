@@ -1,9 +1,10 @@
 import { getDistanceToPoint } from '../../helper/pathfinding';
 import { scale as mkScale, XY, xy2arr } from '../../helper/xy';
-import { OffScreenCanvasProps, Renderer } from '../helper/renderer';
+import { OffScreenCanvasProps, Renderer } from '../canvas';
 import { mkDrawSprite } from '../sprite/sprite';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
-import { entityIsRoad } from '../../entity/road';
+import { entityIsRoad, RoadEnd } from '../../entity/road';
+import { mkAnimations } from '../helper/animation';
 
 const angle = (p1: XY, p2: XY) => Math.atan2(p2.y - p1.y, p2.x - p1.x);
 
@@ -15,6 +16,7 @@ const roadLayerRenderer = ({
 	const canvas = makeCanvasOrOnScreenCanvas(width, height);
 	const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
 	const drawSprite = mkDrawSprite(ctx);
+	const { animationTick, useBouncyValue } = mkAnimations();
 
 	const drawRoad = (
 		{ start, end }: { start: XY; end: XY },
@@ -66,15 +68,21 @@ const roadLayerRenderer = ({
 					if (
 						rendererState.editingTarget &&
 						'entityId' in rendererState.editingTarget &&
+						'roadEnd' in rendererState.editingTarget &&
 						rendererState.editingTarget.entityId === entity.id
 					) {
-						let end = {
-							x: Math.round((cursor.x - zoom / 2) / zoom),
-							y: Math.round((cursor.y - zoom / 2) / zoom),
-						};
-						drawRoad({ ...entity, end }, angle(entity.start, end), 1);
-						drawSprite('cap', { scale: 1 }, entity.start, zoom);
-						drawSprite('cap', { scale: 1 }, end, zoom);
+						let end = rendererState.editingTarget.roadEnd;
+						let to = rendererState.gameCursor;
+
+						let ghostRoad = { ...entity, [end]: to };
+						drawRoad(ghostRoad, angle(ghostRoad.start, ghostRoad.end), 1);
+						[RoadEnd.end, RoadEnd.start].forEach((thisEnd) => {
+							let scale = 1;
+							if (thisEnd === end) {
+								scale = 1.75;
+							}
+							drawSprite('cap', { scale }, ghostRoad[thisEnd], zoom);
+						});
 						drawRoad(entity, angle(entity.start, entity.end), 0.5);
 					} else {
 						drawRoad(entity, angle(entity.start, entity.end));

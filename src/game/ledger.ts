@@ -1,6 +1,6 @@
 import { LedgerRecord } from '../helper/defs';
-import { Reducer } from '../global/actions';
-import { dispatch } from '../global/dispatch';
+import { GameReducer } from '../wk/game.actions';
+import { dispatchToGame } from '../global/dispatch';
 
 export type LedgerAction = {
 	type: 'ledger-add-funds';
@@ -8,13 +8,16 @@ export type LedgerAction = {
 };
 
 export const addFunds = (record: Omit<LedgerRecord, 'date'>) => {
-	dispatch({
+	dispatchToGame({
 		type: 'ledger-add-funds',
 		record,
 	});
 };
 
-export const ledgerReducer: Reducer<LedgerAction> = (action, { gameState }) => {
+export const ledgerReducer: GameReducer<LedgerAction> = (
+	action,
+	{ gameState }
+) => {
 	switch (action.type) {
 		case 'ledger-add-funds': {
 			return {

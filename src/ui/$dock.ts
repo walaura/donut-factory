@@ -13,6 +13,7 @@ import { UIStatePriority, useGameState } from './helper/useGameState';
 import { allAgents } from './inspectors/all-entities';
 import { moneyInspector } from './inspectors/money-inspector';
 import { MsgActions } from '../helper/message';
+import { dispatchToCanvas } from '../global/dispatch';
 
 const $pressable = (
 	children: TemplateHole,
@@ -184,8 +185,9 @@ const $dock = (wk) => {
 					emoji: '✏️',
 					title: 'Edit mode',
 					onClick: (ev) => {
-						wk.postMessage({
-							action: MsgActions.ENTER_EDIT_MODE,
+						dispatchToCanvas({
+							type: 'set-edit-mode',
+							to: true,
 						});
 					},
 				}),
