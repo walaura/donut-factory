@@ -6,7 +6,8 @@
 	"scripts": {
 		"OH-SO-PARCEL-IS-BEING-A-LITTLE-PRINCESS-HERE-I-SEE": "node ./lol.js",
 		"start": "npm run OH-SO-PARCEL-IS-BEING-A-LITTLE-PRINCESS-HERE-I-SEE && parcel ./src/index.html",
-		"make": "npm run OH-SO-PARCEL-IS-BEING-A-LITTLE-PRINCESS-HERE-I-SEE && parcel build ./src/index.html"
+		"make": "npm run OH-SO-PARCEL-IS-BEING-A-LITTLE-PRINCESS-HERE-I-SEE && parcel build ./src/index.html",
+		"circles": "madge --circular --extensions ts ./src"
 	},
 	"author": "walaura",
 	"license": "ISC",
@@ -19,6 +20,7 @@
 		"hash-sum": "^2.0.0",
 		"line-replace": "^1.0.3",
 		"lit-html": "^1.2.1",
+		"madge": "^3.8.0",
 		"nanoid": "^3.0.2",
 		"parcel": "^1.12.4",
 		"postcss": "^7.0.27",

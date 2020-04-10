@@ -84,19 +84,12 @@ export const postFromWorker = <
 	self.postMessage(msg);
 };
 
-let wk: Worker;
-export const registerBackgroundWorkers = () => {
-	wk = getWorker('game');
-};
-export const postFromWindow = <M = WorkerMessage>(
-	msg: M,
-	worker: Worker = wk
-) => {
+export const postFromWindow = <M = WorkerMessage>(msg: M, worker: Worker) => {
 	worker.postMessage(msg);
 };
 export const listenFromWindow = <M = WorkerMessage>(
 	onAction: (msg: M) => void,
-	worker: Worker = wk
+	worker: Worker
 ) => {
 	worker.onmessage = ({ data }) => {
 		if (!isMessage<M>(data)) {

@@ -1,3 +1,11 @@
+import { GameAction } from '../wk/game.actions';
+import {
+	postFromWindow,
+	MsgActions,
+	CanvasRendererMessage,
+} from '../helper/message';
+import { CanvasAction } from '../wk/canvas.actions';
+
 export const dispatchToGame = (action: GameAction) => {
 	if (self.memory.id === 'MAIN') {
 		postFromWindow({

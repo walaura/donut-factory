@@ -5,16 +5,12 @@ self.memory = {
 	workers: null,
 };
 
-import {
-	listenFromWindow,
-	postFromWindow,
-	registerBackgroundWorkers,
-} from './helper/message';
+import { listenFromWindow, postFromWindow } from './helper/message';
 import { MsgActions } from './helper/message';
 import renderSetup from './ui/ui';
 import { GameState } from './helper/defs';
+import { getWorker } from './global/worker';
 
-registerBackgroundWorkers();
 listenFromWindow((data) => {
 	switch (data.action) {
 		case MsgActions.TOCK:
@@ -24,13 +20,13 @@ listenFromWindow((data) => {
 			self.memory.lastKnownGameState = data.state;
 			return;
 	}
-});
+}, getWorker('game'));
 let initialState = null;
 try {
 	//@ts-ignore
 	initialState = JSON.parse(localStorage.getItem('autosave'));
 } catch {}
-postFromWindow({ action: MsgActions.START, initialState });
+postFromWindow({ action: MsgActions.START, initialState }, getWorker('game'));
 
 const renderGame = renderSetup();
 let lastAutosave = Date.now();
@@ -41,7 +37,7 @@ const loopWithState = (state: GameState) => {
 		window.localStorage.setItem('autosave', JSON.stringify(state));
 	}
 	if (!state.paused) {
-		postFromWindow({ action: MsgActions.TICK });
+		postFromWindow({ action: MsgActions.TICK }, getWorker('game'));
 	}
 };
 const loop = () => {
