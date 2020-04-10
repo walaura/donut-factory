@@ -8,13 +8,15 @@ import { CanvasAction } from '../wk/canvas.actions';
 
 export const dispatchToGame = (action: GameAction) => {
 	if (self.memory.id === 'MAIN') {
-		postFromWindow(
-			{
-				action: MsgActions.PushGameAction,
-				value: action,
-			},
-			getWorker('game')
-		);
+		if (self.memory.workers?.game) {
+			postFromWindow(
+				{
+					action: MsgActions.PushGameAction,
+					value: action,
+				},
+				self.memory.workers?.game
+			);
+		}
 		return;
 	}
 	if (self.memory.id === 'GAME-WK') {
@@ -26,13 +28,15 @@ export const dispatchToGame = (action: GameAction) => {
 
 export const dispatchToCanvas = (action: CanvasAction) => {
 	if (self.memory.id === 'MAIN') {
-		postFromWindow<CanvasRendererMessage>(
-			{
-				action: MsgActions.PushCanvasAction,
-				value: action,
-			},
-			getWorker('canvas')
-		);
+		if (self.memory.workers?.canvas) {
+			postFromWindow<CanvasRendererMessage>(
+				{
+					action: MsgActions.PushCanvasAction,
+					value: action,
+				},
+				self.memory.workers?.canvas
+			);
+		}
 		return;
 	}
 	if (self.memory.id === 'CANVAS-WK') {
