@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "dist/index.html",
 	"scripts": {
-		"postinstall": "gitlog",
+		"postinstall": "npm run gitlog",
 		"gitlog": "./node_modules/.bin/git-json > .git.json",
 		"OH-PARCEL-COME-ON": "node ./lol.js",
 		"start": "npm run OH-PARCEL-COME-ON && parcel ./src/index.html",
