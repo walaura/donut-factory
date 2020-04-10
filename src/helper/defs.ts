@@ -1,12 +1,12 @@
 import { Vehicle } from '../entity/vehicle';
 import { HandlerName } from '../global/handlers';
-import { Target } from './pathfinding';
+import { Target } from './target';
 import { XY } from './xy';
 import { OrderQueue, Order } from '../entity/composables/with-orders';
 import { Product } from '../entity/product';
 import { UnitAgent } from '../entity/factory';
 import { Road } from '../entity/road';
-import { CanvasRendererState } from '../wk/CanvasRendererState';
+import { CanvasRendererState } from '../wk/canvas.defs';
 
 export type ID = string;
 

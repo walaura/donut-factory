@@ -47,14 +47,14 @@ const roadLayerRenderer = ({
 	return {
 		onFrame: (state, { rendererState }) => {
 			ctx.clearRect(0, 0, width, height);
-			let { cursor } = rendererState;
 
 			for (let entity of Object.values(state.entities)) {
 				if (entityIsRoad(entity)) {
 					if (
-						rendererState.editingTarget &&
-						'entityId' in rendererState.editingTarget &&
-						rendererState.editingTarget.entityId === entity.id
+						rendererState.editMode &&
+						rendererState.editModeTarget &&
+						'entityId' in rendererState.editModeTarget &&
+						rendererState.editModeTarget.entityId === entity.id
 					) {
 					} else {
 						drawSprite('cap', { scale: 1 }, entity.start, zoom);
@@ -66,12 +66,13 @@ const roadLayerRenderer = ({
 			for (let entity of Object.values(state.entities)) {
 				if (entityIsRoad(entity)) {
 					if (
-						rendererState.editingTarget &&
-						'entityId' in rendererState.editingTarget &&
-						'roadEnd' in rendererState.editingTarget &&
-						rendererState.editingTarget.entityId === entity.id
+						rendererState.editMode &&
+						rendererState.editModeTarget &&
+						'entityId' in rendererState.editModeTarget &&
+						'roadEnd' in rendererState.editModeTarget &&
+						rendererState.editModeTarget.entityId === entity.id
 					) {
-						let end = rendererState.editingTarget.roadEnd;
+						let end = rendererState.editModeTarget.roadEnd;
 						let to = rendererState.gameCursor;
 
 						let ghostRoad = { ...entity, [end]: to };

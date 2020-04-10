@@ -1,12 +1,13 @@
 import { entityIsRoad, RoadEnd } from '../entity/road';
-import { Target, getDistanceToPoint } from '../helper/pathfinding';
+import { getDistanceToPoint } from '../helper/pathfinding';
+import { Target } from '../helper/target';
 import { GameState } from '../helper/defs';
 import { XY, scale as mkScale } from '../helper/xy';
 import { bgLayerRenderer } from './layer/bg';
 import { entityLayerRenderer } from './layer/entities';
 import { roadLayerRenderer } from './layer/road';
-import { CanvasRendererState } from '../wk/canvas.wk';
 import { commitActions } from '../wk/canvas.actions';
+import { CanvasRendererState } from '../wk/canvas.defs';
 
 export type OnFrame = (
 	gameState: GameState,
@@ -27,16 +28,16 @@ export const renderCanvasLayers = (
 	canvas: OffscreenCanvas,
 	{ width, height, zoom }: OffScreenCanvasProps
 ): {
+	rendererState: CanvasRendererState;
 	onFrame: (
 		previousGameState: GameState,
-		state: GameState
+		state: GameState,
+		rendererState: CanvasRendererState
 	) => { canvas: OffscreenCanvas; rendererState: CanvasRendererState };
 	setCursor: (xy: XY) => void;
-	enterEditMode: () => void;
 } => {
 	let cursor: XY = { x: 20, y: 40 };
-	let editMode = false;
-	let editingTarget: Target;
+
 	const bgRenderer = bgLayerRenderer({ width, height, zoom });
 	const entityRenderer = entityLayerRenderer({ width, height, zoom });
 	const roadRenderer = roadLayerRenderer({ width, height, zoom });
@@ -47,33 +48,31 @@ export const renderCanvasLayers = (
 	const setCursor = (newCursor: XY) => {
 		cursor = newCursor;
 	};
-	let dirt: GameState;
-	const enterEditMode = () => {
-		editMode = true;
-		let rd = Object.values(dirt.entities).filter(entityIsRoad)[0];
-		editingTarget = {
-			entityId: rd.id,
-			roadEnd: RoadEnd.end,
-		};
-	};
 
-	const onFrame = (previousGameState: GameState, state: GameState) => {
-		dirt = previousGameState;
-
-		const gameCursor = {
+	const onFrame = (
+		previousGameState: GameState,
+		state: GameState,
+		rendererState: CanvasRendererState
+	) => {
+		rendererState.gameCursor = {
 			x: Math.round((cursor.x - zoom / 2) / zoom),
 			y: Math.round((cursor.y - zoom / 2) / zoom),
 		};
-		let rendererState: CanvasRendererState = {
-			selected: { xy: cursor },
-			zoom,
-			gameCursor,
-			cursor,
-			editMode,
-			editingTarget,
-		};
+		rendererState.selected = { xy: rendererState.gameCursor };
 
 		for (let agent of Object.values(state.entities)) {
+			if (RoadEnd.end in agent) {
+				[RoadEnd.end, RoadEnd.start].forEach((rdEnd) => {
+					let scaled = scale(agent[rdEnd]);
+					let distance = getDistanceToPoint(cursor, scaled) / zoom;
+					if (distance < 4) {
+						rendererState.selected = {
+							entityId: agent.id,
+							roadEnd: rdEnd,
+						};
+					}
+				});
+			}
 			if (!('x' in agent)) {
 				continue;
 			}
@@ -108,19 +107,23 @@ export const renderCanvasLayers = (
 		// cursor
 		if (!('entityId' in rendererState.selected)) {
 			ctx.beginPath();
-			const x = Math.round((cursor.x - zoom / 2) / zoom) * zoom;
-			const y = Math.round((cursor.y - zoom / 2) / zoom) * zoom;
-			ctx.rect(x, y, zoom, zoom);
+			const { x, y } = rendererState.gameCursor;
+			ctx.rect(x * zoom, y * zoom, zoom, zoom);
 			ctx.globalAlpha = 0.25;
 			ctx.stroke();
 			ctx.globalAlpha = 1;
 		}
-
-		// mutations
 		rendererState = commitActions(rendererState);
 
 		return { canvas, rendererState };
 	};
 
-	return { onFrame, setCursor, enterEditMode };
+	let rendererState: CanvasRendererState = {
+		selected: { xy: cursor },
+		zoom,
+		gameCursor: cursor,
+		cursor,
+		editMode: false,
+	};
+	return { onFrame, setCursor, rendererState };
 };

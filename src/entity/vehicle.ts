@@ -1,10 +1,10 @@
 import { XY, xy } from '../helper/xy';
 import {
 	getDistanceToPoint,
-	Target,
 	mkFindTarget,
 	mkFindPath,
 } from '../helper/pathfinding';
+import { Target } from '../helper/target';
 import { getCargoQuantity, buildCargoStore } from './composables/with-cargo';
 import {
 	GameState,

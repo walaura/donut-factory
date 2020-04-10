@@ -1,35 +1,9 @@
 import { GameState, Entity } from './defs';
-import { ID } from './defs';
 import { Vehicle } from '../entity/vehicle';
 import { XY } from './xy';
 import { findEntity } from '../game/entities';
 import { RoadEnd, Road } from '../entity/road';
-
-type SharedTargets =
-	| {
-			entityId: ID;
-			roadEnd: RoadEnd;
-	  }
-	| {
-			entityId: ID;
-	  }
-	| { xy: XY };
-
-export type Target = SharedTargets &
-	(
-		| {
-				isFinal: true;
-		  }
-		| {}
-	);
-
-export type StatefulTarget = Target & {
-	score: number;
-};
-
-export type NestedStatefulTarget = StatefulTarget & {
-	next?: NestedStatefulTarget[];
-};
+import { NestedStatefulTarget, StatefulTarget, Target } from './target';
 
 const unnestTargets = (
 	what: NestedStatefulTarget[]

@@ -32,6 +32,7 @@ import { shortNumber } from '../helper/format';
 import { getAgentStatus } from '../helper/status';
 import { UIStatePriority, useGameState } from '../helper/useGameState';
 import { attachWindow } from '../windows/attach';
+import { $roadInfo } from './road-inspector';
 
 const $colorRow = (agent: Entity & WithColor) =>
 	$form({
@@ -104,73 +105,6 @@ const $orderInfo = (
 		}),
 		$pretty(vehicle.orders.state),
 	]);
-
-const $roadInfo = (road: Road, state: GameState) => [
-	$form({
-		label: 'Start',
-		control: html`
-			<div>
-				<input
-					@change=${(ev) => {
-						let x = parseInt(ev.target.value);
-						mergeEntity<Road>(road.id, {
-							start: {
-								x,
-							},
-						});
-					}}
-					type="number"
-					step="1"
-					value=${road.start.x}
-				/>
-				<input
-					@change=${(ev) => {
-						mergeEntity<Road>(road.id, {
-							start: {
-								y: parseInt(ev.target.value),
-							},
-						});
-					}}
-					type="number"
-					step="1"
-					value=${road.start.y}
-				/>
-			</div>
-		`,
-	}),
-	$form({
-		label: 'End',
-		control: html`
-			<div>
-				<input
-					@change=${(ev) => {
-						let x = parseInt(ev.target.value);
-						mergeEntity<Road>(road.id, {
-							end: {
-								x,
-							},
-						});
-					}}
-					type="number"
-					step="1"
-					value=${road.end.x}
-				/>
-				<input
-					@change=${(ev) => {
-						mergeEntity<Road>(road.id, {
-							end: {
-								y: parseInt(ev.target.value),
-							},
-						});
-					}}
-					type="number"
-					step="1"
-					value=${road.end.y}
-				/>
-			</div>
-		`,
-	}),
-];
 
 const $pathInfo = (vehicle: Vehicle, state: GameState) =>
 	$rows(

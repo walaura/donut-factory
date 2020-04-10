@@ -14,6 +14,7 @@ import {
 	listenFromWorker,
 } from '../helper/message';
 import { renderCanvasLayers } from '../canvas/canvas';
+import { CanvasRendererState } from './canvas.defs';
 
 const ZOOM = 20;
 
@@ -41,7 +42,8 @@ listenFromWorker<CanvasRendererMessage>((message) => {
 			let prevState = self.memory.prevKnownGameState || state;
 			self.memory.state = self.memory.canvasHandle.onFrame(
 				prevState,
-				state
+				state,
+				self.memory.state as CanvasRendererState
 			).rendererState;
 			fireTock();
 			self.memory.prevKnownGameState = state;
@@ -56,6 +58,7 @@ listenFromWorker<CanvasRendererMessage>((message) => {
 				height: canvas.height / pixelRatio,
 				zoom: ZOOM,
 			});
+			self.memory.state = self.memory.canvasHandle.rendererState;
 			fireTock();
 			return;
 		}
@@ -66,13 +69,6 @@ self.onmessage = function (ev) {
 	let msg = ev.data as CanvasRendererMessage;
 	if (self.memory.id !== 'CANVAS-WK') {
 		throw 'what';
-	}
-
-	if (msg.action === MsgActions.ENTER_EDIT_MODE) {
-		if (!self.memory.canvasHandle) {
-			return;
-		}
-		self.memory.canvasHandle.enterEditMode();
 	}
 	if (msg.action === MsgActions.SEND_CURSOR) {
 		if (!self.memory.canvasHandle) {

@@ -10,7 +10,7 @@ import { TemplateHole } from './helper/defs';
 import { numberWithCommas } from './helper/format';
 import { css } from './helper/style';
 import { UIStatePriority, useGameState } from './helper/useGameState';
-import { allAgents } from './inspectors/all-entities';
+import { allEntities } from './inspectors/all-entities';
 import { moneyInspector } from './inspectors/money-inspector';
 import { MsgActions } from '../helper/message';
 import { dispatchToCanvas } from '../global/dispatch';
@@ -178,7 +178,7 @@ const $dock = (wk) => {
 					emoji: '🌈',
 					title: 'Manage agents',
 					onClick: (ev) => {
-						generateCallableWindowFromEv(ev)(allAgents());
+						generateCallableWindowFromEv(ev)(allEntities());
 					},
 				}),
 				$dockEmoji({
@@ -186,8 +186,7 @@ const $dock = (wk) => {
 					title: 'Edit mode',
 					onClick: (ev) => {
 						dispatchToCanvas({
-							type: 'set-edit-mode',
-							to: true,
+							type: 'toggle-edit-mode',
 						});
 					},
 				}),

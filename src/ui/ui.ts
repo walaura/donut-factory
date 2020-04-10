@@ -7,7 +7,7 @@ import {
 	MsgActions,
 	CanvasRendererMessage,
 } from '../helper/message';
-import { Target } from '../helper/pathfinding';
+import { Target } from '../helper/target';
 import { $compatError } from './$compaterror';
 import { $dock } from './$dock';
 import { $windowDock, generateCallableWindowFromEv } from './$window/$window';
@@ -59,20 +59,41 @@ const renderSetup = () => {
 		if (self.memory.id !== 'MAIN') {
 			throw 'no';
 		}
-		dispatchToCanvas({
-			type: 'set-edit-mode',
-			to: false,
-		});
-		if (self.memory.lastKnownCanvasState?.editMode) {
-			let { gameCursor, editingTarget } = self.memory.lastKnownCanvasState;
-			if ('roadEnd' in editingTarget) {
-				mergeEntity<Road>(editingTarget.entityId, {
-					[editingTarget.roadEnd]: gameCursor,
+		if (!self.memory.lastKnownCanvasState) {
+			throw 'no';
+		}
+		if (self.memory.lastKnownCanvasState.editMode === true) {
+			if (
+				!self.memory.lastKnownCanvasState.editModeTarget &&
+				self.memory.lastKnownCanvasState.selected &&
+				'roadEnd' in self.memory.lastKnownCanvasState.selected
+			) {
+				dispatchToCanvas({
+					type: 'set-edit-mode-target',
+					to: self.memory.lastKnownCanvasState?.selected,
+				});
+				return;
+			}
+
+			let { gameCursor, editModeTarget } = self.memory.lastKnownCanvasState;
+			if (editModeTarget && 'roadEnd' in editModeTarget) {
+				dispatchToCanvas({
+					type: 'set-edit-mode-target',
+					to: null,
+				});
+				mergeEntity<Road>(editModeTarget.entityId, {
+					[editModeTarget.roadEnd]: gameCursor,
 				});
 			}
+			return;
 		}
-		if ('entityId' in selected) {
-			generateCallableWindowFromEv(ev)(entityInspector(selected.entityId));
+		if (
+			self.memory.lastKnownCanvasState.selected &&
+			'entityId' in self.memory.lastKnownCanvasState.selected
+		) {
+			generateCallableWindowFromEv(ev)(
+				entityInspector(self.memory.lastKnownCanvasState.selected.entityId)
+			);
 		}
 	});
 

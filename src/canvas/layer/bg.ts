@@ -14,9 +14,6 @@ const bgLayerRenderer = ({
 	return {
 		onFrame: (_, { rendererState }) => {
 			const isEditMode = rendererState.editMode;
-			if (drawn[isEditMode ? 0 : 1]) {
-				return { canvas };
-			}
 
 			drawn[isEditMode ? 0 : 1] = true;
 			ctx.clearRect(0, 0, width, height);

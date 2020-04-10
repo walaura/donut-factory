@@ -5,7 +5,7 @@ import {
 } from '../helper/defs';
 import { GameAction } from '../wk/game.actions';
 import { renderCanvasLayers } from '../canvas/canvas';
-import { CanvasRendererState } from '../wk/CanvasRendererState';
+import { CanvasRendererState } from '../wk/canvas.defs';
 import { CanvasAction } from '../wk/canvas.actions';
 
 export type Workers = {

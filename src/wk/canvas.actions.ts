@@ -1,18 +1,57 @@
 import { listenFromWorker, MsgActions } from '../helper/message';
-import { CanvasRendererState } from './CanvasRendererState';
-const deepmerge = require('deepmerge');
+import { CanvasRendererState } from './canvas.defs';
+import { Target } from '../helper/target';
 
-export type CanvasAction = {
-	type: 'set-edit-mode';
-	to: boolean;
-};
+export type CanvasAction =
+	| {
+			type: 'set-edit-mode';
+			to: boolean;
+	  }
+	| {
+			type: 'toggle-edit-mode';
+	  }
+	| {
+			type: 'set-edit-mode-target';
+			to: Target;
+	  };
 
 export type CanvasReducer<A extends CanvasAction> = (
 	action: A,
 	canvasState: CanvasRendererState
 ) => CanvasRendererState | undefined;
 
-const reducers: CanvasReducer<CanvasAction>[] = [];
+const editModeReducer: CanvasReducer<CanvasAction> = (action, state) => {
+	switch (action.type) {
+		case 'toggle-edit-mode': {
+			return {
+				...state,
+				editMode: !state.editMode,
+				editModeTarget: state.editMode ? null : state.editModeTarget,
+			};
+		}
+		case 'set-edit-mode-target': {
+			return {
+				...state,
+				editMode: true,
+				editModeTarget: action.to,
+			};
+		}
+		case 'set-edit-mode':
+			return action.to === true
+				? {
+						...state,
+						editMode: true,
+						editModeTarget: null,
+				  }
+				: {
+						...state,
+						editMode: false,
+				  };
+	}
+	return state;
+};
+
+const reducers: CanvasReducer<CanvasAction>[] = [editModeReducer];
 
 export const commitActions = (
 	prevState: CanvasRendererState
