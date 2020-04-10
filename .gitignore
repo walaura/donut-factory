@@ -106,3 +106,4 @@ dist
 # Parcel
 .parcel-cache
 .cache
+.git.json

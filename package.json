@@ -4,9 +4,11 @@
 	"description": "",
 	"main": "dist/index.html",
 	"scripts": {
-		"OH-SO-PARCEL-IS-BEING-A-LITTLE-PRINCESS-HERE-I-SEE": "node ./lol.js",
-		"start": "npm run OH-SO-PARCEL-IS-BEING-A-LITTLE-PRINCESS-HERE-I-SEE && parcel ./src/index.html",
-		"make": "npm run OH-SO-PARCEL-IS-BEING-A-LITTLE-PRINCESS-HERE-I-SEE && parcel build ./src/index.html",
+		"postinstall": "gitlog",
+		"gitlog": "./node_modules/.bin/git-json > .git.json",
+		"OH-PARCEL-COME-ON": "node ./lol.js",
+		"start": "npm run OH-PARCEL-COME-ON && parcel ./src/index.html",
+		"make": "npm run OH-PARCEL-COME-ON && parcel build ./src/index.html",
 		"circles": "madge --circular --extensions ts ./src"
 	},
 	"author": "walaura",
@@ -17,6 +19,7 @@
 		"css-tree": "^1.0.0-alpha.39",
 		"d3-polygon": "^1.0.6",
 		"deepmerge": "^4.2.2",
+		"git2json": "0.0.1",
 		"hash-sum": "^2.0.0",
 		"line-replace": "^1.0.3",
 		"lit-html": "^1.2.1",

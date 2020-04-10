@@ -14,6 +14,7 @@ import { allEntities } from './inspectors/all-entities';
 import { moneyInspector } from './inspectors/money-inspector';
 import { MsgActions } from '../helper/message';
 import { dispatchToCanvas } from '../global/dispatch';
+import { $infoWindow } from './windows/info';
 
 const $pressable = (
 	children: TemplateHole,
@@ -195,28 +196,7 @@ const $dock = (wk) => {
 					emoji: '⚙️',
 					title: 'Show global state',
 					onClick: (ev) => {
-						generateCallableWindowFromEv(ev)({
-							emoji: '⚙️',
-							path: ['ONEOFF'],
-							name: 'All state',
-							render: () =>
-								$wash(
-									$flex(
-										[
-											useGameState((state) => [$pretty(state)]),
-											$padding(html`<button
-												@click=${() => {
-													localStorage.removeItem('autosave');
-													window.location.reload();
-												}}
-											>
-												New game+
-											</button>`),
-										],
-										{ distribute: ['scroll', 'squish'], dividers: true }
-									)
-								),
-						});
+						generateCallableWindowFromEv(ev)($infoWindow());
 					},
 				}),
 			]),

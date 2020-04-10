@@ -42,7 +42,12 @@ export enum CallableWindowTypes {
 	'MasterDetail',
 }
 
-type Path = ['inspect-entity', ID] | ['all-entities'] | ['ledger'] | ['ONEOFF'];
+type Path =
+	| ['info']
+	| ['inspect-entity', ID]
+	| ['all-entities']
+	| ['ledger']
+	| ['ONEOFF'];
 
 export type CallableWindowRoute = BaseWindowProps & {
 	type?: CallableWindowTypes;

@@ -149,7 +149,7 @@ export const $tabset = ({ tabs, sideways = false }: Tabset): TemplateHole => {
 					$wash(
 						tabs.map((tab, index) => {
 							if (index === activeTab) {
-								return $scroll($rows(tab.contents as any, { breakout: false }));
+								return $scroll(tab.contents);
 							}
 							return null;
 						}),

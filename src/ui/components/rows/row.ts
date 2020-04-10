@@ -5,7 +5,7 @@ import { $padding } from '../$padding';
 const $row = (children) =>
 	$padding(children, { type: 'padding', size: 'normal' });
 
-const $rows = (children: any[], { breakout = true } = {}) => {
+const $rows = (children: any[], { breakout = false } = {}) => {
 	const styles = css`
 		& > * {
 			box-shadow: 0 1px 0 0 var(--divider);
