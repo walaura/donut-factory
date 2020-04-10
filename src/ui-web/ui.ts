@@ -13,15 +13,19 @@ import { $windowDock, generateCallableWindowFromEv } from './$window/$window';
 import { onStateUpdate } from './helper/useGameState';
 import { entityInspector } from './inspectors/entity-inspector';
 
-const Board = () => [$compatError(), $windowDock(), $dock()];
+const Board = (worker) => [$compatError(), $windowDock(), $dock(worker)];
 
 let worker;
+let rendered = false;
 const renderSetup = () => {
-	render(Board(), (window as any).game);
 	let onTick = (state: GameState) => {
 		onStateUpdate(state);
 		if (worker) {
 			worker.postMessage({ action: 'TOCK', state } as LoopWorkerMessage);
+			if (!rendered) {
+				render(Board(worker), (window as any).game);
+				rendered = true;
+			}
 		}
 	};
 	let selected: Target;

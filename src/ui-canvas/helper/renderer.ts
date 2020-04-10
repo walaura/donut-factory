@@ -17,6 +17,7 @@ export type Renderer = {
 export type RendererState = {
 	selected: Target;
 	zoom: number;
+	editMode: boolean;
 };
 
 export type OffScreenCanvasProps = {
@@ -34,9 +35,10 @@ export const renderCanvasLayers = (
 		state: GameState
 	) => { canvas: OffscreenCanvas; rendererState: RendererState };
 	setCursor: (xy: XY) => void;
+	enterEditMode: () => void;
 } => {
 	let cursor: XY = { x: 20, y: 40 };
-
+	let editMode = false;
 	const bgRenderer = bgLayerRenderer({ width, height, zoom });
 	const entityRenderer = entityLayerRenderer({ width, height, zoom });
 	const roadRenderer = roadLayerRenderer({ width, height, zoom });
@@ -48,10 +50,15 @@ export const renderCanvasLayers = (
 		cursor = newCursor;
 	};
 
+	const enterEditMode = () => {
+		editMode = true;
+	};
+
 	const onFrame = (previousGameState: GameState, state: GameState) => {
 		const rendererState: RendererState = {
 			selected: { xy: cursor },
 			zoom,
+			editMode,
 		};
 
 		for (let agent of Object.values(state.entities)) {
@@ -100,5 +107,5 @@ export const renderCanvasLayers = (
 		return { canvas, rendererState };
 	};
 
-	return { onFrame, setCursor };
+	return { onFrame, setCursor, enterEditMode };
 };

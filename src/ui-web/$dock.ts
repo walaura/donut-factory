@@ -12,6 +12,7 @@ import { css } from './helper/style';
 import { UIStatePriority, useGameState } from './helper/useGameState';
 import { allAgents } from './inspectors/all-entities';
 import { moneyInspector } from './inspectors/money-inspector';
+import { MsgActions } from '../helper/message';
 
 const $pressable = (
 	children: TemplateHole,
@@ -101,7 +102,7 @@ const $dockPanel = (
 	);
 };
 
-const $dock = () => {
+const $dock = (wk) => {
 	const styles = css`
 		position: fixed;
 		contain: content;
@@ -180,11 +181,21 @@ const $dock = () => {
 					},
 				}),
 				$dockEmoji({
-					emoji: '🤓',
+					emoji: '✏️',
+					title: 'Edit mode',
+					onClick: (ev) => {
+						wk.postMessage({
+							action: MsgActions.ENTER_EDIT_MODE,
+						});
+					},
+				}),
+
+				$dockEmoji({
+					emoji: '⚙️',
 					title: 'Show global state',
 					onClick: (ev) => {
 						generateCallableWindowFromEv(ev)({
-							emoji: '🤓',
+							emoji: '⚙️',
 							path: ['ONEOFF'],
 							name: 'All state',
 							render: () =>

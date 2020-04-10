@@ -12,6 +12,7 @@ export enum MsgActions {
 	'PAUSE' = 'PAUSE',
 	'START' = 'START',
 	'COMMIT_ACTION' = 'COMMIT_ACTION',
+	'ENTER_EDIT_MODE' = 'ENTER_EDIT_MODE',
 }
 
 export type WorldWorkerMessage =
@@ -31,6 +32,9 @@ export type WorldWorkerMessage =
 	| {
 			action: MsgActions.TOCK;
 			state: GameState;
+	  }
+	| {
+			action: MsgActions.ENTER_EDIT_MODE;
 	  };
 
 export type LoopWorkerMessage =

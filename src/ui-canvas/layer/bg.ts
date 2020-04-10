@@ -2,7 +2,7 @@ import { OffScreenCanvasProps, Renderer } from '../helper/renderer';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 
 const grass = '#dcedc8';
-
+const blueprint = '#4e72b5';
 const bgLayerRenderer = ({
 	width,
 	height,
@@ -10,22 +10,25 @@ const bgLayerRenderer = ({
 }: OffScreenCanvasProps): Renderer => {
 	const canvas = makeCanvasOrOnScreenCanvas(width, height);
 	const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
-	let drawn = false;
+	let drawn = [false, false];
 	return {
-		onFrame: () => {
-			if (drawn) {
+		onFrame: (_, { rendererState }) => {
+			const isEditMode = rendererState.editMode;
+			if (drawn[isEditMode ? 0 : 1]) {
 				return { canvas };
 			}
-			drawn = true;
+
+			drawn[isEditMode ? 0 : 1] = true;
+			ctx.clearRect(0, 0, width, height);
+			ctx.globalAlpha = 1;
+
 			ctx.font = '16px sans-serif';
-			ctx.fillStyle = grass;
-			ctx.beginPath();
-			ctx.rect(0, 0, width, height);
-			ctx.fill();
+			ctx.fillStyle = isEditMode ? blueprint : grass;
+			ctx.fillRect(0, 0, width, height);
 			let rows = new Array(Math.ceil(height / zoom)).fill(null);
 			let columns = new Array(Math.ceil(width / zoom)).fill(null);
-			ctx.fillStyle = 'black';
-			ctx.globalAlpha = 0.05;
+			ctx.fillStyle = isEditMode ? 'white' : 'black';
+			ctx.globalAlpha = isEditMode ? 0.15 : 0.05;
 			rows.forEach((_, i) => {
 				ctx.beginPath();
 				ctx.moveTo(0, i * zoom - 1);

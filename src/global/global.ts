@@ -1,16 +1,17 @@
 import { GameState } from '../helper/defs';
 import { Action } from './actions';
-
-export enum WorkerMemoryType {
-	'Canvas',
-	'Game',
-	'Main',
-}
+import { renderCanvasLayers } from '../ui-canvas/helper/renderer';
 
 export type WorkerMemory =
 	| {
-			id: 'CANVAS-WK' | 'MAIN';
+			id: 'MAIN';
 			state: GameState | null;
+	  }
+	| {
+			id: 'CANVAS-WK';
+			canvasHandle: ReturnType<typeof renderCanvasLayers> | undefined;
+			state: GameState | null;
+			prevState: GameState | null;
 	  }
 	| {
 			id: 'GAME-WK';

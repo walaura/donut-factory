@@ -1,6 +1,8 @@
 self.memory = {
 	id: 'CANVAS-WK',
 	state: null,
+	prevState: null,
+	canvasHandle: undefined,
 };
 
 import {
@@ -17,35 +19,48 @@ export type RendererState = {
 
 const ZOOM = 20;
 
-let prevState;
-let canvasHandle: ReturnType<typeof renderCanvasLayers> | undefined;
 self.onmessage = function (ev) {
 	let msg = ev.data as WorldWorkerMessage;
+	if (self.memory.id !== 'CANVAS-WK') {
+		throw 'what';
+	}
+	if (msg.action === MsgActions.TOCK) {
+		if (!self.memory.canvasHandle) {
+			return;
+		}
+		const frame = self.memory.canvasHandle.onFrame(
+			self.memory.prevState || msg.state,
+			msg.state
+		);
+		postFromWorker<WorldWorkerMessage>({
+			action: MsgActions.CANVAS_RESPONSE,
+			rendererState: frame.rendererState,
+		});
+		self.memory.prevState = msg.state;
+		return;
+	}
+	console.log(msg);
 	if (msg.action === MsgActions.SEND_CANVAS) {
 		const { canvas } = msg;
 		let ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
 		ctx.scale(msg.pixelRatio, msg.pixelRatio);
-		canvasHandle = renderCanvasLayers(canvas, {
+		self.memory.canvasHandle = renderCanvasLayers(canvas, {
 			width: canvas.width / msg.pixelRatio,
 			height: canvas.height / msg.pixelRatio,
 			zoom: ZOOM,
 		});
 	}
-	if (msg.action === MsgActions.TOCK) {
-		if (!canvasHandle) {
+
+	if (msg.action === MsgActions.ENTER_EDIT_MODE) {
+		if (!self.memory.canvasHandle) {
 			return;
 		}
-		const frame = canvasHandle.onFrame(prevState || msg.state, msg.state);
-		postFromWorker<WorldWorkerMessage>({
-			action: MsgActions.CANVAS_RESPONSE,
-			rendererState: frame.rendererState,
-		});
-		prevState = msg.state;
+		self.memory.canvasHandle.enterEditMode();
 	}
 	if (msg.action === MsgActions.SEND_CURSOR) {
-		if (!canvasHandle) {
+		if (!self.memory.canvasHandle) {
 			return;
 		}
-		canvasHandle.setCursor({ ...msg.pos });
+		self.memory.canvasHandle.setCursor({ ...msg.pos });
 	}
 };
