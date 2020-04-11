@@ -4,9 +4,8 @@
 	"description": "",
 	"main": "dist/index.html",
 	"scripts": {
-		"postinstall": "npm run gitlog",
 		"gitlog": "./node_modules/.bin/git-json > .git.json",
-		"OH-PARCEL-COME-ON": "node ./lol.js",
+		"OH-PARCEL-COME-ON": "npm run gitlog && node ./lol.js",
 		"start": "npm run OH-PARCEL-COME-ON && parcel ./src/index.html",
 		"make": "npm run OH-PARCEL-COME-ON && parcel build ./src/index.html",
 		"circles": "madge --circular --extensions ts ./src"
