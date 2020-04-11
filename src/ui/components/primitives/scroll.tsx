@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { css } from '../helper/style';
+import { css } from '../../helper/style';
 
 const base = css`
 	width: 100%;

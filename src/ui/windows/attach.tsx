@@ -4,13 +4,13 @@ import { RevealButton, VisibleButton } from '../components/button';
 import { Flex } from '../components/list/flex-list';
 import { RowList } from '../components/list/row-list';
 import { Info } from '../components/row/info';
-import { Scroll } from '../components/Scroll';
 import { Heading } from '../components/type';
 import { Wash } from '../components/wash';
 import { getAgentStatus } from '../helper/status';
 import { useLastKnownGameState } from '../hook/use-game-state';
 import { useTaskbarItem } from '../hook/use-taskbar/Item';
 import { useTaskbar } from '../hook/use-taskbar';
+import { Scroll } from '../components/primitives/scroll';
 
 const Row = ({
 	entity,

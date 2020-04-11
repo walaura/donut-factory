@@ -2,15 +2,14 @@ import { h } from 'preact';
 import { VisibleButton } from '../components/button';
 import { Flex } from '../components/list/flex-list';
 import { RowList } from '../components/list/row-list';
-import { Pre } from '../components/primitives/pre';
 import { Padding } from '../components/primitives/padding';
+import { Pre } from '../components/primitives/pre';
 import { Info } from '../components/row/info';
 import { Tabs } from '../components/tabs';
 import { Heading } from '../components/type';
-import { Wash } from '../components/wash';
 import { clock, longDate } from '../helper/format';
 import { useLastKnownGameState } from '../hook/use-game-state';
-import { Scroll } from '../components/Scroll';
+import { Scroll } from '../components/primitives/scroll';
 
 const gitlog = require('../../../.git.json');
 
