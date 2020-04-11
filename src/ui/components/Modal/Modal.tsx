@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { RouteIdentifiers } from '../../helper/route.defs.ts';
 import { css, keyframes } from '../../helper/style';
-import { ModalHeader } from './ModalHeader';
+import { ModalHeader } from './modal-header';
 
 export interface BaseWindowProps {
 	emoji: string;

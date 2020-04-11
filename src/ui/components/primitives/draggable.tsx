@@ -1,7 +1,7 @@
-import { XY } from '../../helper/xy';
+import { XY } from '../../../helper/xy';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { h } from 'preact';
-import { css } from '../helper/style';
+import { css } from '../../helper/style';
 
 const style = css`
 	position: fixed;

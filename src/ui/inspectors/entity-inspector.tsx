@@ -11,14 +11,14 @@ import {
 	WithCargo,
 	WithColor,
 } from '../../helper/defs';
-import { VisibleButton } from '../components/Button';
-import { RowList } from '../components/List/RowList';
-import { Pre } from '../components/Pre';
-import { Accesory } from '../components/primitives/Accesory';
-import { MiniGrid } from '../components/primitives/MiniGrid';
-import { Form } from '../components/row/Form';
-import { Info } from '../components/row/Info';
-import { Tabs } from '../components/Tabs';
+import { VisibleButton } from '../components/button';
+import { RowList } from '../components/list/row-list';
+import { Pre } from '../components/primitives/pre';
+import { Accesory } from '../components/primitives/accesory';
+import { MiniGrid } from '../components/primitives/mini-grid';
+import { Form } from '../components/row/form';
+import { Info } from '../components/row/info';
+import { Tabs } from '../components/tabs';
 import { shortNumber } from '../helper/format';
 import { useEntityStatus } from '../helper/status';
 import { useLastKnownEntityState } from '../hook/use-game-state';

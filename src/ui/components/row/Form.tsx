@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { Accesory } from '../primitives/Accesory';
+import { Accesory } from '../primitives/accesory';
 import { Heading } from '../type';
 
 export const Form = ({ children, label }) => (

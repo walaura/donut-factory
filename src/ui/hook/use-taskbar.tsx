@@ -1,7 +1,7 @@
 import { createContext, h } from 'preact';
 import { useContext, useEffect, useState } from 'preact/hooks';
 import { ID } from '../../helper/defs';
-import { Modal } from '../components/Modal/Modal';
+import { Modal } from '../components/modal/modal';
 import { WindowHandleProvider } from './use-taskbar/Handles';
 import {
 	DeflatedTaskbarItemType,

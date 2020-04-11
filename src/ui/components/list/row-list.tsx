@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import { css } from '../../helper/style';
-import { PaddingSize, Padding } from '../primitives/Padding';
+import { PaddingSize, Padding } from '../primitives/padding';
 
 const styles = css`
 	& > * {

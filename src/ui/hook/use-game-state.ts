@@ -37,6 +37,7 @@ const subscribeToStateUpdate = <S extends LastKnownGameState | any>(
 	};
 	callbacks.push(cbEntry);
 	return () => {
+		console.log('cleanup fired', callbacks.length);
 		callbacks = callbacks.filter((entry) => entry !== cbEntry);
 	};
 };
@@ -78,6 +79,7 @@ const hasher = (s: any) => {
 
 export const onReactStateUpdate = (newState: LastKnownGameState) => {
 	const now = Date.now();
+
 	for (let cb of callbacks) {
 		if (now - cb.lastCalled > cb.priority) {
 			let response = cb.query(newState);

@@ -1,14 +1,10 @@
-import { html } from 'lit-html';
-import { JSX, h } from 'preact';
+import { h, JSX } from 'preact';
 import { useState } from 'preact/hooks';
 import { css } from '../helper/style';
-import { $emoji } from './$emoji';
-import { $wash } from './$wash';
-import { Flex } from './List/FlexList';
-import { Wash } from './Wash';
-import { Scroll } from './Scroll';
-import { DietButton } from './Button';
-import { Emoji } from './Emoji';
+import { DietButton } from './button';
+import { Flex } from './list/flex-list';
+import { Wash } from './wash';
+import { Emoji } from './emoji';
 
 interface Tab {
 	name: string;
@@ -38,8 +34,9 @@ const tabbarStyles = {
 			contain: strict;
 			min-width: var(--pressable);
 			height: var(--pressable);
+			min-height: var(--pressable);
 			box-shadow: none !important;
-			display: flex;
+			display: grid;
 			align-items: center;
 			justify-content: center;
 			background: none;

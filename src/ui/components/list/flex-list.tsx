@@ -1,24 +1,34 @@
 import { h } from 'preact';
 import { css } from '../../helper/style';
-import { Padding, PaddingSize } from '../primitives/Padding';
+import { Padding, PaddingSize } from '../primitives/padding';
 
-const base = css`
-	display: flex;
+const mkTemplate = (sideways, template) =>
+	`grid-template-${sideways ? 'columns' : 'rows'}: ${template.join(' ')}`;
+
+const base = (sideways, template) => css`
+	display: grid;
 	position: absolute;
 	top: 0;
 	left: 0;
 	bottom: 0;
 	right: 0;
 	contain: strict;
+	height: 100%;
+	grid-auto-flow: ${sideways ? 'row' : 'column'};
+	${mkTemplate(sideways, template)};
 	& > * {
 		overflow: hidden;
 		position: relative;
 		contain: layout;
-	}
-	& > * > * {
 		height: 100%;
 	}
 `;
+
+const gridDistro = {
+	grow: '1fr',
+	scroll: '1fr',
+	squish: 'min-content',
+};
 
 const distro = {
 	grow: css`
@@ -52,19 +62,16 @@ const FlexList = ({
 	direction?: 'row' | 'column';
 	dividers?: boolean;
 }) => {
-	const directionStyle = css`
-		flex-direction: ${direction};
-		height: 100%;
-	`;
-
 	const result = (
-		<div class={[base, directionStyle].join(' ')}>
+		<div
+			data-cssid="grid"
+			class={base(
+				direction === 'row',
+				distribute.map((d) => gridDistro[d])
+			)}>
 			{children.map((c, index) => (
 				<div
-					class={[
-						distro[distribute[index] ?? 'grow'],
-						dividers && dividerStyles,
-					]
+					class={[distro[distribute[index]], dividers && dividerStyles]
 						.filter(Boolean)
 						.join(' ')}>
 					{padding ? <Padding size={padding}>{c}</Padding> : c}

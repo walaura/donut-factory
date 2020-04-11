@@ -9,9 +9,8 @@ import {
 } from '../../hook/use-taskbar/Item';
 import { Padding } from '../primitives/padding';
 import { Wash } from '../wash';
-import { Modal } from './modal';
+import { Modal } from './Modal';
 import { Flex } from '../list/flex-list';
-import { ModalHeader } from './modal-header';
 import { Emoji } from '../emoji';
 import { Heading } from '../type';
 

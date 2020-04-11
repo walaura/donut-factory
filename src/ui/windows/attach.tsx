@@ -1,12 +1,12 @@
 import { h, Fragment } from 'preact';
 import { Entity, ID } from '../../helper/defs';
-import { RevealButton, VisibleButton } from '../components/Button';
-import { Flex } from '../components/List/FlexList';
-import { RowList } from '../components/List/RowList';
-import { Info } from '../components/row/Info';
+import { RevealButton, VisibleButton } from '../components/button';
+import { Flex } from '../components/list/flex-list';
+import { RowList } from '../components/list/row-list';
+import { Info } from '../components/row/info';
 import { Scroll } from '../components/Scroll';
 import { Heading } from '../components/type';
-import { Wash } from '../components/Wash';
+import { Wash } from '../components/wash';
 import { getAgentStatus } from '../helper/status';
 import { useLastKnownGameState } from '../hook/use-game-state';
 import { useTaskbarItem } from '../hook/use-taskbar/Item';

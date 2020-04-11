@@ -1,10 +1,10 @@
 import { css } from '../../helper/style';
 import { h } from 'preact';
-import { Emoji } from '../Emoji';
-import { DietButton } from '../Button';
+import { Emoji } from '../emoji';
+import { DietButton } from '../button';
 import { useWindowHandles } from '../../hook/use-taskbar/Handles';
 import { RouteIdentifiers } from '../../helper/route.defs.ts';
-import { Padding } from '../primitives/Padding';
+import { Padding } from '../primitives/padding';
 
 const styles = {
 	icon: css`

@@ -4,14 +4,14 @@ import {
 	useLastKnownEntityState,
 	UIStatePriority,
 } from '../../hook/use-game-state';
-import { Form } from '../../components/row/Form';
-import { Select } from '../../components/row/Select';
+import { Form } from '../../components/row/form';
+import { Select } from '../../components/row/select';
 import { mergeEntity } from '../../../game/entities';
 import { Vehicle } from '../../../entity/vehicle';
-import { MiniGrid } from '../../components/primitives/MiniGrid';
-import { VisibleButton } from '../../components/Button';
+import { MiniGrid } from '../../components/primitives/mini-grid';
+import { VisibleButton } from '../../components/button';
 import { dispatchToGame } from '../../../global/dispatch';
-import { RowList } from '../../components/List/RowList';
+import { RowList } from '../../components/list/row-list';
 
 export const EntitySettingsTab = ({ entityId }: { entityId: ID }) => {
 	let rows: (string | JSX.Element)[] = [];

@@ -1,6 +1,6 @@
 import { h, JSX } from 'preact';
 import { css } from '../../helper/style';
-import { Emoji } from '../Emoji';
+import { Emoji } from '../emoji';
 import { Heading } from '../type';
 
 const styles = {

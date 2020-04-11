@@ -2,7 +2,7 @@ import { createContext, h } from 'preact';
 import { useContext } from 'preact/hooks';
 
 import { useTaskbar } from '../use-taskbar';
-import { Draggable, DragHandle } from '../../components/Draggable';
+import { Draggable, DragHandle } from '../../components/primitives/draggable';
 
 const WindowHandlesContext = createContext<WindowHandles>(
 	(null as any) as WindowHandles
