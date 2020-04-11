@@ -1,9 +1,9 @@
 import { h } from 'preact';
 import { LedgerRecord } from '../../helper/defs';
-import { Info } from '../components/Info/Info';
+import { Info } from '../components/row/Info';
 import { Flex } from '../components/List/FlexList';
 import { RowList } from '../components/List/RowList';
-import { Padding } from '../components/Padding';
+import { Padding } from '../components/primitives/Padding';
 import { Wash } from '../components/Wash';
 import { clock, longDate, numberWithCommas } from '../helper/format';
 import { css } from '../helper/style';

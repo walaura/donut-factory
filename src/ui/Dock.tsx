@@ -5,7 +5,8 @@ import { Emoji } from './components/Emoji';
 import { numberWithCommas } from './helper/format';
 import { css } from './helper/style';
 import { UIStatePriority, useLastKnownGameState } from './hook/use-game-state';
-import { useOverlays } from './hook/use-overlays';
+import { useTaskbar } from './hook/use-taskbar';
+import { DetailsModal } from './components/Modal/DetailsModal';
 
 const emojiStyles = {
 	root: css`
@@ -152,13 +153,13 @@ const ClockPanel = () => {
 
 const MoneyPanel = () => {
 	let ledger = useLastKnownGameState((s) => s.ledger, UIStatePriority.Cat);
-	let { pushRoute: pushRoute } = useOverlays();
+	let { push } = useTaskbar();
 
 	return (
 		<Fragment>
 			<DockPanel
 				onClick={(ev) => {
-					pushRoute(ev, ['ledger', undefined]);
+					push({ route: ['ledger', undefined] }, { ev });
 				}}>
 				<DockEmoji emoji="💰" title="Money" />
 				<DockText>
@@ -172,14 +173,17 @@ const MoneyPanel = () => {
 };
 
 const ToolsPanel = () => {
-	let { pushRoute } = useOverlays();
+	let { push } = useTaskbar();
 	return (
 		<DockPanel>
 			<DockEmoji
 				emoji={'👩‍🔧'}
 				title="Staffing"
 				onClick={(ev) => {
-					pushRoute(ev, ['allEntities', undefined]);
+					push(
+						{ route: ['allEntities', undefined] },
+						{ ev, prefersContainer: DetailsModal }
+					);
 				}}
 			/>
 			<DockEmoji
@@ -196,7 +200,7 @@ const ToolsPanel = () => {
 				emoji={'🍔'}
 				title="System"
 				onClick={(ev) => {
-					pushRoute(ev, ['system', undefined]);
+					push({ route: ['system', undefined] }, { ev });
 				}}
 			/>
 		</DockPanel>

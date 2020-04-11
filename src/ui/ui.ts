@@ -1,3 +1,5 @@
+import 'preact/debug';
+import 'preact/devtools';
 import { h, render } from 'preact';
 import { Road } from '../entity/road';
 import { mergeEntity } from '../game/entities';

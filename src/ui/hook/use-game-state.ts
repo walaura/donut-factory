@@ -1,11 +1,8 @@
-import { useEffect, useState } from 'preact/hooks';
 import sum from 'hash-sum';
-import {
-	GameState,
-	LastKnownGameState,
-	LastKnownCanvasRendererState,
-	ID,
-} from '../../helper/defs';
+import { useEffect, useState } from 'preact/hooks';
+import { findEntity } from '../../game/entities';
+import { ID, LastKnownGameState } from '../../helper/defs';
+
 export enum UIStatePriority {
 	Snail = 1250,
 	Cat = 500,
@@ -49,6 +46,11 @@ type UpdaterProps<S> = {
 	priority?: UIStatePriority;
 	query?: Query<S>;
 };
+
+export const useLastKnownEntityState = (
+	entityId: ID,
+	priority: UIStatePriority = UIStatePriority.Snail
+) => useLastKnownGameState((s) => findEntity(entityId, s), priority);
 
 export const useLastKnownGameState = <S = unknown>(
 	query: Required<UpdaterProps<S>>['query'],

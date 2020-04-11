@@ -2,7 +2,9 @@ import { css } from '../../helper/style';
 import { h } from 'preact';
 import { Emoji } from '../Emoji';
 import { DietButton } from '../Button';
-import { useOverlayHandles } from '../../hook/use-overlays';
+import { useWindowHandles } from '../../hook/use-taskbar/Handles';
+import { RouteIdentifiers } from '../../helper/route.defs.ts';
+import { Padding } from '../primitives/Padding';
 
 const styles = {
 	icon: css`
@@ -10,6 +12,7 @@ const styles = {
 		align-items: center;
 		justify-content: center;
 		transform: scale(1.25);
+		min-width: var(--pressable);
 	`,
 	base: css`
 		font-weight: var(--font-bold);
@@ -17,12 +20,13 @@ const styles = {
 		color: var(--text-title);
 		padding: var(--space-v) 0;
 		min-height: var(--pressable);
-		display: grid;
-		border-radius: var(--radius-small);
-		grid-template-columns: calc(var(--pressable)) 1fr calc(var(--pressable));
+		display: flex;
 		align-items: center;
 		justify-content: center;
 		margin-bottom: 2px;
+		> * {
+			flex: 0 0 1;
+		}
 	`,
 	close: css`
 		transform: scale(2) rotate(45deg);
@@ -30,28 +34,26 @@ const styles = {
 		align-items: center;
 		justify-content: center;
 		fill: currentColor;
+		min-width: var(--pressable);
 	`,
 };
 
-export const ModalHeader = ({
-	emoji,
-	title,
-}: {
-	emoji: string;
-	title: string;
-}) => {
-	let { dragHandle, closeHandle } = useOverlayHandles();
+export const ModalHeader = ({ emoji, name }: RouteIdentifiers) => {
+	let { dragHandle, closeHandle } = useWindowHandles();
 
 	return (
 		<header className={styles.base} onMouseDown={dragHandle}>
-			<div className={styles.icon}>
-				<Emoji emoji={emoji} />
-			</div>
+			{emoji && (
+				<div className={styles.icon}>
+					<Emoji emoji={emoji} />
+				</div>
+			)}
 			<div
 				className={css`
 					transform: translate(0, 0.1em);
+					flex: 1 1 0;
 				`}>
-				{title}
+				<Padding size="small">{name}</Padding>
 			</div>
 			{closeHandle && (
 				<div className={styles.close}>

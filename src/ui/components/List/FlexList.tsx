@@ -1,5 +1,6 @@
 import { h } from 'preact';
 import { css } from '../../helper/style';
+import { Padding, PaddingSize } from '../primitives/Padding';
 
 const base = css`
 	display: flex;
@@ -42,8 +43,11 @@ const FlexList = ({
 	distribute = ['grow'],
 	direction = 'column',
 	dividers = true,
+	padding = undefined,
 }: {
 	children: preact.ComponentChildren[];
+	padding?: undefined | null | PaddingSize;
+
 	distribute?: (keyof typeof distro)[];
 	direction?: 'row' | 'column';
 	dividers?: boolean;
@@ -63,7 +67,7 @@ const FlexList = ({
 					]
 						.filter(Boolean)
 						.join(' ')}>
-					{c}
+					{padding ? <Padding size={padding}>{c}</Padding> : c}
 				</div>
 			))}
 		</div>

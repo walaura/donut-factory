@@ -47,8 +47,9 @@ pre {
 	--divider: hsla(243, 33%, 17%, 0.1);
 	--radius: 0.66em;
 	--radius-small: 0.46em;
-	--space-h: 0.66em;
-	--space-v: 0.33em;
+	--space-h: 0.75em;
+	--space-v: 0.5em;
+	--space-min: calc(min(var(--space-h), var(--space-v)) / 2);
 	--pressable: 3em;
 	--text-dim: hsla(242, 33%, 17%, 0.815);
 	--text-bold: hsl(242, 56%, 17%);

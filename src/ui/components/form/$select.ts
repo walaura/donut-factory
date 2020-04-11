@@ -6,14 +6,5 @@ export const $select = ({ values, selected, onChange }) => html`
 			onChange(ev.target.value);
 		}}
 	>
-		${Object.entries(values).map(
-			([key, val]) =>
-				html`<option
-					value=${key}
-					?selected=${key.toString() === selected.toString()}
-				>
-					${val}
-				</option>`
-		)}
 	</select>
 `;

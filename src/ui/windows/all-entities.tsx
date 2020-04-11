@@ -1,25 +1,25 @@
 import { h } from 'preact';
-import { Entity, entityHasXY, LastKnownGameState } from '../../helper/defs';
-import { Info } from '../components/Info/Info';
-import { RowList } from '../components/List/RowList';
-import { Padding } from '../components/Padding';
-import { getAgentStatus } from '../helper/status';
-import { UIStatePriority, useLastKnownGameState } from '../hook/use-game-state';
-import { Tabs } from '../components/Tabs';
-import { VisibleButton, RevealButton } from '../components/Button';
-import { addEntity } from '../../game/entities';
 import { MkConsumer } from '../../entity/consumer';
 import { MkMover } from '../../entity/vehicle';
-import { useOverlayHandles, useOverlays } from '../hook/use-overlays';
+import { addEntity } from '../../game/entities';
+import { Entity, entityHasXY, LastKnownGameState } from '../../helper/defs';
+import { RevealButton, VisibleButton } from '../components/Button';
+import { Info } from '../components/row/Info';
+import { RowList } from '../components/List/RowList';
+import { Padding } from '../components/primitives/Padding';
+import { Tabs } from '../components/Tabs';
+import { getAgentStatus } from '../helper/status';
+import { UIStatePriority, useLastKnownGameState } from '../hook/use-game-state';
+import { useTaskbar } from '../hook/use-taskbar';
 
 const Row = ({ entity }: { entity: Entity }) => {
 	const allOfIt = useLastKnownGameState((s) => s, UIStatePriority.Snail);
-	const { pushRoute } = useOverlays();
+	const { push } = useTaskbar();
 	return (
 		<Padding>
 			<RevealButton
 				onClick={(ev) => {
-					pushRoute(ev, ['entity', { entityId: entity.id }]);
+					push({ route: ['entity', { entityId: entity.id }] }, { ev });
 				}}>
 				<Info icon={entity.emoji} heading={entity.name}>
 					{[getAgentStatus(entity.id, allOfIt)]}

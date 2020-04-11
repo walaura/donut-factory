@@ -1,5 +1,6 @@
 import { h } from 'preact';
 import { css } from '../../helper/style';
+import { PaddingSize, Padding } from '../primitives/Padding';
 
 const styles = css`
 	& > * {
@@ -9,12 +10,26 @@ const styles = css`
 
 export const RowList = ({
 	children,
+	padding = undefined,
 }: {
-	children: preact.ComponentChildren[];
-}) => (
-	<div class={styles}>
-		{(children ?? []).map((children) => (
-			<div children={children} />
-		))}
-	</div>
-);
+	children: preact.ComponentChildren;
+	padding?: undefined | null | PaddingSize;
+}) => {
+	if (!(children instanceof Array)) {
+		children = [children];
+	}
+	return (
+		<div class={styles}>
+			{'map' in children &&
+				children.map((child) =>
+					padding ? (
+						<Padding size={padding}>
+							<div>{child}</div>
+						</Padding>
+					) : (
+						<div>{child}</div>
+					)
+				)}
+		</div>
+	);
+};

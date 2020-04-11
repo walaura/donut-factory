@@ -15,6 +15,7 @@ const styles = (counter: boolean) => css`
 	background: ${counter ? 'var(--bg-counter-wash)' : 'var(--bg-wash)'};
 	display: grid;
 	min-height: 100%;
+	max-height: 100%;
 	width: 100%;
 	justify-content: stretch;
 	align-items: stretch;

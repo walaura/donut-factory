@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { BaseRouteRendererProps } from '../../helper/route.defs.ts';
+import { RouteIdentifiers } from '../../helper/route.defs.ts';
 import { css, keyframes } from '../../helper/style';
 import { ModalHeader } from './ModalHeader';
 
@@ -55,13 +55,14 @@ export const Modal = ({
 	name,
 	children,
 	width = 1,
-}: BaseRouteRendererProps & {
+}: RouteIdentifiers & {
 	width?: number;
+	children: preact.ComponentChildren;
 }) => {
 	width = width * 260;
 	return (
 		<div className={styles(width)}>
-			<ModalHeader title={name} emoji={emoji} />
+			<ModalHeader name={name} emoji={emoji} />
 			<Body>{children}</Body>
 		</div>
 	);

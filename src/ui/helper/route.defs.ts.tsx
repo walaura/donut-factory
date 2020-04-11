@@ -8,28 +8,14 @@ export type SerializableRoute<
 	? [K, Parameters<typeof routeRenderers[K]['root']>[0]]
 	: never;
 
-export type Identifiers = {
-	emoji: string;
+export type RouteIdentifiers = {
+	emoji?: string;
 	name: string;
 };
 
-export type BaseRouteRendererProps = Identifiers & {
-	children: preact.ComponentChildren;
+export type RouteRendererHostProps<Props> = RouteIdentifiers & {
+	root: (props: Props) => JSX.Element;
 };
 
-export type RouteRendererHostProps<P> = Identifiers & {
-	root: (props: P) => JSX.Element;
-};
-
-export type RouteRenderer<
-	Host extends (args: any) => any,
-	Container extends (args: any) => any
-> = RouteRendererHostProps<Parameters<Host>[0]> extends Pick<
-	Parameters<Container>[0],
-	keyof RouteRendererHostProps<Parameters<Host>[0]>
->
-	? WithID &
-			RouteRendererHostProps<Parameters<Host>[0]> & {
-				container: Container;
-			}
-	: never;
+export type RouteRenderer<Root extends (args: any) => any> = WithID &
+	RouteRendererHostProps<Parameters<Root>[0]>;

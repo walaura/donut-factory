@@ -1,24 +1,27 @@
 import { h } from 'preact';
-import { css } from '../helper/style';
+import { css } from '../../helper/style';
 
 const metrics = {
 	padding: {
 		small: css`
-			padding: 4px;
+			padding: var(--space-min);
 		`,
 		normal: css`
-			padding: calc(var(--space-v) * 2) var(--space-h);
+			padding: var(--space-v) var(--space-h);
 		`,
 	},
 	antiPadding: {
 		small: css`
-			margin: -4px;
+			margin: calc(var(--space-min) * -1);
 		`,
 		normal: css`
 			margin: calc(var(--space-v) * -2) calc(var(--space-h) * -1);
 		`,
 	},
 };
+
+export type PaddingSize = keyof typeof metrics['padding'];
+
 const Padding = ({
 	children,
 	type = 'padding',
@@ -26,7 +29,7 @@ const Padding = ({
 }: {
 	children: preact.ComponentChildren;
 	type?: keyof typeof metrics;
-	size?: keyof typeof metrics['padding'];
+	size?: PaddingSize;
 }) => {
 	return <div class={metrics[type][size]}>{children}</div>;
 };

@@ -2,7 +2,6 @@ import { html } from 'lit-html';
 import { $padding } from '../$padding';
 import { css } from '../../helper/style';
 import { $emoji } from '../$emoji';
-import { $heading } from '../type';
 
 interface Info {
 	body: any;

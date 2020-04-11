@@ -94,28 +94,29 @@ const Tabbar = ({
 }) => {
 	return (
 		<nav data-sideways={sideways} class={tabbarStyles.main}>
-			{tabs
-				.filter((t) => t.shows ?? true)
-				.map((t, i) => {
-					return (
-						<DietButton
-							data-active={i === activeTab}
-							onClick={() => onChange(i)}
-							title={t.name}>
-							<Wash
-								squareOff={
-									sideways
-										? ['topRight', 'bottomRight']
-										: ['bottomLeft', 'bottomRight']
-								}
-								counter={i !== activeTab}>
-								<span class={tabbarStyles.center}>
-									<Emoji emoji={t.emoji} />
-								</span>
-							</Wash>
-						</DietButton>
-					);
-				})}
+			{tabs.map((t, i) => {
+				if (t.shows === false) {
+					return null;
+				}
+				return (
+					<DietButton
+						data-active={i === activeTab}
+						onClick={() => onChange(i)}
+						title={t.name}>
+						<Wash
+							squareOff={
+								sideways
+									? ['topRight', 'bottomRight']
+									: ['bottomLeft', 'bottomRight']
+							}
+							counter={i !== activeTab}>
+							<span class={tabbarStyles.center}>
+								<Emoji emoji={t.emoji} />
+							</span>
+						</Wash>
+					</DietButton>
+				);
+			})}
 		</nav>
 	);
 };
@@ -133,7 +134,6 @@ const styles = css`
 `;
 export const Tabs = ({ children, sideways = false }: TabsProps) => {
 	const [activeTab, setActiveTab] = useState(0);
-
 	return (
 		<div data-sideways={sideways} class={styles}>
 			<Flex
@@ -146,7 +146,7 @@ export const Tabs = ({ children, sideways = false }: TabsProps) => {
 					activeTab={activeTab}
 					sideways={sideways}
 				/>
-				<Wash squareOff={sideways ? ['topLeft'] : []}>
+				<Wash key={activeTab} squareOff={sideways ? ['topLeft'] : []}>
 					<Scroll>{children[activeTab].contents}</Scroll>
 				</Wash>
 			</Flex>

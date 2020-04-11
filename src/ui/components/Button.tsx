@@ -13,9 +13,22 @@ const styles = {
 		text-align: left;
 		border-radius: var(--radius-small);
 		overflow: hidden;
-		transition: 0.1s ease-out;
+		&:focus:not(.focus-visible) {
+			outline: 0;
+		}
+		&:focus-visible {
+			box-shadow: 0 0 0 3px var(--main);
+		}
+	`,
+	animation: css`
+		transition: all 0.15s ease-out;
+		&:hover {
+			transform: scale(1.01);
+		}
 		&:active {
-			transform: scale(1.1);
+			transition: all 0.075s ease-out;
+			transform: scale(1.05) translateY(1%);
+			box-shadow: var(--shadow-1);
 		}
 	`,
 	visible: css`
@@ -25,49 +38,52 @@ const styles = {
 		margin: 0;
 	`,
 	reveal: css`
-		margin: calc(var(--space-h) / -2);
-		padding: calc(var(--space-h) / 2);
+		margin: calc(var(--space-v) / -2) calc(var(--space-h) / -2);
+		padding: calc(var(--space-v) / -2) calc(var(--space-h) / 2);
 		position: relative;
-		& > * {
+		width: 100%;
+		box-sizing: content-box;
+		& > div:last-child {
+			z-index: 4;
+			will-change: transform;
+		}
+		& > div:first-child {
+			opacity: 0;
+			z-index: 2;
 			position: absolute;
 			top: 0;
 			left: 0;
 			bottom: 0;
 			right: 0;
 		}
-		& > :last-child {
-			z-index: 4;
-			will-change: transform;
-		}
-		& > :first-child {
-			opacity: 0;
-			z-index: 2;
-		}
-		&:hover > :first-child {
-			opacity: 0.1;
-		}
-		&:active > :first-child {
+		&:hover > div:first-child {
 			opacity: 0.25;
+		}
+		&:active > div:first-child {
+			opacity: 0.6;
 		}
 	`,
 };
 export const VisibleButton = (props: JSX.HTMLAttributes<HTMLButtonElement>) => (
-	<button {...props} className={[styles.shared, styles.visible].join(' ')} />
+	<button
+		{...props}
+		className={[styles.shared, styles.animation, styles.visible].join(' ')}
+	/>
 );
 
 export const RevealButton = ({
 	isActive = false,
 	...props
 }: JSX.HTMLAttributes<HTMLButtonElement> & { isActive?: boolean }) => (
-	<div className={styles.reveal}>
+	<button
+		{...props}
+		class={[styles.shared, styles.reveal, styles.animation].join(' ')}>
+		<div class={[styles.shared, styles.visible].join(' ')}></div>
 		<div
-			className={[
-				styles.shared,
-				styles.visible,
-				css`
-					pointer-events: none;
-				`,
-			].join(' ')}></div>
-		<DietButton {...props} />
-	</div>
+			class={css`
+				pointer-events: none;
+			`}>
+			{props.children}
+		</div>
+	</button>
 );

@@ -1,221 +1,205 @@
-import { html } from 'lit-html';
-import { CallableWindowRoute, WindowCallbacks } from '../$window/$window';
-import {
-	clearOrders,
-	linkOrder,
-	Load,
-	mkMoveOrder,
-	Order,
-} from '../../entity/composables/with-orders';
-import { Road } from '../../entity/road';
-import { Vehicle } from '../../entity/vehicle';
-import { addEntity, findEntity, mergeEntity } from '../../game/entities';
-import { dispatchToGame } from '../../global/dispatch';
+import { h, JSX } from 'preact';
+import { useEffect } from 'preact/hooks';
+import { Load, Order } from '../../entity/composables/with-orders';
+import { entityIsRoad, RoadEnd } from '../../entity/road';
+import { mergeEntity } from '../../game/entities';
+import { dispatchToCanvas } from '../../global/dispatch';
 import {
 	Entity,
 	EntityType,
-	GameState,
 	ID,
 	WithCargo,
 	WithColor,
 } from '../../helper/defs';
-import { $tabset } from '../components/$tabset';
-import { $buttonGrid } from '../components/form/$buttonGrid';
-import { $select } from '../components/form/$select';
-import { $form } from '../components/rows/form';
-import { $infoBig, $infoSmall } from '../components/rows/info';
-import { $pretty } from '../components/rows/pretty';
-import { $rows } from '../components/rows/row';
-import { TemplateHole } from '../helper/defs';
+import { VisibleButton } from '../components/Button';
+import { RowList } from '../components/List/RowList';
+import { Pre } from '../components/Pre';
+import { Accesory } from '../components/primitives/Accesory';
+import { MiniGrid } from '../components/primitives/MiniGrid';
+import { Form } from '../components/row/Form';
+import { Info } from '../components/row/Info';
+import { Tabs } from '../components/Tabs';
 import { shortNumber } from '../helper/format';
-import { getAgentStatus } from '../helper/status';
-import { attachWindow } from '../windows/attach';
-import { $roadInfo } from './road-inspector';
-import { useLastKnownGameState, UIStatePriority } from '../hook/use-game-state';
-import { h } from 'preact';
+import { useEntityStatus } from '../helper/status';
+import { useLastKnownEntityState } from '../hook/use-game-state';
+import { useTaskbar } from '../hook/use-taskbar';
+import { useTaskbarItem } from '../hook/use-taskbar/Item';
+import { AttachWindow } from '../windows/attach';
+import { OrderInfoTab } from './tab/orders';
+import { PathInfoTab } from './tab/path';
+import { EntitySettingsTab } from './tab/settings';
 
-const $colorRow = (agent: Entity & WithColor) =>
-	$form({
-		label: `Color`,
-		control: html` <input
-			@change=${(ev) => {
-				const color = parseInt(ev.target.value, 10);
-				mergeEntity<Vehicle>(agent.id, {
-					color,
-				});
-			}}
-			type="range"
-			id="color"
-			name="color"
-			min="0"
-			max="360"
-			value=${agent.color}
-		/>`,
-	});
-
-const $orderInspector = (
-	order: Order,
-	state: GameState,
-	{ onNavigate }: Pick<WindowCallbacks, 'onNavigate'>
-) => {
-	if ('load' in order) {
-		return $form({
-			label: $t(findEntity(order.load.product, state)),
-			control: html`<button
-				@click=${(ev) => {
-					onNavigate(ev)(
-						attachWindow({
-							onAttach: (product) => {
-								mergeEntity<Order & { load: Load }>(order.id, {
-									load: {
-										product,
-									},
-								});
-							},
-							filter: (agent) => {
-								return agent.type === EntityType.Product;
-							},
-						})
+const OrderLoadRow = ({ order }: { order: Order & { load: Load } }) => {
+	const { push } = useTaskbar();
+	return (
+		<Form label={order.name}>
+			<VisibleButton
+				onClick={() => {
+					push(
+						{
+							name: 'Attach',
+							content: (
+								<AttachWindow
+									onAttach={(product) => {
+										mergeEntity<Order & { load: Load }>(order.id, {
+											load: {
+												product,
+											},
+										});
+									}}
+									filter={(agent) => {
+										return agent.type !== EntityType.Order;
+									}}
+								/>
+							),
+						},
+						{}
 					);
-				}}
-			>
+				}}>
 				Change product
-			</button>`,
-		});
-	}
-	return null;
+			</VisibleButton>
+		</Form>
+	);
 };
 
-const $orderInfo = (
-	vehicle: Vehicle,
-	state: GameState,
-	{ onNavigate }: Pick<WindowCallbacks, 'onNavigate'>
-) =>
-	$rows([
-		...Object.values(vehicle.orders.list).map((orderId, index) => {
-			const order = findEntity(orderId, state);
-			if (!order || order.type !== EntityType.Order) {
-				return 'Things messed up yo';
-			}
-			return $infoSmall({
-				onClick: (ev) => onNavigate(ev)(entityInspector(orderId)),
-				label: vehicle.orders.position === index ? '🚦<HERE>' : '💤',
-				info: [{ body: getAgentStatus(order.id, state) }],
-			});
-		}),
-		$pretty(vehicle.orders.state),
-	]);
-
-const $pathInfo = (vehicle: Vehicle, state: GameState) =>
-	$rows(
-		vehicle.path.map((t) => {
-			if ('entityId' in t) {
-				let entity = findEntity(t.entityId, state);
-				if (!entity) return 'uhhhh';
-				return $infoBig({
-					heading: entity.name,
-					icon: entity.emoji,
-					accesories: ['roadEnd' in t && t.roadEnd, $pretty(t)].filter(Boolean),
-				});
-			}
-		})
-	);
-
-const $cargoRows = (cargo: WithCargo['cargo'], gameState: GameState) =>
-	Object.values(cargo).map((load) => {
-		let entity = findEntity(load.productId, gameState);
-		let total = load.quantity;
-		if (!entity) {
-			return $pretty(load);
-		}
-		return $infoSmall({
-			label: entity.name,
-			info: [
-				{
-					body: `${shortNumber(load.quantity)} ${entity.name}`,
-					accesory: new Array(Math.max(0, Math.ceil(total) ?? 0))
-						.fill(entity.emoji)
-						.splice(0, 200),
-				},
-			],
-		});
-	});
-const $info = (
-	entityId: ID,
-	gameState: GameState,
-	{ onNavigate }: Pick<WindowCallbacks, 'onNavigate'>
-) => {
-	const agent = findEntity(entityId, gameState);
-	if (!agent) {
-		return;
+const OrderLoadRows = ({ entityId }: { entityId: ID }) => {
+	const order = useLastKnownEntityState(entityId);
+	if (!order || !('load' in order)) {
+		return null;
 	}
-	let rows: TemplateHole[] = [];
-	if ('cargo' in agent) {
-		rows.push(...$cargoRows(agent.cargo, gameState));
-	}
-	if ('start' in agent) {
-		rows.push($roadInfo(agent, gameState));
-	}
+	return <OrderLoadRow order={order} />;
+};
 
-	if ('color' in agent) {
-		rows.push($colorRow(agent));
-	}
+const RoadRow = ({ entityId }: { entityId: ID }) => {
+	const road = useLastKnownEntityState(entityId);
+	if (!road || !entityIsRoad(road)) return null;
 
-	if ('load' in agent) {
-		rows.push($orderInspector(agent, gameState, { onNavigate }));
-	}
-
-	if (agent.type === EntityType.Vehicle) {
-		const tires = {
-			5: 'Nice n chill',
-			10: 'Balanced',
-			20: 'Bananas',
-		};
-
-		rows.push(
-			...[
-				$form({
-					label: 'Tires',
-					control: $select({
-						values: tires,
-						selected: agent.offroadSpeed * 10,
-						onChange: (val) => {
-							const offroadSpeed = parseInt(val, 10) / 10;
-							mergeEntity<Vehicle>(agent.id, {
-								offroadSpeed,
+	return (
+		<Form label={'Road'}>
+			<MiniGrid>
+				{[RoadEnd.start, RoadEnd.end].map((roadEnd) => (
+					<VisibleButton
+						onClick={() => {
+							dispatchToCanvas({
+								type: 'set-edit-mode-target',
+								to: {
+									entityId: road.id,
+									roadEnd,
+								},
 							});
-						},
-					}),
-				}),
-				$form({
-					label: `This vehicle likes roads a ${agent.preferenceForRoads}/10`,
-					control: html`
-						<input
-							@change=${(ev) => {
-								const preferenceForRoads = parseInt(ev.target.value, 10);
-								mergeEntity<Vehicle>(agent.id, {
-									preferenceForRoads,
-								});
-							}}
-							type="range"
-							min="0"
-							max="10"
-							value=${agent.preferenceForRoads}
-						/>
-					`,
-				}),
-			]
-		);
-	}
+						}}>
+						Set {roadEnd}
+					</VisibleButton>
+				))}
+			</MiniGrid>
+		</Form>
+	);
+};
 
-	return $rows(rows.filter(Boolean));
+const ColorRow = ({ entityId }: { entityId: ID }) => {
+	const entity = useLastKnownEntityState(entityId);
+	if (!entity || !('color' in entity)) return null;
+
+	return (
+		<Form label={'Color'}>
+			<input
+				onChange={(ev) => {
+					//@ts-ignore
+					const color = parseInt(ev?.target?.value ?? 0, 10);
+					mergeEntity<Entity & WithColor>(entity.id, {
+						color,
+					});
+				}}
+				type="range"
+				id="color"
+				name="color"
+				min="0"
+				max="360"
+				value={entity.color}
+			/>
+		</Form>
+	);
+};
+
+const CargoRow = ({ load }: { load: WithCargo['cargo'][string] }) => {
+	const product = useLastKnownEntityState(load.productId);
+	let { quantity } = load;
+	if (!product) {
+		return <Pre>{load}</Pre>;
+	}
+	return (
+		<Info heading={product.name}>
+			<Accesory
+				accesory={new Array(Math.max(0, Math.ceil(quantity) ?? 0))
+					.fill(product.emoji)
+					.splice(0, 200)}>
+				{shortNumber(quantity) + ' ' + product.name}
+			</Accesory>
+		</Info>
+	);
+};
+
+const EntityInfoTab = ({ entityId }: { entityId: ID }) => {
+	const entity = useLastKnownEntityState(entityId);
+	const status = useEntityStatus(entityId);
+	if (!entity) {
+		return null;
+	}
+	let rows: (string | JSX.Element)[] = [];
+
+	status && rows.push(status);
+
+	if ('cargo' in entity) {
+		for (let cargo of Object.values(entity.cargo)) {
+			rows.push(<CargoRow load={cargo} />);
+		}
+	}
+	if ('color' in entity) {
+		rows.push(<ColorRow entityId={entityId} />);
+	}
+	if ('load' in entity) {
+		rows.push(<OrderLoadRows entityId={entityId} />);
+	}
+	if (entityIsRoad(entity)) {
+		rows.push(<RoadRow entityId={entityId} />);
+	}
+	return <RowList padding="normal">{rows}</RowList>;
 };
 
 export const EntityInspector = ({ entityId }: { entityId: ID }) => {
-	let entity = useLastKnownGameState(
-		(s) => findEntity(entityId, s),
-		UIStatePriority.Snail
-	);
+	const { setIdentifiers } = useTaskbarItem();
 
-	return <strong>{entity?.name}</strong>;
+	const entity = useLastKnownEntityState(entityId);
+	useEffect(() => {
+		entity && setIdentifiers(entity);
+	}, [entity?.name]);
+
+	return (
+		<Tabs>
+			{[
+				{
+					emoji: 'ℹ️',
+					name: 'Basic',
+					contents: <EntityInfoTab entityId={entityId} />,
+				},
+				{
+					emoji: '📥',
+					name: 'Orders',
+					shows: entity?.type === EntityType.Vehicle,
+					contents: <OrderInfoTab entityId={entityId} />,
+				},
+				{
+					emoji: '🛣',
+					name: 'Paths',
+					shows: entity?.type === EntityType.Vehicle,
+					contents: <PathInfoTab entityId={entityId} />,
+				},
+				{
+					emoji: '🔧',
+					name: 'System',
+					contents: <EntitySettingsTab entityId={entityId} />,
+				},
+			]}
+		</Tabs>
+	);
 };

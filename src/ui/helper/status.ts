@@ -1,8 +1,26 @@
-import { EntityType } from '../../helper/defs';
+import { Order, OrderType } from '../../entity/composables/with-orders';
 import { findEntity } from '../../game/entities';
-import { GameState, ID } from '../../helper/defs';
-import { OrderType } from '../../entity/composables/with-orders';
+import { EntityType, GameState, ID } from '../../helper/defs';
 import { $t } from '../components/type';
+import { useLastKnownGameState } from './../hook/use-game-state';
+
+const getOrderStatus = (entity: Order, gameState: GameState) => {
+	if (!entity) {
+		return null;
+	}
+	switch (entity.order) {
+		case OrderType.Load:
+			return `Load ${entity.load.quantity} boxes of ${$t(
+				findEntity(entity.load.product, gameState)
+			)}`;
+		case OrderType.Unload:
+			return `Unload ${entity.load.quantity} boxes of ${$t(
+				findEntity(entity.load.product, gameState)
+			)}`;
+		case OrderType.Move:
+			return `Move to ${$t(findEntity(entity.target, gameState))}`;
+	}
+};
 
 export const getAgentStatus = (entityId: ID, gameState: GameState) => {
 	const agent = findEntity(entityId, gameState);
@@ -10,19 +28,17 @@ export const getAgentStatus = (entityId: ID, gameState: GameState) => {
 	if (!agent) {
 		return txt;
 	}
-	if (agent.type === EntityType.Order) {
-		switch (agent.order) {
-			case OrderType.Load:
-				return `Load ${agent.load.quantity} boxes of ${$t(
-					findEntity(agent.load.product, gameState)
-				)}`;
-			case OrderType.Unload:
-				return `Unload ${agent.load.quantity} boxes of ${$t(
-					findEntity(agent.load.product, gameState)
-				)}`;
-			case OrderType.Move:
-				return `Move to ${$t(findEntity(agent.target, gameState))}`;
+	if (agent.type === EntityType.Vehicle) {
+		let status = getOrderStatus(
+			findEntity(agent.orders.list[agent.orders.position], gameState) as Order,
+			gameState
+		);
+		if (status) {
+			txt = status;
 		}
+	}
+	if (agent.type === EntityType.Order) {
+		return getOrderStatus(agent, gameState);
 	}
 	if (agent.type !== EntityType.Vehicle) {
 		return txt;
@@ -32,4 +48,9 @@ export const getAgentStatus = (entityId: ID, gameState: GameState) => {
 	}
 
 	return txt;
+};
+
+export const useEntityStatus = (entityId: ID) => {
+	const world = useLastKnownGameState((s) => s);
+	return getAgentStatus(entityId, world);
 };
