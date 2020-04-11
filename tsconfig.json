@@ -1,6 +1,8 @@
 {
 	"allowSyntheticDefaultImports": true,
 	"compilerOptions": {
+		"jsx": "react",
+		"jsxFactory": "h",
 		"moduleResolution": "node",
 		"strictNullChecks": true,
 		"lib": ["esnext", "dom", "webworker"],

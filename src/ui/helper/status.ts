@@ -1,8 +1,8 @@
 import { EntityType } from '../../helper/defs';
 import { findEntity } from '../../game/entities';
-import { $t } from '../components/type';
 import { GameState, ID } from '../../helper/defs';
 import { OrderType } from '../../entity/composables/with-orders';
+import { $t } from '../components/type';
 
 export const getAgentStatus = (entityId: ID, gameState: GameState) => {
 	const agent = findEntity(entityId, gameState);

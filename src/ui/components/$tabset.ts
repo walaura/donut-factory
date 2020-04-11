@@ -4,8 +4,7 @@ import { TemplateHole } from '../helper/defs';
 import { useState } from '../helper/useState';
 import { html } from 'lit-html';
 import { css } from '../helper/style';
-import { $emoji } from './emoji';
-import { $rows } from './rows/row';
+import { $emoji } from './$emoji';
 import { $wash } from './$wash';
 
 import { $flex } from './$flex';

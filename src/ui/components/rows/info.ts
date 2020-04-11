@@ -1,8 +1,8 @@
 import { html } from 'lit-html';
-import { $emoji } from '../emoji';
-import { $heading } from '../type';
-import { css } from '../../helper/style';
 import { $padding } from '../$padding';
+import { css } from '../../helper/style';
+import { $emoji } from '../$emoji';
+import { $heading } from '../type';
 
 interface Info {
 	body: any;

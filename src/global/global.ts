@@ -7,6 +7,8 @@ import { GameAction } from '../wk/game.actions';
 import { renderCanvasLayers } from '../canvas/canvas';
 import { CanvasRendererState } from '../wk/canvas.defs';
 import { CanvasAction } from '../wk/canvas.actions';
+import { SerializableRoute } from '../ui/helper/route.defs.ts';
+import { XY } from '../helper/xy';
 
 export type Workers = {
 	game: Worker;
@@ -18,6 +20,9 @@ export type MainThreadMemory = {
 	lastKnownGameState: LastKnownGameState | null;
 	lastKnownCanvasState: LastKnownCanvasRendererState | null;
 	workers: Workers | null;
+	ui: {
+		pushRoute: (xy: XY, rt: SerializableRoute) => void;
+	} | null;
 };
 
 export type WorkerMemory =

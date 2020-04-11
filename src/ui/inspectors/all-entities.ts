@@ -7,13 +7,10 @@ import {
 import { MkConsumer } from '../../entity/consumer';
 import { MkMover } from '../../entity/vehicle';
 import { addEntity } from '../../game/entities';
-import { Entity, entityHasXY, GameState } from '../../helper/defs';
+import { Entity, GameState } from '../../helper/defs';
 import { $tabset } from '../components/$tabset';
 import { $infoBig } from '../components/rows/info';
-import { $rows } from '../components/rows/row';
 import { getAgentStatus } from '../helper/status';
-import { useGameState } from '../helper/useGameState';
-import { entityInspector } from './entity-inspector';
 
 let fairypos = { x: 45, y: 15 };
 
@@ -47,38 +44,10 @@ const allEntities = (): CallableWindowRoute => ({
 				{
 					name: 'useful agents',
 					emoji: '🚚',
-					contents: [
-						useGameState((state) =>
-							$rows(
-								Object.values(state.entities)
-									.filter(entityHasXY)
-									.map((agent) =>
-										$row(agent, state, entityInspector(agent.id), {
-											onNavigate,
-											selectedNavigator,
-										})
-									)
-							)
-						),
-					],
 				},
 				{
 					name: 'All other agents',
 					emoji: '📋',
-					contents: [
-						useGameState((state) =>
-							$rows(
-								Object.values(state.entities)
-									.filter((a) => !entityHasXY(a))
-									.map((agent) =>
-										$row(agent, state, entityInspector(agent.id), {
-											onNavigate,
-											selectedNavigator,
-										})
-									)
-							)
-						),
-					],
 				},
 				{
 					name: 'Build/Hire',

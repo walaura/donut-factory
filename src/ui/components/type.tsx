@@ -1,15 +1,16 @@
-import { html } from 'lit-html';
+import { h, JSX } from 'preact';
 import { Entity } from '../../helper/defs';
+import { css } from '../helper/style';
 
-export const $heading = (txt) => html`
-	<style>
-		x-heading {
+export const Heading = ({ children }: { children: JSX.Element | string }) => (
+	<h3
+		class={css`
 			font-weight: var(--font-bold);
 			color: var(--text-bold);
-		}
-	</style>
-	<x-heading><h3>${txt}</h3></x-heading>
-`;
+		`}>
+		{children}
+	</h3>
+);
 
 export const $t = (entity: Pick<Entity, 'name' | 'emoji'> | null) =>
 	entity ? `${entity.emoji}${entity.name}` : 'Unknown';

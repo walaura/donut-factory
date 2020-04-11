@@ -1,15 +1,14 @@
-import { XY } from '../../helper/xy';
 import { TemplateHole } from '../helper/defs';
 import {
 	$windowBase,
 	CallableWindowRoute,
 	generateCallableWindowFromEv,
+	WindowRendererProps,
 } from './$window';
-import { $wash } from '../components/$wash';
 
 export const $basicWindow = (
 	callable: CallableWindowRoute,
-	{ x, y, onClose }: Partial<XY> & { onClose: () => void }
+	{ at: { x, y }, onClose, scope }: WindowRendererProps
 ): TemplateHole => {
 	const onNavigate = generateCallableWindowFromEv;
 	return $windowBase({
@@ -17,6 +16,6 @@ export const $basicWindow = (
 		y,
 		onClose,
 		...callable,
-		children: callable.render({ onNavigate, onClose }),
+		children: callable.render({ onNavigate, onClose, scope }),
 	});
 };

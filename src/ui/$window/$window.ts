@@ -6,6 +6,7 @@ import { draggable } from '../helper/draggable';
 import { css, keyframes } from '../helper/style';
 import { $basicWindow } from './$basic-window';
 import { $detailViewWindow } from './$detail-view-window';
+import { XY } from '../../helper/xy';
 
 let windows = [];
 
@@ -22,6 +23,8 @@ $dockRef.className = css`
 const addDynamicWindow = (handle: (ref: HTMLElement) => TemplateHole) => {
 	let $holder = document.createElement('no-op');
 	$dockRef.appendChild($holder);
+
+	$holder.__windowScope = {};
 	render(handle($holder), $holder);
 };
 
@@ -32,10 +35,13 @@ export interface BaseWindowProps {
 	onClose?: () => void;
 }
 
+export type WindowScopeRef = { current: any };
+
 export interface WindowCallbacks {
 	onClose: () => void;
 	onNavigate: (ev: MouseEvent) => (wndw: CallableWindowRoute) => void;
 	selectedNavigator?: CallableWindowRoute;
+	windowScope: WindowScopeRef;
 }
 export enum CallableWindowTypes {
 	'Simple',
@@ -55,19 +61,30 @@ export type CallableWindowRoute = BaseWindowProps & {
 	render: (cb: WindowCallbacks) => TemplateHole;
 };
 
+export type WindowRendererProps = {
+	at: XY;
+	onClose: () => void;
+	scope: WindowScopeRef;
+};
+
 export const generateCallableWindowFromEv = ({
 	clientX: x,
 	clientY: y,
 }: MouseEvent) => (props: CallableWindowRoute) => {
-	addDynamicWindow((parentRef) => {
+	addDynamicWindow(($holder) => {
 		const onClose = () => {
 			$dockRef.dataset.withModal = undefined;
-			parentRef.remove();
+			$holder.remove();
 		};
-		if (props.type === CallableWindowTypes.MasterDetail) {
+		if (false && props.type === CallableWindowTypes.MasterDetail) {
 			return $detailViewWindow(props, { onClose, x, y });
 		}
-		return $basicWindow(props, { onClose, x, y });
+		debugger;
+		return $basicWindow(props, {
+			onClose,
+			at: { x, y },
+			scope: { current: $holder.__windowScope },
+		});
 	});
 };
 export const $windowDock = () => {

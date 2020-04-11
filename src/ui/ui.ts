@@ -1,23 +1,17 @@
-import { dispatchToCanvas } from './../global/dispatch';
-import { render } from 'lit-html';
+import { h, render } from 'preact';
+import { Road } from '../entity/road';
+import { mergeEntity } from '../game/entities';
+import { getWorker } from '../global/worker';
 import { GameState } from '../helper/defs';
 import {
+	CanvasRendererMessage,
 	listenFromWindow,
 	LoopWorkerMessage,
 	MsgActions,
-	CanvasRendererMessage,
 } from '../helper/message';
-import { Target } from '../helper/target';
-import { $compatError } from './$compaterror';
-import { $dock } from './$dock';
-import { $windowDock, generateCallableWindowFromEv } from './$window/$window';
-import { onStateUpdate } from './helper/useGameState';
-import { entityInspector } from './inspectors/entity-inspector';
-import { mergeEntity } from '../game/entities';
-import { Road } from '../entity/road';
-import { getWorker } from '../global/worker';
-
-const Board = (worker) => [$compatError(), $windowDock(), $dock(worker)];
+import { dispatchToCanvas } from './../global/dispatch';
+import { onReactStateUpdate } from './hook/use-game-state';
+import { UI } from './react-root';
 
 let worker;
 let rendered = false;
@@ -25,17 +19,17 @@ const renderSetup = () => {
 	if (self.memory.id !== 'MAIN') {
 		throw 'no';
 	}
+	let rendered = false;
 	let onTick = (state: GameState) => {
-		onStateUpdate(state);
+		if (!rendered) {
+			render(h(UI, {}), (window as any).overlays);
+			rendered = true;
+		}
+		onReactStateUpdate(state);
 		if (worker) {
 			worker.postMessage({ action: 'TOCK', state } as LoopWorkerMessage);
-			if (!rendered) {
-				render(Board(worker), (window as any).game);
-				rendered = true;
-			}
 		}
 	};
-	let selected: Target;
 
 	const pixelRatio = 1.5;
 	const $canvas = (window as any).floor as HTMLCanvasElement;
@@ -91,9 +85,10 @@ const renderSetup = () => {
 			self.memory.lastKnownCanvasState.selected &&
 			'entityId' in self.memory.lastKnownCanvasState.selected
 		) {
-			generateCallableWindowFromEv(ev)(
-				entityInspector(self.memory.lastKnownCanvasState.selected.entityId)
-			);
+			self.memory.ui?.pushRoute(ev, [
+				'entity',
+				{ entityId: self.memory.lastKnownCanvasState.selected.entityId },
+			]);
 		}
 	});
 

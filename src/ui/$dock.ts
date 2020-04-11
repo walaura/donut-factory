@@ -1,20 +1,14 @@
 import { html } from 'lit-html';
 import { styleMap } from 'lit-html/directives/style-map';
+import { dispatchToCanvas } from '../global/dispatch';
 import { generateCallableWindowFromEv } from './$window/$window';
-import { $flex } from './components/$flex';
-import { $padding } from './components/$padding';
-import { $wash } from './components/$wash';
-import { $emoji } from './components/emoji';
-import { $pretty } from './components/rows/pretty';
 import { TemplateHole } from './helper/defs';
 import { numberWithCommas } from './helper/format';
 import { css } from './helper/style';
-import { UIStatePriority, useGameState } from './helper/useGameState';
 import { allEntities } from './inspectors/all-entities';
 import { moneyInspector } from './inspectors/money-inspector';
-import { MsgActions } from '../helper/message';
-import { dispatchToCanvas } from '../global/dispatch';
-import { $infoWindow } from './windows/info';
+import { $infoWindow } from './windows/system';
+import { $emoji } from './components/$emoji';
 
 const $pressable = (
 	children: TemplateHole,
@@ -104,7 +98,7 @@ const $dockPanel = (
 	);
 };
 
-const $dock = (wk) => {
+const $dock = () => {
 	const styles = css`
 		position: fixed;
 		contain: content;
@@ -115,65 +109,23 @@ const $dock = (wk) => {
 		grid-auto-flow: column;
 		grid-gap: calc(var(--space-h) * 2);
 		transition: 0.1s ease-in-out;
-		& button:active x-emoji {
+		& button:active [data-cssid='emoji'] {
 			transform: scale(1.5);
 		}
 	`;
 
 	return html` <x-dock class=${styles}>
 		${[
-			$dockPanel(
-				[
-					$dockEmoji({ emoji: '💰', title: 'Money' }),
-					$dockText(
-						useGameState(
-							(state) =>
-								numberWithCommas(
-									state.ledger.map(({ tx }) => tx).reduce((a, b) => a + b, 0)
-								),
-							UIStatePriority.Bunny
-						)
-					),
-				],
-				{
-					onClick: (ev) => {
-						generateCallableWindowFromEv(ev)(moneyInspector());
-					},
-				}
-			),
+			$dockPanel([$dockEmoji({ emoji: '💰', title: 'Money' })], {
+				onClick: (ev) => {
+					generateCallableWindowFromEv(ev)(moneyInspector());
+				},
+			}),
 			html`<div
 				class=${css`
 					position: relative;
 				`}
-			>
-				${useGameState((state) => {
-					let date = new Date(state.date);
-					const dtf = new Intl.DateTimeFormat('en', {
-						year: 'numeric',
-						month: 'short',
-						day: '2-digit',
-					});
-					const clock = new Intl.DateTimeFormat('en', {
-						hour: 'numeric',
-						minute: 'numeric',
-					});
-					return $dockPanel([
-						$dockEmoji({ emoji: '📆', title: 'Calendar' }),
-						$dockText(dtf.format(date)),
-						$dockText(
-							html`<div
-								class=${css`
-									width: 7ch;
-									overflow: hidden;
-									text-align: center;
-								`}
-							>
-								${clock.format(date)}
-							</div>`
-						),
-					]);
-				}, UIStatePriority.UI)}
-			</div>`,
+			></div>`,
 			$dockPanel([
 				$dockEmoji({
 					emoji: '🌈',

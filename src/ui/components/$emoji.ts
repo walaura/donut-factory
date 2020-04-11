@@ -20,5 +20,5 @@ export const $emoji = (str) => {
 			transform: translate(10%, 5%);
 		}
 	`;
-	return html`<x-emoji class=${styles}><xe-glyph>${str}</xe-glyph></x-emoji>`;
+	return html`<[data-cssid='emoji'] class=${styles}><xe-glyph>${str}</xe-glyph></[data-cssid='emoji']>`;
 };
