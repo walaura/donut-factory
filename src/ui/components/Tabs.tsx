@@ -5,6 +5,7 @@ import { DietButton } from './button';
 import { Flex } from './list/flex-list';
 import { Wash } from './wash';
 import { Emoji } from './emoji';
+import { Scroll } from './primitives/scroll';
 
 interface Tab {
 	name: string;
@@ -37,8 +38,8 @@ const tabbarStyles = {
 			min-height: var(--pressable);
 			box-shadow: none !important;
 			display: grid;
-			align-items: center;
-			justify-content: center;
+			align-items: stretch;
+			justify-content: stretch;
 			background: none;
 			padding: 0;
 			border-radius: 0;

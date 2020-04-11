@@ -1,12 +1,10 @@
-import { html, render } from 'lit-html';
 import sum from 'hash-sum';
-
 import * as postcss from 'postcss';
 
 const makeWrapper = (className) => {
-	let selector = ['styles', className].join('-');
+	let selector = ['style', className].join('-');
 	if (!document.querySelector(`#${selector}`)) {
-		let $styles = document.createElement('x-styles');
+		let $styles = document.createElement('style');
 		$styles.id = selector;
 		document.head.append($styles);
 		return $styles;
@@ -22,12 +20,12 @@ const parseNSaveRawCss = (
 	if (!$styles) {
 		return className;
 	}
-	render(
-		html`<style>
-			${parser(className, raw)}
-		</style>`,
-		$styles
-	);
+	let cssResult = parser(className, raw);
+	if (cssResult instanceof Array) {
+		$styles.innerText = cssResult.join('\n');
+	} else {
+		$styles.innerText = cssResult;
+	}
 	return className;
 };
 
