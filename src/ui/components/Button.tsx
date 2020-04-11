@@ -1,5 +1,6 @@
 import { h, JSX } from 'preact';
 import { css } from '../helper/style';
+import { Emoji } from './Emoji';
 
 const dietStyles = css`
 	display: contents;
@@ -11,6 +12,7 @@ export const DietButton = (props) => (
 const styles = {
 	shared: css`
 		text-align: left;
+		display: flex;
 		border-radius: var(--radius-small);
 		overflow: hidden;
 		&:focus:not(.focus-visible) {
@@ -32,9 +34,11 @@ const styles = {
 		}
 	`,
 	visible: css`
+		color: var(--bg-light);
 		padding: calc(var(--space-h) / 2);
-		background: var(--bg-light);
+		background: var(--alt);
 		box-shadow: var(--shadow-2);
+		font-weight: var(--font-bold);
 		margin: 0;
 	`,
 	reveal: css`
@@ -57,18 +61,49 @@ const styles = {
 			right: 0;
 		}
 		&:hover > div:first-child {
-			opacity: 0.25;
+			opacity: 0.1;
 		}
 		&:active > div:first-child {
-			opacity: 0.6;
+			opacity: 0.2;
 		}
 	`,
 };
-export const VisibleButton = (props: JSX.HTMLAttributes<HTMLButtonElement>) => (
+
+const visibleButtonLayoutStyles = {
+	square: css`
+		display: grid;
+		grid-template-columns: 1fr;
+		grid-template-rows: min-content min-content;
+		align-items: flex-start;
+		justify-content: space-between;
+		justify-items: space-between;
+		grid-gap: var(--space-v);
+	`,
+};
+type VisibleButtonProps = {
+	children;
+	icon?: string;
+	iconLayout?: keyof typeof visibleButtonLayoutStyles;
+};
+
+export const VisibleButton = ({
+	children,
+	icon,
+	iconLayout = 'square',
+	...props
+}: VisibleButtonProps & JSX.HTMLAttributes<HTMLButtonElement>) => (
 	<button
 		{...props}
-		className={[styles.shared, styles.animation, styles.visible].join(' ')}
-	/>
+		className={[styles.shared, styles.animation, styles.visible].join(' ')}>
+		{icon ? (
+			<div class={visibleButtonLayoutStyles[iconLayout]}>
+				<Emoji emoji={icon} />
+				<span>{children}</span>
+			</div>
+		) : (
+			children
+		)}
+	</button>
 );
 
 export const RevealButton = ({

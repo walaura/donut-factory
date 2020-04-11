@@ -16,6 +16,7 @@ const layouts = {
 	`,
 	fluffy: css`
 		grid-auto-columns: 1fr;
+		grid-auto-flow: column;
 	`,
 };
 
@@ -25,4 +26,4 @@ export const MiniGrid = ({
 }: {
 	children;
 	layout?: keyof typeof layouts;
-}) => <div class={[baseStyles, layout].join(' ')}>{children}</div>;
+}) => <div class={[baseStyles, layouts[layout]].join(' ')}>{children}</div>;

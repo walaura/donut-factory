@@ -62,9 +62,8 @@ export const OrderInfoTab = ({ entityId }: { entityId: ID }) => {
 				))}
 			</RowList>
 			<Padding>
-				<MiniGrid>
+				<MiniGrid layout={'fluffy'}>
 					<VisibleButton
-						layout={'square'}
 						icon={'✨'}
 						onClick={() => {
 							pushAttach({
@@ -83,7 +82,6 @@ export const OrderInfoTab = ({ entityId }: { entityId: ID }) => {
 						Add new order
 					</VisibleButton>
 					<VisibleButton
-						layout={'square'}
 						icon={'✨'}
 						onClick={() => {
 							pushAttach({
@@ -98,7 +96,6 @@ export const OrderInfoTab = ({ entityId }: { entityId: ID }) => {
 						Attach existing order
 					</VisibleButton>
 					<VisibleButton
-						layout={'square'}
 						icon={'🗑'}
 						onClick={() => {
 							clearOrders(entityId);

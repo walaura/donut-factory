@@ -40,9 +40,10 @@ pre {
 	background: #dcedc8;
 	--main: hsl(340, 82%, 52%);
 	--alt: hsl(241, 53%, 18%);
+	--action: #1aa864;
+	--action-fade: #e1f2ea;
 	--bg-wash: hsl(340, 80%, 82%, 0.35);
 	--bg-counter-wash: hsla(340, 100%, 97%, 0.9);
-	--text-title: hsl(340, 82%, 52%);
 	--bg-light: #fff;
 	--divider: hsla(243, 33%, 17%, 0.1);
 	--radius: 0.66em;
@@ -53,10 +54,11 @@ pre {
 	--pressable: 3em;
 	--text-dim: hsla(242, 33%, 17%, 0.815);
 	--text-bold: hsl(242, 56%, 17%);
+	--text-title: hsl(340, 82%, 52%);
 	--shadow-1: 0 0 0 1px rgba(255, 255, 255, 0.5),
 		0 0.25em 0.25em 0.25em rgba(0, 0, 0, 0.05);
 	--shadow-2: 0 0 0 1px rgba(255, 255, 255, 0.5),
-		0 0.125em 0.125em 0.125em rgba(0, 0, 0, 0.025);
+		0 0.25em 0.125em 0.125em rgba(0, 0, 0, 0.025);
 
 	--font-normal: 300;
 	--font-bold: 500;
