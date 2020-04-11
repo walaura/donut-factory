@@ -8,28 +8,31 @@ import {
 } from '../../helper/route.defs.ts';
 import { RouteFromProvider, RouteProvider } from '../use-route';
 import { useTaskbar } from '../use-taskbar';
+import { XY, Size } from '../../../helper/xy';
 
 export type TaskbarItemRenderer = (
 	props: RouteIdentifiers & { children: JSX.Element }
 ) => JSX.Element;
 
-export type TaskbarItemType =
+export type TaskbarItemType = {
+	id: ID;
+	container: TaskbarItemRenderer;
+	position?: XY;
+	size?: Size;
+} & (
 	| {
-			id: ID;
-			container: TaskbarItemRenderer;
 			route: SerializableRoute;
 	  }
 	| {
-			id: ID;
-			container: TaskbarItemRenderer;
 			content: JSX.Element;
 			emoji?: string;
 			name: string;
-	  };
+	  }
+);
 
 export type DeflatedTaskbarItemType = DistributiveOmit<
 	TaskbarItemType,
-	'id' | 'container'
+	'id' | 'container' | 'position' | 'size'
 >;
 
 type DistributiveOmit<T, K extends keyof T> = T extends unknown

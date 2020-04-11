@@ -2,6 +2,10 @@ export interface XY {
 	x: number;
 	y: number;
 }
+export interface Size {
+	width: number;
+	height: number;
+}
 
 const xy2arr = ({ x, y }: XY): [number, number] => [x, y];
 const xy = ([x, y]): XY => ({ x, y });

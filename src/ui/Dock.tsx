@@ -182,7 +182,11 @@ const ToolsPanel = () => {
 				onClick={(ev) => {
 					push(
 						{ route: ['allEntities', undefined] },
-						{ ev, prefersContainer: DetailsModal }
+						{
+							ev,
+							prefersContainer: DetailsModal,
+							size: { width: 600, height: 450 },
+						}
 					);
 				}}
 			/>

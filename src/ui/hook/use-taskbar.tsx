@@ -9,15 +9,19 @@ import {
 	TaskbarItemRenderer,
 	TaskbarItemType,
 } from './use-taskbar/Item';
+import { XY, Size } from '../../helper/xy';
 const shortid = require('shortid');
 
 type PushProps = {
 	prefersContainer?: TaskbarItemRenderer;
 	ev?: Pick<MouseEvent, 'clientX' | 'clientY'>;
+	size?: Size;
 };
 
 export type TaskbarContext = {
 	windows: TaskbarItemType[];
+	focusStack: ID[];
+	focus: (itemId: ID) => void;
 	push: (item: DeflatedTaskbarItemType, props: PushProps) => void;
 	closeWindow: (id: ID) => void;
 };
@@ -33,7 +37,7 @@ export const Taskbar = () => {
 	return (
 		<div data-cssid="windows">
 			{windows.map((item) => (
-				<WindowHandleProvider id={item.id}>
+				<WindowHandleProvider item={item}>
 					<Item item={item} />
 				</WindowHandleProvider>
 			))}
@@ -41,20 +45,29 @@ export const Taskbar = () => {
 	);
 };
 
+const evToXY = ({
+	clientX: x,
+	clientY: y,
+}: Pick<MouseEvent, 'clientX' | 'clientY'>): XY => ({ x, y });
+
 export const inflateTaskbarItem = (
 	deflated: DeflatedTaskbarItemType,
 	others: PushProps
 ): TaskbarItemType => {
 	if ('route' in deflated) {
 		return {
+			position: others.ev ? evToXY(others.ev) : undefined,
 			id: shortid(),
 			container: others.prefersContainer || Modal,
 			route: deflated.route,
+			size: others.size,
 		};
 	}
 	return {
+		position: others.ev ? evToXY(others.ev) : undefined,
 		id: shortid(),
 		container: others.prefersContainer || Modal,
+		size: others.size,
 		...deflated,
 	};
 };
@@ -67,6 +80,7 @@ export const TaskbarProvider = ({
 	pusher?: TaskbarContext['push'];
 }) => {
 	const [windows, setWindows] = useState<TaskbarContext['windows']>([]);
+	const [focusStack, focus] = useState<TaskbarContext['windows']>([]);
 
 	let push: TaskbarContext['push'];
 	if (pusher) {
@@ -79,7 +93,11 @@ export const TaskbarProvider = ({
 
 	const value: TaskbarContext = {
 		windows,
-		closeWindow: (id) => {
+		focusStack: [],
+		focus: (id: ID) => {
+			console.log('dsfdsf');
+		},
+		closeWindow: (id: ID) => {
 			setWindows((ws) => ws.filter((w) => w.id !== id));
 		},
 		push,
