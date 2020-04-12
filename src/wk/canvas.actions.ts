@@ -13,6 +13,10 @@ export type CanvasAction =
 			pos: XY;
 	  }
 	| {
+			type: 'pan-delta';
+			pos: XY;
+	  }
+	| {
 			type: 'toggle-edit-mode';
 	  }
 	| {
@@ -46,6 +50,15 @@ const editModeReducer: CanvasReducer<CanvasAction> = (action, state) => {
 				...state,
 				editMode: true,
 				editModeTarget: action.to,
+			};
+		}
+		case 'pan-delta': {
+			return {
+				...state,
+				viewport: {
+					x: state.viewport.x + action.pos.x,
+					y: state.viewport.y + action.pos.y,
+				},
 			};
 		}
 		case 'set-edit-mode':

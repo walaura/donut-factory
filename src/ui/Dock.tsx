@@ -175,39 +175,41 @@ const MoneyPanel = () => {
 const ToolsPanel = () => {
 	let { push } = useTaskbar();
 	return (
-		<DockPanel>
-			<DockEmoji
-				emoji={'👩‍🔧'}
-				title="Staffing"
-				onClick={(ev) => {
-					push(
-						{ route: ['allEntities', undefined] },
-						{
-							ev,
-							prefersContainer: DetailsModal,
-							size: { width: 600, height: 450 },
-						}
-					);
-				}}
-			/>
-			<DockEmoji
-				emoji={'✏️'}
-				title="Edit mode"
-				onClick={(ev) => {
-					dispatchToCanvas({
-						type: 'toggle-edit-mode',
-					});
-				}}
-			/>
+		<Fragment>
+			<DockPanel>
+				<DockEmoji
+					emoji={'👩‍🔧'}
+					title="Staffing"
+					onClick={(ev) => {
+						push(
+							{ route: ['allEntities', undefined] },
+							{
+								ev,
+								prefersContainer: DetailsModal,
+								size: { width: 600, height: 450 },
+							}
+						);
+					}}
+				/>
+				<DockEmoji
+					emoji={'✏️'}
+					title="Edit mode"
+					onClick={(ev) => {
+						dispatchToCanvas({
+							type: 'toggle-edit-mode',
+						});
+					}}
+				/>
 
-			<DockEmoji
-				emoji={'🍔'}
-				title="System"
-				onClick={(ev) => {
-					push({ route: ['system', undefined] }, { ev });
-				}}
-			/>
-		</DockPanel>
+				<DockEmoji
+					emoji={'🍔'}
+					title="System"
+					onClick={(ev) => {
+						push({ route: ['system', undefined] }, { ev });
+					}}
+				/>
+			</DockPanel>
+		</Fragment>
 	);
 };
 

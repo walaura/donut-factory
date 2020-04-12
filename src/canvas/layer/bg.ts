@@ -1,16 +1,16 @@
 import { OffscreenCanvasRenderer } from '../canvas.df';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
+import { mkWorldToScreen } from '../helper/latlong';
 
 const grass = '#dcedc8';
 const blueprint = '#4e72b5';
-
 const bgLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 	const canvas = makeCanvasOrOnScreenCanvas(width, height);
 	const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
-	let drawn = [false, false];
 	return ({ rendererState }) => {
-		const { zoom, editMode } = rendererState;
-		drawn[editMode ? 0 : 1] = true;
+		const { zoom, viewport, editMode } = rendererState;
+		const gridlines = zoom;
+		const gameWorldToViewport = mkWorldToScreen(rendererState);
 		ctx.clearRect(0, 0, width, height);
 		ctx.globalAlpha = 1;
 
@@ -22,17 +22,20 @@ const bgLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 		ctx.fillStyle = editMode ? 'white' : 'black';
 		ctx.globalAlpha = editMode ? 0.15 : 0.05;
 		rows.forEach((_, i) => {
+			let oi = i;
+			oi = i - Math.ceil(viewport.y / gridlines);
 			ctx.beginPath();
-			ctx.moveTo(0, i * zoom - 1);
-			ctx.lineTo(width, i * zoom - 1);
+			ctx.moveTo(0, oi * zoom + viewport.y - 1);
+			ctx.lineTo(width, oi * zoom + viewport.y - 1);
 			ctx.stroke();
 		});
 		columns.forEach((_, i) => {
+			let oi = i;
+			oi = i - Math.ceil(viewport.x / gridlines);
 			ctx.beginPath();
-			ctx.moveTo(i * zoom - 1, 0);
-			ctx.lineTo(i * zoom - 1, height);
+			ctx.moveTo(oi * gridlines + viewport.x - 1, 0);
+			ctx.lineTo(oi * gridlines + viewport.x - 1, height);
 			ctx.stroke();
-			ctx.fillText(i.toString(), i * zoom - 1, zoom / 2);
 		});
 		return canvas;
 	};

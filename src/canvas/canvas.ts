@@ -15,9 +15,11 @@ import { bgLayerRenderer } from './layer/bg';
 import { entityLayerRenderer } from './layer/entities';
 import { roadLayerRenderer } from './layer/road';
 import { Target, StatefulTarget } from '../helper/target';
+import { mkScreenToWorld, mkWorldToScreen } from './helper/latlong';
 
 const initialState: CanvasRendererState = {
 	selected: { xy: { x: 0, y: 0 } },
+	viewport: { x: 0, y: 0 },
 	zoom: 20,
 	gameCursor: { x: 0, y: 0 },
 	screenCursor: { x: 0, y: 0 },
@@ -91,7 +93,10 @@ export const renderCanvasLayers = (
 	const onFrame: ExternalOnFrame = ({ state, prevState, rendererState }) => {
 		rendererState = commitActions(rendererState);
 
-		rendererState.gameCursor = translateScreenCursorToGameCursor(rendererState);
+		let viewportToGameWorld = mkScreenToWorld(rendererState);
+		let world2screen = mkWorldToScreen(rendererState);
+
+		rendererState.gameCursor = viewportToGameWorld(rendererState.screenCursor);
 		rendererState.selected = findSelected({ state, rendererState });
 		const { gameCursor, zoom, selected } = rendererState;
 
@@ -113,8 +118,8 @@ export const renderCanvasLayers = (
 		// draw cursor
 		if (!('entityId' in selected)) {
 			ctx.beginPath();
-			const { x, y } = gameCursor;
-			ctx.rect(x * zoom, y * zoom, zoom, zoom);
+			const { x, y } = world2screen(gameCursor);
+			ctx.rect(x, y, zoom, zoom);
 			ctx.globalAlpha = 0.25;
 			ctx.stroke();
 			ctx.globalAlpha = 1;

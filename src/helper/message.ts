@@ -13,7 +13,6 @@ export enum MsgActions {
 	'START' = 'START',
 	'PushGameAction' = 'COMMIT_ACTION',
 	'PushCanvasAction' = 'COMMIT_CV_ACTION',
-	'ENTER_EDIT_MODE' = 'ENTER_EDIT_MODE',
 }
 
 export type CanvasRendererMessage =
@@ -33,9 +32,6 @@ export type CanvasRendererMessage =
 	| {
 			action: MsgActions.TOCK;
 			state: GameState;
-	  }
-	| {
-			action: MsgActions.ENTER_EDIT_MODE;
 	  };
 
 export type LoopWorkerMessage =

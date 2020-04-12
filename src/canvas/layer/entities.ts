@@ -7,6 +7,7 @@ import { OffscreenCanvasRenderer } from '../canvas.df';
 import { mkAnimations } from '../helper/animation';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 import { mkAgents } from '../sprite/entity';
+import { CanvasRendererState } from '../../wk/canvas.defs';
 
 const lerp = (start, end, t) => {
 	return start * (1 - t) + end * t;
@@ -16,6 +17,17 @@ interface Feedback extends WithID {
 	text: string;
 	xy: XY;
 }
+
+const mkGameWorldToViewport = (rendererState: CanvasRendererState) => {
+	const { zoom, viewport } = rendererState;
+	const translate = (xy: XY) => ({
+		x: xy.x + viewport.x,
+		y: xy.y + viewport.y,
+	});
+	const scale = (xy: XY) => mkScale(xy, zoom);
+
+	return (xy: XY) => translate(scale(xy));
+};
 
 const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 	let feedback: { [key in string]: Feedback } = {};
@@ -28,8 +40,7 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 
 	return ({ state, prevState, rendererState }) => {
 		const { selected, zoom } = rendererState;
-		const scale = (xy: XY) => mkScale(xy, zoom);
-
+		const gameWorldToViewport = mkGameWorldToViewport(rendererState);
 		ctx.clearRect(0, 0, width, height);
 		ctx.fillStyle = 'black';
 
@@ -51,7 +62,7 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 			if ('entityId' in selected && selected.entityId === entity.id) {
 				fontSize.up();
 			}
-			const { x, y } = scale(entity);
+			let { x, y } = gameWorldToViewport(entity);
 			let flip = false;
 			let prevAgent = prevState.entities[entity.id];
 			if (entity.type === EntityType.Vehicle && prevAgent && 'x' in prevAgent) {
@@ -107,7 +118,7 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 			ctx.fillText(
 				toast.text,
 				...xy2arr(
-					scale({
+					gameWorldToViewport({
 						x: toast.xy.x,
 						y: toast.xy.y + lerp(0, -10, yDelta.value),
 					})

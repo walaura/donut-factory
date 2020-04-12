@@ -4,6 +4,8 @@ import { XY } from '../../helper/xy';
 import { OffscreenCanvasRenderer } from '../canvas.df';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 import { mkDrawSprite } from '../sprite/sprite';
+import { mkWorldToScreen } from '../helper/latlong';
+import { CanvasRendererStateViewport } from '../../wk/canvas.defs';
 
 const angle = (p1: XY, p2: XY) => Math.atan2(p2.y - p1.y, p2.x - p1.x);
 
@@ -15,7 +17,7 @@ const roadLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 	const drawRoad = (
 		{ start, end }: { start: XY; end: XY },
 		rotate,
-		zoom: number,
+		{ zoom, viewport }: CanvasRendererStateViewport,
 		alpha = 1
 	) => {
 		let i = 0;
@@ -32,7 +34,7 @@ const roadLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 				'road',
 				{ rotate: rotate + Math.PI / 2 + (rota ? 0 : Math.PI) },
 				{ x: midX, y: midY },
-				zoom
+				{ zoom, viewport }
 			);
 			i++;
 		}
@@ -51,8 +53,8 @@ const roadLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 					rendererState.editModeTarget.entityId === entity.id
 				) {
 				} else {
-					drawSprite('cap', { scale: 1 }, entity.start, zoom);
-					drawSprite('cap', { scale: 1 }, entity.end, zoom);
+					drawSprite('cap', { scale: 1 }, entity.start, rendererState);
+					drawSprite('cap', { scale: 1 }, entity.end, rendererState);
 				}
 			}
 		}
@@ -70,17 +72,26 @@ const roadLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 					let to = rendererState.gameCursor;
 
 					let ghostRoad = { ...entity, [end]: to };
-					drawRoad(ghostRoad, angle(ghostRoad.start, ghostRoad.end), zoom);
+					drawRoad(
+						ghostRoad,
+						angle(ghostRoad.start, ghostRoad.end),
+						rendererState
+					);
 					[RoadEnd.end, RoadEnd.start].forEach((thisEnd) => {
 						let scale = 1;
 						if (thisEnd === end) {
 							scale = 1.75;
 						}
-						drawSprite('cap', { scale }, ghostRoad[thisEnd], zoom);
+						drawSprite('cap', { scale }, ghostRoad[thisEnd], rendererState);
 					});
-					drawRoad(entity, angle(entity.start, entity.end), zoom, 0.25);
+					drawRoad(
+						entity,
+						angle(entity.start, entity.end),
+						rendererState,
+						0.25
+					);
 				} else {
-					drawRoad(entity, angle(entity.start, entity.end), zoom);
+					drawRoad(entity, angle(entity.start, entity.end), rendererState);
 				}
 			}
 		}

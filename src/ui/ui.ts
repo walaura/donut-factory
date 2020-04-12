@@ -45,13 +45,40 @@ const renderSetup = () => {
 	}
 
 	const offscreenCanvas = $canvas.transferControlToOffscreen();
+
+	$canvas.onwheel = function (ev) {
+		ev.preventDefault();
+
+		dispatchToCanvas({
+			type: 'pan-delta',
+			pos: { x: ev.deltaX * -1, y: ev.deltaY * -1 },
+		});
+	};
+
 	$canvas.addEventListener('mousemove', ({ clientX: x, clientY: y }) => {
 		dispatchToCanvas({
 			type: 'set-screen-cursor',
 			pos: { x, y },
 		});
 	});
-	$canvas.addEventListener('click', (ev) => {
+	let mouseIsDown = false;
+	window.addEventListener('mousemove', ({ movementX: x, movementY: y }) => {
+		if (!mouseIsDown) {
+			return;
+		}
+		dispatchToCanvas({
+			type: 'pan-delta',
+			pos: { x, y },
+		});
+	});
+	$canvas.addEventListener('mousedown', () => {
+		mouseIsDown = true;
+	});
+	window.addEventListener('mouseup', () => {
+		mouseIsDown = false;
+	});
+
+	$canvas.addEventListener('mousedown', (ev) => {
 		if (self.memory.id !== 'MAIN') {
 			throw 'no';
 		}
