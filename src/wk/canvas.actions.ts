@@ -20,6 +20,9 @@ export type CanvasAction =
 			type: 'toggle-edit-mode';
 	  }
 	| {
+			type: 'toggle-debug-mode';
+	  }
+	| {
 			type: 'set-edit-mode-target';
 			to: Target | null;
 	  };
@@ -50,6 +53,12 @@ const editModeReducer: CanvasReducer<CanvasAction> = (action, state) => {
 				...state,
 				editMode: true,
 				editModeTarget: action.to,
+			};
+		}
+		case 'toggle-debug-mode': {
+			return {
+				...state,
+				debugMode: !state.debugMode,
 			};
 		}
 		case 'pan-delta': {

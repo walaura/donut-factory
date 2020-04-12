@@ -25,16 +25,21 @@ export type MainThreadMemory = {
 	} | null;
 };
 
+export type CanvasWorkerMemory = {
+	id: 'CANVAS-WK';
+	canvasHandle: ReturnType<typeof renderCanvasLayers> | undefined;
+	lastKnownGameState: LastKnownGameState | null;
+	prevKnownGameState: LastKnownGameState | null;
+	state: CanvasRendererState | null;
+	actionQueue: CanvasAction[];
+	store: {
+		[key in string]: OffscreenCanvas;
+	};
+};
+
 export type WorkerMemory =
 	| MainThreadMemory
-	| {
-			id: 'CANVAS-WK';
-			canvasHandle: ReturnType<typeof renderCanvasLayers> | undefined;
-			lastKnownGameState: LastKnownGameState | null;
-			prevKnownGameState: LastKnownGameState | null;
-			state: CanvasRendererState | null;
-			actionQueue: CanvasAction[];
-	  }
+	| CanvasWorkerMemory
 	| {
 			id: 'GAME-WK';
 			state: GameState | null;

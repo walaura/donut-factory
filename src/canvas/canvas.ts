@@ -25,6 +25,7 @@ const initialState: CanvasRendererState = {
 	screenCursor: { x: 0, y: 0 },
 	editMode: false,
 	editModeTarget: null,
+	debugMode: false,
 };
 
 const findSelected = ({
@@ -65,17 +66,6 @@ const findSelected = ({
 	}
 	return result;
 };
-
-const translateScreenCursorToGameCursor = ({
-	zoom,
-	screenCursor: { x, y },
-}: {
-	zoom: number;
-	screenCursor: XY;
-}) => ({
-	x: Math.round((x - zoom / 2) / zoom),
-	y: Math.round((y - zoom / 2) / zoom),
-});
 
 export const renderCanvasLayers = (
 	canvas: OffscreenCanvas,

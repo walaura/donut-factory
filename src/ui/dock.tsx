@@ -224,17 +224,15 @@ const Dock = (): h.JSX.Element => {
 	if (isEditMode) {
 		return (
 			<div class={styles}>
-				<DockPanel>
-					<DockEmoji
-						emoji={'🚫'}
-						title="Quit editing"
-						onClick={(ev) => {
-							dispatchToCanvas({
-								type: 'set-edit-mode',
-								to: false,
-							});
-						}}
-					/>
+				<DockPanel
+					onClick={(ev) => {
+						dispatchToCanvas({
+							type: 'set-edit-mode',
+							to: false,
+						});
+					}}>
+					<DockText>Stop Editing</DockText>
+					<DockEmoji emoji={'🚫'} title="Quit editing" />
 				</DockPanel>
 			</div>
 		);

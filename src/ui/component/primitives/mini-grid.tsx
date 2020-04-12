@@ -1,5 +1,6 @@
 import { h } from 'preact';
 import { css } from '../../helper/style';
+import { WithLayoutHints } from '../../hook/use-layout-hint';
 
 const baseStyles = css`
 	display: grid;
@@ -26,4 +27,12 @@ export const MiniGrid = ({
 }: {
 	children;
 	layout?: keyof typeof layouts;
-}) => <div class={[baseStyles, layouts[layout]].join(' ')}>{children}</div>;
+}) => (
+	<WithLayoutHints
+		horizontal={
+			layout === 'fluffy' || layout === 'dense' ? 'narrower' : 'normal'
+		}
+		vertical={layout === 'dense' ? 'narrower' : 'normal'}>
+		<div class={[baseStyles, layouts[layout]].join(' ')}>{children}</div>
+	</WithLayoutHints>
+);

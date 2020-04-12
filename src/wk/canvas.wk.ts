@@ -5,6 +5,7 @@ self.memory = {
 	lastKnownGameState: null,
 	prevKnownGameState: null,
 	actionQueue: [],
+	store: {},
 };
 
 import {
@@ -15,8 +16,6 @@ import {
 } from '../helper/message';
 import { renderCanvasLayers } from '../canvas/canvas';
 import { CanvasRendererState } from './canvas.defs';
-
-const ZOOM = 20;
 
 const fireTock = () => {
 	if (self.memory.id !== 'CANVAS-WK') {

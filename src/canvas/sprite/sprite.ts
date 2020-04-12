@@ -1,12 +1,9 @@
-import { XY } from '../../helper/xy';
-import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 import sum from 'hash-sum';
-import { CanvasRendererMessage } from '../../helper/message';
-import {
-	CanvasRendererState,
-	CanvasRendererStateViewport,
-} from '../../wk/canvas.defs';
+import { XY } from '../../helper/xy';
+import { CanvasRendererStateViewport } from '../../wk/canvas.defs';
 import { mkWorldToScreen } from '../helper/latlong';
+import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
+import { makeCanvas } from '../helper/canvas-store';
 
 export const SIZE = 60;
 const IMAGE_SIZE = 40;
@@ -22,9 +19,6 @@ const Sprites = {
 export type SpriteKey = keyof typeof Sprites;
 export type MkSpriteProps = { rotate?: number; scale?: number };
 
-let spriteStore: {
-	[key in number]: OffscreenCanvas;
-} = {};
 for (let key of Object.keys(Sprites)) {
 	fetch(Sprites[key])
 		.then((r) => r.blob())
@@ -44,34 +38,32 @@ const mkSprite = (
 	if (typeof Sprites[key] === 'string') {
 		return EMPTY;
 	}
-	let memo = sum({ key, rotate, scale });
-	if (spriteStore[memo]) {
-		return spriteStore[memo];
-	}
-	spriteStore[memo] = new OffscreenCanvas(SIZE, SIZE);
-	const ctx = spriteStore[memo].getContext(
-		'2d'
-	) as OffscreenCanvasRenderingContext2D;
+	return makeCanvas(
+		{ width: SIZE, height: SIZE },
+		{ key, rotate, scale }
+	)((canvas) => {
+		const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
 
-	ctx.clearRect(0, 0, SIZE, SIZE);
+		ctx.clearRect(0, 0, SIZE, SIZE);
 
-	ctx.setTransform();
-	if (rotate) {
-		ctx.translate(SIZE / 2, SIZE / 2);
-		ctx.rotate(rotate);
-		ctx.translate(SIZE / -2, SIZE / -2);
-	}
-	if (scale) {
-		ctx.translate(SIZE / 2, SIZE / 2);
-		ctx.scale(1 + scale / 2.5, 1 + scale / 2.5);
-		ctx.translate(SIZE / -2, SIZE / -2);
-	}
+		ctx.setTransform();
+		if (rotate) {
+			ctx.translate(SIZE / 2, SIZE / 2);
+			ctx.rotate(rotate);
+			ctx.translate(SIZE / -2, SIZE / -2);
+		}
+		if (scale) {
+			ctx.translate(SIZE / 2, SIZE / 2);
+			ctx.scale(1 + scale / 2.5, 1 + scale / 2.5);
+			ctx.translate(SIZE / -2, SIZE / -2);
+		}
 
-	ctx.drawImage(Sprites[key], OFFSET, OFFSET);
+		ctx.drawImage(Sprites[key], OFFSET, OFFSET);
 
-	ctx.setTransform(1, 0, 0, 1, 0, 0);
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-	return spriteStore[memo];
+		return canvas;
+	});
 };
 
 const mkDrawSprite = (ctx: OffscreenCanvasRenderingContext2D) => (

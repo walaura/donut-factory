@@ -20,5 +20,6 @@ export type CanvasRendererState = {
 	selected: Target;
 	screenCursor: XY;
 	gameCursor: XY;
+	debugMode: boolean;
 } & CanvasEditModes &
 	CanvasRendererStateViewport;

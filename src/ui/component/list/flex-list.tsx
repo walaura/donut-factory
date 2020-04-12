@@ -35,10 +35,6 @@ const distro = {
 		overflow: hidden;
 		flex: 1 0 0;
 	`,
-	scroll: css`
-		overflow: scroll;
-		flex: 1 0 0;
-	`,
 	squish: css`
 		flex: 0 1 auto;
 	`,

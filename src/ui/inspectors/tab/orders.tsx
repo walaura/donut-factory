@@ -18,6 +18,7 @@ import {
 	clearOrders,
 	linkOrder,
 } from '../../../entity/composables/with-orders';
+import { Scroll } from '../../component/primitives/scroll';
 const OrderInfoRow = ({
 	active,
 	orderId,
@@ -52,15 +53,17 @@ export const OrderInfoTab = ({ entityId }: { entityId: ID }) => {
 		return null;
 	}
 	return (
-		<Flex distribute={['scroll', 'squish']} dividers>
-			<RowList padding="normal">
-				{Object.values(ordered.orders.list).map((orderId, index) => (
-					<OrderInfoRow
-						active={ordered.orders.position === index}
-						orderId={orderId}
-					/>
-				))}
-			</RowList>
+		<Flex distribute={['grow', 'squish']} dividers>
+			<Scroll>
+				<RowList padding="normal">
+					{Object.values(ordered.orders.list).map((orderId, index) => (
+						<OrderInfoRow
+							active={ordered.orders.position === index}
+							orderId={orderId}
+						/>
+					))}
+				</RowList>
+			</Scroll>
 			<Padding>
 				<MiniGrid layout={'fluffy'}>
 					<VisibleButton

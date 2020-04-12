@@ -1,6 +1,7 @@
 import { h, JSX } from 'preact';
 import { css } from '../helper/style';
 import { Emoji } from './emoji';
+import { useLayoutHints } from '../hook/use-layout-hint';
 
 const dietStyles = css`
 	display: contents;
@@ -70,6 +71,15 @@ const styles = {
 };
 
 const visibleButtonLayoutStyles = {
+	long: css`
+		display: grid;
+		grid-template-columns: var(--pressable) 1fr;
+		grid-template-rows: 1fr;
+		align-items: center;
+		justify-items: center;
+		grid-gap: var(--space-h);
+		height: 100%;
+	`,
 	square: css`
 		display: grid;
 		grid-template-columns: 1fr;
@@ -82,29 +92,40 @@ const visibleButtonLayoutStyles = {
 };
 type VisibleButtonProps = {
 	children;
-	icon?: string;
-	iconLayout?: keyof typeof visibleButtonLayoutStyles;
-};
-
-export const VisibleButton = ({
-	children,
-	icon,
-	iconLayout = 'square',
-	...props
-}: VisibleButtonProps & JSX.HTMLAttributes<HTMLButtonElement>) => (
-	<button
-		{...props}
-		className={[styles.shared, styles.animation, styles.visible].join(' ')}>
-		{icon ? (
-			<div class={visibleButtonLayoutStyles[iconLayout]}>
-				<Emoji emoji={icon} />
-				<span>{children}</span>
-			</div>
-		) : (
-			children
-		)}
-	</button>
+	onClick: JSX.HTMLAttributes<HTMLButtonElement>['onClick'];
+} & (
+	| {
+			icon: string;
+	  }
+	| {
+			state: boolean;
+	  }
+	| {}
 );
+
+export const VisibleButton = ({ children, ...props }: VisibleButtonProps) => {
+	const { horizontal } = useLayoutHints();
+	let layout = horizontal === 'narrower' ? 'square' : 'long';
+	return (
+		<button
+			onMouseDown={props.onClick}
+			className={[styles.shared, styles.animation, styles.visible].join(' ')}>
+			{'icon' in props ? (
+				<div class={visibleButtonLayoutStyles[layout]}>
+					<Emoji emoji={props.icon} />
+					<span>{children}</span>
+				</div>
+			) : 'state' in props ? (
+				<div class={visibleButtonLayoutStyles[layout]}>
+					<Emoji emoji={props.state ? '🔴' : '💚'} />
+					<span>{children}</span>
+				</div>
+			) : (
+				children
+			)}
+		</button>
+	);
+};
 
 export const RevealButton = ({
 	isActive = false,

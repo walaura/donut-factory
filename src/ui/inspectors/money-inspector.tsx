@@ -9,6 +9,7 @@ import { clock, longDate, numberWithCommas } from '../helper/format';
 import { css } from '../helper/style';
 import { useLastKnownGameState } from '../hook/use-game-state';
 import { UIStatePriority } from '../hook/use-global-state';
+import { Scroll } from '../component/primitives/scroll';
 
 const currency = '$';
 
@@ -29,25 +30,25 @@ export const MoneyInspector = () => {
 
 	return (
 		<Wash>
-			<Flex distribute={['squish', 'scroll']}>
-				{[
-					<Padding>
-						<h1
-							class={css`
-								text-align: center;
-							`}>
-							{currency +
-								numberWithCommas(
-									ledger.map(({ tx }) => tx).reduce((a, b) => a + b, 0)
-								)}
-						</h1>
-					</Padding>,
+			<Flex dividers distribute={['squish', 'grow']}>
+				<Padding>
+					<h1
+						class={css`
+							text-align: center;
+						`}>
+						{currency +
+							numberWithCommas(
+								ledger.map(({ tx }) => tx).reduce((a, b) => a + b, 0)
+							)}
+					</h1>
+				</Padding>
+				<Scroll>
 					<RowList>
 						{[...ledger].reverse().map((entry) => (
 							<Row>{entry}</Row>
 						))}
-					</RowList>,
-				]}
+					</RowList>
+				</Scroll>
 			</Flex>
 		</Wash>
 	);

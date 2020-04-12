@@ -10,6 +10,9 @@ import { Heading } from '../component/type';
 import { clock, longDate } from '../helper/format';
 import { useLastKnownGameState } from '../hook/use-game-state';
 import { Scroll } from '../component/primitives/scroll';
+import { MiniGrid } from '../component/primitives/mini-grid';
+import { useLastKnownCanvasState } from '../hook/use-canvas-state';
+import { dispatchToCanvas } from '../../global/dispatch';
 
 const gitlog = require('../../../.git.json');
 
@@ -19,6 +22,7 @@ const AllState = () => {
 };
 
 export const SystemMenu = () => {
+	const debugMode = useLastKnownCanvasState((c) => c.debugMode);
 	return (
 		<Tabs>
 			{[
@@ -26,62 +30,76 @@ export const SystemMenu = () => {
 					emoji: '👋',
 					name: 'About',
 					contents: (
-						<Flex distribute={['grow', 'squish']} dividers>
-							<Scroll>
-								<RowList>
+						<Scroll>
+							<RowList>
+								<Padding>
+									<p>
+										Hey hi! This is Donut Factory. An experiment from{' '}
+										<a href="http://twitter.com/freezydorito">@freezydorito</a>{' '}
+										in building an OpenTTD clone from scratch.
+										<br />
+										<br />
+										Things are a bit broken at the moment but feel free to try
+										to make things work out!
+										<br />
+										<br />
+										You can check out the source code at{' '}
+										<a href="https://github.com/walaura/donut-factory">
+											github
+										</a>{' '}
+										too
+									</p>
+								</Padding>
+								<Padding>
+									<Heading>LOOK @ WHATS GOING ON</Heading>
+								</Padding>
+								{Object.values(gitlog).map((o: any) => (
 									<Padding>
-										<p>
-											Hey hi! This is Donut Factory. An experiment from{' '}
-											<a href="http://twitter.com/freezydorito">
-												@freezydorito
-											</a>{' '}
-											in building an OpenTTD clone from scratch.
-											<br />
-											<br />
-											Things are a bit broken at the moment but feel free to try
-											to make things work out!
-											<br />
-											<br />
-											You can check out the source code at{' '}
-											<a href="https://github.com/walaura/donut-factory">
-												github
-											</a>{' '}
-											too
-										</p>
+										<Info icon={'🎀'} heading={o.subject}>
+											{[
+												o.body &&
+													o.body.split('\n').map((itm) => (
+														<p>
+															{itm}
+															<br />
+														</p>
+													)),
+												longDate(parseInt(o.authordate, 10) * 1000) +
+													' - ' +
+													clock(parseInt(o.authordate, 10) * 1000),
+											]}
+										</Info>
 									</Padding>
-									<Padding>
-										<Heading>LOOK @ WHATS GOING ON</Heading>
-									</Padding>
-									{Object.values(gitlog).map((o: any) => (
-										<Padding>
-											<Info icon={'🎀'} heading={o.subject}>
-												{[
-													o.body &&
-														o.body.split('\n').map((itm) => (
-															<p>
-																{itm}
-																<br />
-															</p>
-														)),
-													longDate(parseInt(o.authordate, 10) * 1000) +
-														' - ' +
-														clock(parseInt(o.authordate, 10) * 1000),
-												]}
-											</Info>
-										</Padding>
-									))}
-								</RowList>
-							</Scroll>
-							<Padding>
+								))}
+							</RowList>
+						</Scroll>
+					),
+				},
+				{
+					emoji: '🍔',
+					name: 'Menu',
+					contents: (
+						<Padding>
+							<MiniGrid layout={'longcat'}>
 								<VisibleButton
+									icon={'💣'}
 									onClick={() => {
 										localStorage.removeItem('autosave');
 										window.location.reload();
 									}}>
 									NEW GAME (useful if things r broken)
 								</VisibleButton>
-							</Padding>
-						</Flex>
+								<VisibleButton
+									state={debugMode}
+									onClick={() => {
+										dispatchToCanvas({
+											type: 'toggle-debug-mode',
+										});
+									}}>
+									Canvas debug mode
+								</VisibleButton>
+							</MiniGrid>
+						</Padding>
 					),
 				},
 				{

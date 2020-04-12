@@ -16,6 +16,7 @@ const mkAgents = () => {
 			'2d'
 		) as OffscreenCanvasRenderingContext2D;
 		ctx.clearRect(0, 0, size, size);
+
 		if (flip) {
 			ctx.translate(size, 0);
 			ctx.scale(-1, 1);
@@ -24,6 +25,13 @@ const mkAgents = () => {
 		if ('color' in agent) {
 			ctx.filter = `hue-rotate(${agent.color}deg)`;
 		}
+
+		ctx.globalAlpha = 0.2;
+		ctx.beginPath();
+		ctx.arc(size / 2, size - 15, 10, 0, 2 * Math.PI);
+		ctx.fill();
+		ctx.globalAlpha = 1;
+
 		ctx.font = size * 0.66 + 'px Arial';
 		ctx.fillText(agent.emoji, size * 0.17, size * 0.75);
 		ctx.setTransform(1, 0, 0, 1, 0, 0);

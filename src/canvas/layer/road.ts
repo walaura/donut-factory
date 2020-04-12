@@ -1,11 +1,10 @@
 import { entityIsRoad, RoadEnd } from '../../entity/road';
 import { getDistanceToPoint } from '../../helper/pathfinding';
 import { XY } from '../../helper/xy';
+import { CanvasRendererStateViewport } from '../../wk/canvas.defs';
 import { OffscreenCanvasRenderer } from '../canvas.df';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 import { mkDrawSprite } from '../sprite/sprite';
-import { mkWorldToScreen } from '../helper/latlong';
-import { CanvasRendererStateViewport } from '../../wk/canvas.defs';
 
 const angle = (p1: XY, p2: XY) => Math.atan2(p2.y - p1.y, p2.x - p1.x);
 
