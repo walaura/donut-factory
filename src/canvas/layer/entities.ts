@@ -1,7 +1,7 @@
 import { worldToViewport } from './../helper/latlong';
 import { entityIsRoad } from '../../entity/road';
 import { findEntity } from '../../game/entities';
-import { EntityType, WithID } from '../../helper/defs';
+import { EntityType, WithID, WithCargo } from '../../helper/defs';
 import { appendWithId } from '../../helper/generate';
 import { scale as mkScale, XY, xy2arr } from '../../helper/xy';
 import { OffscreenCanvasRenderer } from '../canvas.df';
@@ -72,6 +72,24 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 			);
 		}
 
+		// have they created shit this frame
+		for (let entity of Object.values(state.entities)) {
+			if ('cargo' in entity && 'produces' in entity) {
+				for (let cargo of Object.values(entity.cargo)) {
+					if (!entity.produces.includes(cargo.productId)) {
+						continue;
+					}
+					let previousCargo = (prevState.entities[entity.id] as WithCargo)
+						.cargo[cargo.productId];
+					if (Math.floor(cargo.quantity) > Math.floor(previousCargo.quantity)) {
+						feedback = appendWithId(feedback, {
+							xy: entity,
+							text: findEntity(cargo.productId, state)?.name ?? '$$',
+						});
+					}
+				}
+			}
+		}
 		// pop cool text
 		let lastUpdate = state.ledger[state.ledger.length - 1];
 		if (
@@ -96,6 +114,10 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 				},
 				'toast:' + toast.id
 			);
+			const origin = worldToViewport({
+				x: toast.xy.x + Math.cos(lerp(0, Math.PI * 5, yDelta.value)) / 7.5,
+				y: toast.xy.y + lerp(0, -10, yDelta.value),
+			});
 			if (yDelta.value < yDelta.max) {
 				yDelta.up();
 			} else {
@@ -104,15 +126,42 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 			}
 			ctx.font = '16px sans-serif';
 			ctx.globalAlpha = lerp(2, 0, yDelta.value);
-			ctx.fillText(
-				toast.text,
-				...xy2arr(
-					worldToViewport({
-						x: toast.xy.x,
-						y: toast.xy.y + lerp(0, -10, yDelta.value),
-					})
-				)
+			let metrics = ctx.measureText(`${toast.text}`.toUpperCase());
+			let padding = 6;
+			let textBoxPosi = {
+				x: origin.x - padding,
+				y: origin.y - metrics.emHeightAscent - padding,
+			};
+			let textBoxDimensions = {
+				x: metrics.width + padding * 2,
+				y: metrics.emHeightAscent + padding * 2,
+			};
+
+			ctx.fillStyle = '#13B477';
+			ctx.fillRect(
+				textBoxPosi.x,
+				textBoxPosi.y,
+				textBoxDimensions.x,
+				textBoxDimensions.y
 			);
+			ctx.beginPath();
+			ctx.arc(
+				textBoxPosi.x,
+				textBoxPosi.y + textBoxDimensions.y / 2,
+				textBoxDimensions.y / 2,
+				0,
+				2 * Math.PI
+			);
+			ctx.arc(
+				textBoxPosi.x + textBoxDimensions.x,
+				textBoxPosi.y + textBoxDimensions.y / 2,
+				textBoxDimensions.y / 2,
+				0,
+				2 * Math.PI
+			);
+			ctx.fill();
+			ctx.fillStyle = '#fff';
+			ctx.fillText(`${toast.text}`.toUpperCase(), ...xy2arr(origin));
 			ctx.globalAlpha = 1;
 		}
 
