@@ -89,7 +89,9 @@ export const TaskbarProvider = ({
 		push = pusher;
 	} else {
 		push = (pushee, others) => {
-			setWindows((w) => [...w, inflateTaskbarItem(pushee, others)]);
+			const inflated = inflateTaskbarItem(pushee, others);
+			setWindows((w) => [...w, inflated]);
+			setFocusStack((prev) => [inflated.id, ...prev]);
 		};
 	}
 

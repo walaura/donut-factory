@@ -1,10 +1,8 @@
-import { mkWorldTile } from './../sprite/world-tile';
-import { declamp } from './../helper/math';
+import { absToViewport } from './../helper/latlong';
 import { OffscreenCanvasRenderer } from '../canvas.df';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
-import { mkWorldToScreen } from '../helper/latlong';
-import { XY } from '../../helper/xy';
-import { clamp } from '../helper/math';
+import { mkWorldTile } from './../sprite/world-tile';
+import { xy } from '../../helper/xy';
 const perlin = require('perlin-noise');
 
 const grass = '#ccd9bd';
@@ -39,16 +37,20 @@ const bgLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 
 		rows.forEach((_, row) => {
 			columns.forEach((_, col) => {
-				let col2 = col - Math.ceil(viewport.x / 600);
-				let row2 = row - Math.ceil(viewport.y / 600);
+				let offset = {
+					x: col - Math.ceil(viewport.x / 600),
+					y: row - Math.ceil(viewport.y / 600),
+				};
+				let atAbs = xy([chunkSize * offset.x, chunkSize * offset.y]);
+				let atViewport = absToViewport(atAbs);
 				ctx.drawImage(
 					mkWorldTile({
 						noise,
 						zoom,
-						at: { x: chunkSize * col2, y: chunkSize * row2 },
+						atAbs,
 					}),
-					0 + viewport.x + chunkSize * col2,
-					0 + viewport.y + chunkSize * row2,
+					atViewport.x,
+					atViewport.y,
 					chunkSize,
 					chunkSize
 				);
@@ -57,12 +59,7 @@ const bgLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 					ctx.font = '20px sans-serif';
 					ctx.fillStyle = 'red';
 					ctx.fillText(`${rows.length}row ${columns.length}col`, 40, 40);
-					ctx.strokeRect(
-						0 + viewport.x + chunkSize * col2,
-						0 + viewport.y + chunkSize * row2,
-						chunkSize,
-						chunkSize
-					);
+					ctx.strokeRect(atViewport.x, atViewport.y, chunkSize, chunkSize);
 				}
 			});
 		});

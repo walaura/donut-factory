@@ -1,3 +1,4 @@
+import { worldToViewport } from './../helper/latlong';
 import { entityIsRoad } from '../../entity/road';
 import { findEntity } from '../../game/entities';
 import { EntityType, WithID } from '../../helper/defs';
@@ -18,17 +19,6 @@ interface Feedback extends WithID {
 	xy: XY;
 }
 
-const mkGameWorldToViewport = (rendererState: CanvasRendererState) => {
-	const { zoom, viewport } = rendererState;
-	const translate = (xy: XY) => ({
-		x: xy.x + viewport.x,
-		y: xy.y + viewport.y,
-	});
-	const scale = (xy: XY) => mkScale(xy, zoom);
-
-	return (xy: XY) => translate(scale(xy));
-};
-
 const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 	let feedback: { [key in string]: Feedback } = {};
 	let mkAgent = mkAgents().mkAgent;
@@ -40,7 +30,6 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 
 	return ({ state, prevState, rendererState }) => {
 		const { selected, zoom } = rendererState;
-		const gameWorldToViewport = mkGameWorldToViewport(rendererState);
 		ctx.clearRect(0, 0, width, height);
 		ctx.fillStyle = 'black';
 
@@ -62,7 +51,7 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 			if ('entityId' in selected && selected.entityId === entity.id) {
 				fontSize.up();
 			}
-			let { x, y } = gameWorldToViewport(entity);
+			let { x, y } = worldToViewport(entity);
 			let flip = false;
 			let prevAgent = prevState.entities[entity.id];
 			if (entity.type === EntityType.Vehicle && prevAgent && 'x' in prevAgent) {
@@ -118,7 +107,7 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 			ctx.fillText(
 				toast.text,
 				...xy2arr(
-					gameWorldToViewport({
+					worldToViewport({
 						x: toast.xy.x,
 						y: toast.xy.y + lerp(0, -10, yDelta.value),
 					})

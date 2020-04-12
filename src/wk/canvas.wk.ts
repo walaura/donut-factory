@@ -1,6 +1,16 @@
 self.memory = {
 	id: 'CANVAS-WK',
-	state: null,
+	state: {
+		selected: { xy: { x: 0, y: 0 } },
+		viewport: { x: 0, y: 0 },
+		zoom: 20,
+		gameCursor: { x: 0, y: 0 },
+		screenCursor: { x: 0, y: 0 },
+		followTarget: null,
+		editMode: false,
+		editModeTarget: null,
+		debugMode: false,
+	},
 	canvasHandle: undefined,
 	lastKnownGameState: null,
 	prevKnownGameState: null,
@@ -56,7 +66,6 @@ listenFromWorker<CanvasRendererMessage>((message) => {
 				width: canvas.width / pixelRatio,
 				height: canvas.height / pixelRatio,
 			});
-			self.memory.state = self.memory.canvasHandle.rendererState;
 			fireTock();
 			return;
 		}

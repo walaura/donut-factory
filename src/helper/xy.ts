@@ -15,9 +15,28 @@ const midpoint = ({ x: x1, y: y1 }: XY, { x: x2, y: y2 }: XY): XY => ({
 	y: (y1 + y2) / 2,
 });
 
-const scale = (xy: XY, scale: number): XY => ({
+const xyScale = (xy: XY, scale: number): XY => ({
 	x: xy.x * scale,
 	y: xy.y * scale,
 });
 
-export { xy, xy2arr, midpoint, scale };
+type MapKey = 'x' | 'y';
+
+const xyMap = (xy: XY, fn: (xy: XY, k: MapKey) => XY['x'] | XY['y']): XY => ({
+	x: fn(xy, 'x'),
+	y: fn(xy, 'y'),
+});
+
+const xyRound = (xy: XY) => xyMap(xy, (xy, k) => Math.floor(xy[k]));
+const xyAdd = (from: XY, to: XY) => xyMap(from, (xy, k) => xy[k] + to[k]);
+
+export {
+	xy,
+	xy2arr,
+	xyMap,
+	midpoint,
+	xyScale as scale,
+	xyScale,
+	xyRound,
+	xyAdd,
+};

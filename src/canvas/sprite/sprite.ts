@@ -1,9 +1,8 @@
-import sum from 'hash-sum';
 import { XY } from '../../helper/xy';
 import { CanvasRendererStateViewport } from '../../wk/canvas.defs';
-import { mkWorldToScreen } from '../helper/latlong';
-import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 import { makeCanvas } from '../helper/canvas-store';
+import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
+import { worldToViewport } from './../helper/latlong';
 
 export const SIZE = 60;
 const IMAGE_SIZE = 40;
@@ -70,13 +69,12 @@ const mkDrawSprite = (ctx: OffscreenCanvasRenderingContext2D) => (
 	key: SpriteKey,
 	props: MkSpriteProps,
 	pos: XY,
-	{ zoom, viewport }: CanvasRendererStateViewport
+	{ zoom }: CanvasRendererStateViewport
 ) => {
-	let gameWorldToViewport = mkWorldToScreen({ zoom, viewport });
 	const diff = SIZE / IMAGE_SIZE;
 	const paddedSize = zoom * diff;
 	const offset = (paddedSize - zoom) / 2;
-	let translatedPos = gameWorldToViewport(pos);
+	let translatedPos = worldToViewport(pos);
 	ctx.drawImage(
 		mkSprite(key, props),
 		translatedPos.x - offset,

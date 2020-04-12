@@ -7,17 +7,17 @@ const noiseResolution = 20;
 const noiseWidth = 300;
 
 export const mkWorldTile = ({
-	at,
+	atAbs,
 	zoom,
 	noise,
 }: {
-	at: XY;
+	atAbs: XY;
 	zoom: CanvasRendererStateViewport['zoom'];
 	noise: number[];
 }) =>
 	makeCanvas(
 		{ width: 600, height: 600 },
-		{ at, world: true }
+		{ atAbs, world: true }
 	)((canvas) => {
 		const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
 		ctx.clearRect(0, 0, 600, 600);
@@ -44,7 +44,7 @@ export const mkWorldTile = ({
 				ctx.globalAlpha = 0.1;
 				ctx.fillStyle = '#fff';
 			}
-			ctx.fillRect(x - at.x, y - at.y, noiseResolution, noiseResolution);
+			ctx.fillRect(x - atAbs.x, y - atAbs.y, noiseResolution, noiseResolution);
 		});
 
 		// gridlines

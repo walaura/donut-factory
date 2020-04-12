@@ -18,6 +18,7 @@ export type CanvasRendererStateViewport = {
 
 export type CanvasRendererState = {
 	selected: Target;
+	followTarget: Target | null;
 	screenCursor: XY;
 	gameCursor: XY;
 	debugMode: boolean;

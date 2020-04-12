@@ -1,3 +1,4 @@
+import { chaseLinear } from './../helper/movement';
 import { XY, xy } from '../helper/xy';
 import {
 	getDistanceToPoint,
@@ -18,7 +19,13 @@ import {
 	EntityType,
 	ID,
 } from '../helper/defs';
-import { Movement, addSpeedToMovement } from '../helper/movement';
+import {
+	Movement,
+	addSpeedToMovement,
+	chase,
+	applyMovement,
+	isAtPos,
+} from '../helper/movement';
 import { HandlerFn } from '../global/handlers';
 import { entityIsRoad } from './road';
 import { findEntity, addEntity } from '../game/entities';
@@ -38,10 +45,6 @@ import { makeConsumerName } from '../helper/names';
 import { addFunds } from '../game/ledger';
 import { dispatchToGame } from '../global/dispatch';
 
-const isAtPos = (from: XY, to: XY) => {
-	return getDistanceToPoint(from, to) < 1;
-};
-
 export const mkHeldTotal = (state: Vehicle) =>
 	Object.keys(state.cargo)
 		.map((productId) => getCargoQuantity(productId, state))
@@ -58,27 +61,13 @@ const mkMove = (state: Vehicle, gameState: GameState) => (
 		speed = speed * state.offroadSpeed;
 	}
 
-	const applyMovement = (movement: Movement) => {
-		from.x += movement.right;
-		from.x -= movement.left;
-		from.y += movement.bottom;
-		from.y -= movement.top;
-	};
 	let to = findTarget(target);
 	if (!to) {
 		return null;
 	}
 
-	const movement = addSpeedToMovement(
-		{
-			left: from.x > to.x ? from.x - to.x : 0,
-			right: from.x < to.x ? to.x - from.x : 0,
-			top: from.y > to.y ? from.y - to.y : 0,
-			bottom: from.y < to.y ? to.y - from.y : 0,
-		},
-		speed / 2
-	);
-	applyMovement(movement);
+	const movement = addSpeedToMovement(chaseLinear(from, to), speed / 2);
+	from = applyMovement(from, movement);
 	return from;
 };
 

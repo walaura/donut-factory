@@ -28,6 +28,7 @@ import { AttachWindow } from '../windows/attach';
 import { OrderInfoTab } from './tab/orders';
 import { PathInfoTab } from './tab/path';
 import { EntitySettingsTab } from './tab/settings';
+import { Padding } from '../component/primitives/padding';
 
 const OrderLoadRow = ({ order }: { order: Order & { load: Load } }) => {
 	const { push } = useTaskbar();
@@ -162,6 +163,24 @@ const EntityInfoTab = ({ entityId }: { entityId: ID }) => {
 	}
 	if (entityIsRoad(entity)) {
 		rows.push(<RoadRow entityId={entityId} />);
+	}
+	rows.push(<Pre>{entity}</Pre>);
+	if ('x' in entity) {
+		rows.push(
+			<MiniGrid layout={'fluffy'}>
+				<VisibleButton
+					onClick={() => {
+						dispatchToCanvas({
+							type: 'set-follow-target',
+							to: {
+								entityId: entity.id,
+							},
+						});
+					}}>
+					Follow
+				</VisibleButton>
+			</MiniGrid>
+		);
 	}
 	return <RowList padding="normal">{rows}</RowList>;
 };

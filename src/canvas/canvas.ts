@@ -1,32 +1,28 @@
-import { entityIsRoad } from './../entity/road';
 import { RoadEnd } from '../entity/road';
-import { GameState, Entity, EntityType } from '../helper/defs';
-import { getDistanceToPoint } from '../helper/pathfinding';
-import { XY } from '../helper/xy';
-import { commitActions } from '../wk/canvas.actions';
-import { CanvasRendererState } from '../wk/canvas.defs';
+import { findEntity } from '../game/entities';
+import { EntityType } from '../helper/defs';
 import {
+	addSpeedToMovement,
+	applyMovement,
+	chase,
+	isAtPos,
+	chaseLinear,
+} from '../helper/movement';
+import { getDistanceToPoint } from '../helper/pathfinding';
+import { StatefulTarget } from '../helper/target';
+import { xy } from '../helper/xy';
+import { commitActions } from '../wk/canvas.actions';
+import { entityIsRoad } from './../entity/road';
+import {
+	ExternalOnFrame,
 	OffScreenCanvasProps,
 	OffscreenCanvasRenderer,
-	ExternalOnFrame,
 	OnFrameProps,
 } from './canvas.df';
+import { viewportToWorld, worldToViewport, worldToAbs } from './helper/latlong';
 import { bgLayerRenderer } from './layer/bg';
 import { entityLayerRenderer } from './layer/entities';
 import { roadLayerRenderer } from './layer/road';
-import { Target, StatefulTarget } from '../helper/target';
-import { mkScreenToWorld, mkWorldToScreen } from './helper/latlong';
-
-const initialState: CanvasRendererState = {
-	selected: { xy: { x: 0, y: 0 } },
-	viewport: { x: 0, y: 0 },
-	zoom: 20,
-	gameCursor: { x: 0, y: 0 },
-	screenCursor: { x: 0, y: 0 },
-	editMode: false,
-	editModeTarget: null,
-	debugMode: false,
-};
 
 const findSelected = ({
 	state,
@@ -46,7 +42,7 @@ const findSelected = ({
 					potentiallySelected.push({
 						entityId: entity.id,
 						roadEnd,
-						score: 0.1,
+						score: rendererState.editMode ? 2 : 0.1,
 					});
 				}
 			});
@@ -71,7 +67,6 @@ export const renderCanvasLayers = (
 	canvas: OffscreenCanvas,
 	{ width, height }: OffScreenCanvasProps
 ): {
-	rendererState: CanvasRendererState;
 	onFrame: ExternalOnFrame;
 } => {
 	const bgRenderer = bgLayerRenderer({ width, height });
@@ -83,12 +78,9 @@ export const renderCanvasLayers = (
 	const onFrame: ExternalOnFrame = ({ state, prevState, rendererState }) => {
 		rendererState = commitActions(rendererState);
 
-		let viewportToGameWorld = mkScreenToWorld(rendererState);
-		let world2screen = mkWorldToScreen(rendererState);
-
-		rendererState.gameCursor = viewportToGameWorld(rendererState.screenCursor);
+		rendererState.gameCursor = viewportToWorld(rendererState.screenCursor);
 		rendererState.selected = findSelected({ state, rendererState });
-		const { gameCursor, zoom, selected } = rendererState;
+		const { gameCursor, zoom, followTarget, selected } = rendererState;
 
 		// clear all
 		ctx.clearRect(0, 0, width, height);
@@ -108,14 +100,33 @@ export const renderCanvasLayers = (
 		// draw cursor
 		if (!('entityId' in selected)) {
 			ctx.beginPath();
-			const { x, y } = world2screen(gameCursor);
+			const { x, y } = worldToViewport(gameCursor);
 			ctx.rect(x, y, zoom, zoom);
 			ctx.globalAlpha = 0.25;
 			ctx.stroke();
 			ctx.globalAlpha = 1;
 		}
+
+		// follow mode?
+		if (followTarget && 'entityId' in followTarget) {
+			let followable = findEntity(followTarget.entityId, state);
+			if (followable && 'x' in followable) {
+				let cursedViewportInGame = viewportToWorld(xy([width / 2, height / 2]));
+				if (!isAtPos(cursedViewportInGame, followable)) {
+					const movement = addSpeedToMovement(
+						chase(cursedViewportInGame, followable),
+						-1
+					);
+					rendererState.viewport = applyMovement(
+						rendererState.viewport,
+						movement
+					);
+				}
+			}
+		}
+
 		return rendererState;
 	};
 
-	return { onFrame, rendererState: initialState };
+	return { onFrame };
 };

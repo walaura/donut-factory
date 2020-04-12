@@ -25,6 +25,10 @@ export type CanvasAction =
 	| {
 			type: 'set-edit-mode-target';
 			to: Target | null;
+	  }
+	| {
+			type: 'set-follow-target';
+			to: Target | null;
 	  };
 
 export type CanvasReducer<A extends CanvasAction> = (
@@ -55,6 +59,12 @@ const editModeReducer: CanvasReducer<CanvasAction> = (action, state) => {
 				editModeTarget: action.to,
 			};
 		}
+		case 'set-follow-target': {
+			return {
+				...state,
+				followTarget: action.to,
+			};
+		}
 		case 'toggle-debug-mode': {
 			return {
 				...state,
@@ -64,6 +74,7 @@ const editModeReducer: CanvasReducer<CanvasAction> = (action, state) => {
 		case 'pan-delta': {
 			return {
 				...state,
+				followTarget: null,
 				viewport: {
 					x: state.viewport.x + action.pos.x,
 					y: state.viewport.y + action.pos.y,
