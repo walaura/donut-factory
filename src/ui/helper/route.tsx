@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { Modal } from '../components/modal/modal';
+import { Modal } from '../component/modal/modal';
 import { MoneyInspector } from '../inspectors/money-inspector';
 import {
 	RouteRenderer,
@@ -8,7 +8,7 @@ import {
 } from './route.defs.ts';
 import { AllEntitities } from '../windows/all-entities';
 import { EntityInspector } from '../inspectors/entity-inspector';
-import { DetailsModal } from '../components/modal/details-modal';
+import { DetailsModal } from '../component/modal/details-modal';
 import { SystemMenu } from '../windows/system';
 
 const ledger: RouteRenderer<typeof MoneyInspector> = {

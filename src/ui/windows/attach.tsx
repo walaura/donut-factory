@@ -1,16 +1,16 @@
 import { h, Fragment } from 'preact';
 import { Entity, ID } from '../../helper/defs';
-import { RevealButton, VisibleButton } from '../components/button';
-import { Flex } from '../components/list/flex-list';
-import { RowList } from '../components/list/row-list';
-import { Info } from '../components/row/info';
-import { Heading } from '../components/type';
-import { Wash } from '../components/wash';
+import { RevealButton, VisibleButton } from '../component/button';
+import { Flex } from '../component/list/flex-list';
+import { RowList } from '../component/list/row-list';
+import { Info } from '../component/row/info';
+import { Heading } from '../component/type';
+import { Wash } from '../component/wash';
 import { getAgentStatus } from '../helper/status';
 import { useLastKnownGameState } from '../hook/use-game-state';
 import { useTaskbarItem } from '../hook/use-taskbar/item';
 import { useTaskbar } from '../hook/use-taskbar';
-import { Scroll } from '../components/primitives/scroll';
+import { Scroll } from '../component/primitives/scroll';
 
 const Row = ({
 	entity,

@@ -1,7 +1,7 @@
 import { Order, OrderType } from '../../entity/composables/with-orders';
 import { findEntity } from '../../game/entities';
 import { EntityType, GameState, ID } from '../../helper/defs';
-import { $t } from '../components/type';
+import { $t } from '../component/type';
 import { useLastKnownGameState } from './../hook/use-game-state';
 
 const getOrderStatus = (entity: Order, gameState: GameState) => {

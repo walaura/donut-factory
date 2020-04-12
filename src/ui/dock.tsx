@@ -1,12 +1,12 @@
 import { Fragment, h } from 'preact';
 import { dispatchToCanvas } from '../global/dispatch';
-import { DietButton } from './components/button';
-import { Emoji } from './components/emoji';
+import { DietButton } from './component/button';
+import { Emoji } from './component/emoji';
 import { numberWithCommas } from './helper/format';
 import { css } from './helper/style';
 import { UIStatePriority, useLastKnownGameState } from './hook/use-game-state';
 import { useTaskbar } from './hook/use-taskbar';
-import { DetailsModal } from './components/modal/details-modal';
+import { DetailsModal } from './component/modal/details-modal';
 
 const emojiStyles = {
 	root: css`

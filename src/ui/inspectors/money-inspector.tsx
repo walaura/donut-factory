@@ -1,10 +1,10 @@
 import { h } from 'preact';
 import { LedgerRecord } from '../../helper/defs';
-import { Info } from '../components/row/info';
-import { Flex } from '../components/list/flex-list';
-import { RowList } from '../components/list/row-list';
-import { Padding } from '../components/primitives/padding';
-import { Wash } from '../components/wash';
+import { Info } from '../component/row/info';
+import { Flex } from '../component/list/flex-list';
+import { RowList } from '../component/list/row-list';
+import { Padding } from '../component/primitives/padding';
+import { Wash } from '../component/wash';
 import { clock, longDate, numberWithCommas } from '../helper/format';
 import { css } from '../helper/style';
 import { UIStatePriority, useLastKnownGameState } from '../hook/use-game-state';

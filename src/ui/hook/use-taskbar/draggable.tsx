@@ -2,7 +2,7 @@ import { XY, Size } from '../../../helper/xy';
 import { useEffect, useRef, useState, PropRef } from 'preact/hooks';
 import { h } from 'preact';
 import { css } from '../../helper/style';
-import { DetailsModal } from '../../components/modal/details-modal';
+import { DetailsModal } from '../../component/modal/details-modal';
 import { useTaskbar } from '../use-taskbar';
 import { ID } from '../../../helper/defs';
 
