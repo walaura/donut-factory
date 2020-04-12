@@ -9,7 +9,7 @@ import {
 } from '../../hook/use-taskbar/item';
 import { Padding } from '../primitives/padding';
 import { Wash } from '../wash';
-import { Modal } from './Modal';
+import { Modal } from './modal';
 import { Flex } from '../list/flex-list';
 import { Emoji } from '../emoji';
 import { Heading } from '../type';
