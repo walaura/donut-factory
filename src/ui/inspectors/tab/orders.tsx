@@ -9,7 +9,7 @@ import { useEntityStatus } from '../../helper/status';
 import { Flex } from '../../components/list/flex-list';
 import { Padding } from '../../components/primitives/padding';
 import { MiniGrid } from '../../components/primitives/mini-grid';
-import { useTaskbarItem } from '../../hook/use-taskbar/Item';
+import { useTaskbarItem } from '../../hook/use-taskbar/item';
 import { AttachWindow, usePushAttachWindow } from '../../windows/attach';
 import { mergeEntity } from '../../../game/entities';
 import {

@@ -6,7 +6,7 @@ import {
 	Item,
 	TaskbarItemType,
 	useTaskbarItem,
-} from '../../hook/use-taskbar/Item';
+} from '../../hook/use-taskbar/item';
 import { Padding } from '../primitives/padding';
 import { Wash } from '../wash';
 import { Modal } from './Modal';

@@ -8,7 +8,7 @@ import { Heading } from '../components/type';
 import { Wash } from '../components/wash';
 import { getAgentStatus } from '../helper/status';
 import { useLastKnownGameState } from '../hook/use-game-state';
-import { useTaskbarItem } from '../hook/use-taskbar/Item';
+import { useTaskbarItem } from '../hook/use-taskbar/item';
 import { useTaskbar } from '../hook/use-taskbar';
 import { Scroll } from '../components/primitives/scroll';
 

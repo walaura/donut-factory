@@ -2,8 +2,8 @@ import { createContext, h } from 'preact';
 import { useContext } from 'preact/hooks';
 
 import { useTaskbar } from '../use-taskbar';
-import { Draggable, DragHandle } from '../../components/primitives/draggable';
-import { TaskbarItemType } from './Item';
+import { Draggable, DragHandle } from './draggable';
+import { TaskbarItemType } from './item';
 
 const WindowHandlesContext = createContext<WindowHandles>(
 	(null as any) as WindowHandles
@@ -25,7 +25,7 @@ export const WindowHandleProvider = ({
 }) => {
 	let { closeWindow } = useTaskbar();
 	return (
-		<Draggable startAt={item.position} size={item.size}>
+		<Draggable id={item.id} startAt={item.position} size={item.size}>
 			{(dragHandle) => (
 				<WindowHandlesContext.Provider
 					value={{

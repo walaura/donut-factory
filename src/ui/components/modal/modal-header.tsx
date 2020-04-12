@@ -2,7 +2,7 @@ import { css } from '../../helper/style';
 import { h } from 'preact';
 import { Emoji } from '../emoji';
 import { DietButton } from '../button';
-import { useWindowHandles } from '../../hook/use-taskbar/Handles';
+import { useWindowHandles } from '../../hook/use-taskbar/handles';
 import { RouteIdentifiers } from '../../helper/route.defs.ts';
 import { Padding } from '../primitives/padding';
 

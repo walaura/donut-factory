@@ -2,9 +2,12 @@ import { XY, Size } from '../../../helper/xy';
 import { useEffect, useRef, useState, PropRef } from 'preact/hooks';
 import { h } from 'preact';
 import { css } from '../../helper/style';
-import { DetailsModal } from '../modal/details-modal';
+import { DetailsModal } from '../../components/modal/details-modal';
+import { useTaskbar } from '../use-taskbar';
+import { ID } from '../../../helper/defs';
 
 const PADDING = 20;
+const STARTING_Z_INDEX = 100;
 
 const style = css`
 	position: fixed;
@@ -14,6 +17,7 @@ const style = css`
 	justify-content: stretch;
 	align-content: stretch;
 	will-change: transform;
+	z-index: ${STARTING_Z_INDEX};
 	padding: ${PADDING};
 	transform: translate(calc(var(--left) - 1em), calc(var(--top) - 1em));
 	width: var(--width);
@@ -67,6 +71,7 @@ const defaultWindowSize = {
 
 export const Draggable = ({
 	children,
+	id,
 	startAt = {
 		x: 50,
 		y: 25,
@@ -74,13 +79,23 @@ export const Draggable = ({
 	size = defaultWindowSize,
 }: {
 	children: (handle) => preact.ComponentChildren;
+	id: ID;
 	startAt?: XY;
 	size?: Size;
 }) => {
+	let { focus, focusStack } = useTaskbar();
 	const r = useRef<HTMLDivElement>();
 	let [handle, setHandle] = useState(null);
 	startAt = adjustInitialXY(startAt, size);
 	let pos = startAt;
+	useEffect(() => {
+		r.current?.style.setProperty(
+			'z-index',
+			STARTING_Z_INDEX +
+				Math.abs(focusStack.indexOf(id) - focusStack.length) +
+				''
+		);
+	}, [focusStack]);
 	useEffect(() => {
 		let delta = { x: 0, y: 0 };
 		let dragging = false;
@@ -109,6 +124,12 @@ export const Draggable = ({
 	useEffect(() => {
 		if (!handle) return;
 		applySize(r, pos, size);
+		r.current?.addEventListener('mousedown', () => {
+			focus(id);
+		});
+		r.current?.addEventListener('focus', () => {
+			focus(id);
+		});
 	}, [handle]);
 	if (!handle) {
 		return null;

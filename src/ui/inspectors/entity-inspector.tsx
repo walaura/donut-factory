@@ -23,7 +23,7 @@ import { shortNumber } from '../helper/format';
 import { useEntityStatus } from '../helper/status';
 import { useLastKnownEntityState } from '../hook/use-game-state';
 import { useTaskbar } from '../hook/use-taskbar';
-import { useTaskbarItem } from '../hook/use-taskbar/Item';
+import { useTaskbarItem } from '../hook/use-taskbar/item';
 import { AttachWindow } from '../windows/attach';
 import { OrderInfoTab } from './tab/orders';
 import { PathInfoTab } from './tab/path';

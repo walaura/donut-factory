@@ -2,13 +2,13 @@ import { createContext, h } from 'preact';
 import { useContext, useEffect, useState } from 'preact/hooks';
 import { ID } from '../../helper/defs';
 import { Modal } from '../components/modal/modal';
-import { WindowHandleProvider } from './use-taskbar/Handles';
+import { WindowHandleProvider } from './use-taskbar/handles';
 import {
 	DeflatedTaskbarItemType,
 	Item,
 	TaskbarItemRenderer,
 	TaskbarItemType,
-} from './use-taskbar/Item';
+} from './use-taskbar/item';
 import { XY, Size } from '../../helper/xy';
 const shortid = require('shortid');
 
@@ -80,7 +80,9 @@ export const TaskbarProvider = ({
 	pusher?: TaskbarContext['push'];
 }) => {
 	const [windows, setWindows] = useState<TaskbarContext['windows']>([]);
-	const [focusStack, focus] = useState<TaskbarContext['windows']>([]);
+	const [focusStack, setFocusStack] = useState<TaskbarContext['focusStack']>(
+		[]
+	);
 
 	let push: TaskbarContext['push'];
 	if (pusher) {
@@ -93,9 +95,9 @@ export const TaskbarProvider = ({
 
 	const value: TaskbarContext = {
 		windows,
-		focusStack: [],
+		focusStack,
 		focus: (id: ID) => {
-			console.log('dsfdsf');
+			setFocusStack((prev) => [id, ...prev]);
 		},
 		closeWindow: (id: ID) => {
 			setWindows((ws) => ws.filter((w) => w.id !== id));
