@@ -1,7 +1,7 @@
 import {
 	GameState,
 	LastKnownGameState,
-	LastKnownCanvasRendererState,
+	LastKnownCanvasState,
 } from '../helper/defs';
 import { GameAction } from '../wk/game.actions';
 import { renderCanvasLayers } from '../canvas/canvas';
@@ -18,7 +18,7 @@ export type Workers = {
 export type MainThreadMemory = {
 	id: 'MAIN';
 	lastKnownGameState: LastKnownGameState | null;
-	lastKnownCanvasState: LastKnownCanvasRendererState | null;
+	lastKnownCanvasState: LastKnownCanvasState | null;
 	workers: Workers | null;
 	ui: {
 		pushRoute: (xy: XY, rt: SerializableRoute) => void;

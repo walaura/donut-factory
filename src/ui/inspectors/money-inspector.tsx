@@ -7,7 +7,8 @@ import { Padding } from '../component/primitives/padding';
 import { Wash } from '../component/wash';
 import { clock, longDate, numberWithCommas } from '../helper/format';
 import { css } from '../helper/style';
-import { UIStatePriority, useLastKnownGameState } from '../hook/use-game-state';
+import { useLastKnownGameState } from '../hook/use-game-state';
+import { UIStatePriority } from '../hook/use-global-state';
 
 const currency = '$';
 

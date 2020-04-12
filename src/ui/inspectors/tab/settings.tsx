@@ -1,9 +1,7 @@
 import { ID, EntityType } from '../../../helper/defs';
 import { JSX, h } from 'preact';
-import {
-	useLastKnownEntityState,
-	UIStatePriority,
-} from '../../hook/use-game-state';
+import { useLastKnownEntityState } from '../../hook/use-game-state';
+import { UIStatePriority } from '../../hook/use-global-state';
 import { Form } from '../../component/row/form';
 import { Select } from '../../component/row/select';
 import { mergeEntity } from '../../../game/entities';

@@ -1,8 +1,6 @@
-import { getWorker } from '../global/worker';
 import { CanvasAction } from '../wk/canvas.actions';
 import { GameAction } from '../wk/game.actions';
-import { GameState, LastKnownCanvasRendererState } from './defs';
-import { XY } from './xy';
+import { GameState, LastKnownCanvasState } from './defs';
 
 export enum MsgActions {
 	'SEND_CANVAS' = 'SEND_CANVAS',
@@ -27,7 +25,7 @@ export type CanvasRendererMessage =
 	  }
 	| {
 			action: MsgActions.CANVAS_RESPONSE;
-			rendererState: LastKnownCanvasRendererState;
+			rendererState: LastKnownCanvasState;
 	  }
 	| {
 			action: MsgActions.TOCK;

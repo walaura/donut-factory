@@ -9,7 +9,8 @@ import { RowList } from '../component/list/row-list';
 import { Padding } from '../component/primitives/padding';
 import { Tabs } from '../component/tabs';
 import { getAgentStatus } from '../helper/status';
-import { UIStatePriority, useLastKnownGameState } from '../hook/use-game-state';
+import { useLastKnownGameState } from '../hook/use-game-state';
+import { UIStatePriority } from '../hook/use-global-state';
 import { useTaskbar } from '../hook/use-taskbar';
 
 const Row = ({ entity }: { entity: Entity }) => {

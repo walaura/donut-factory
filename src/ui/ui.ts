@@ -12,7 +12,8 @@ import {
 	MsgActions,
 } from '../helper/message';
 import { dispatchToCanvas } from './../global/dispatch';
-import { onReactStateUpdate } from './hook/use-game-state';
+import { onReactStateUpdate as onReactStateUpdate_GAME } from './hook/use-game-state';
+import { onReactStateUpdate as onReactStateUpdate_CANVAS } from './hook/use-canvas-state';
 import { UI } from './react-root';
 
 let worker;
@@ -27,7 +28,7 @@ const renderSetup = () => {
 			render(h(UI, {}), (window as any).overlays);
 			rendered = true;
 		}
-		onReactStateUpdate(state);
+		onReactStateUpdate_GAME(state);
 		if (worker) {
 			worker.postMessage({ action: 'TOCK', state } as LoopWorkerMessage);
 		}
@@ -136,6 +137,7 @@ const renderSetup = () => {
 				throw 'no';
 			}
 			self.memory.lastKnownCanvasState = msg.rendererState;
+			onReactStateUpdate_CANVAS(self.memory.lastKnownCanvasState);
 		}
 	}, worker);
 

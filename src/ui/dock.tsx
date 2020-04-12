@@ -4,9 +4,12 @@ import { DietButton } from './component/button';
 import { Emoji } from './component/emoji';
 import { numberWithCommas } from './helper/format';
 import { css } from './helper/style';
-import { UIStatePriority, useLastKnownGameState } from './hook/use-game-state';
+import { useLastKnownGameState } from './hook/use-game-state';
+import { UIStatePriority } from './hook/use-global-state';
 import { useTaskbar } from './hook/use-taskbar';
 import { DetailsModal } from './component/modal/details-modal';
+import { useLastKnownCanvasState } from './hook/use-canvas-state';
+import { Pre } from './component/primitives/pre';
 
 const emojiStyles = {
 	root: css`
@@ -200,7 +203,6 @@ const ToolsPanel = () => {
 						});
 					}}
 				/>
-
 				<DockEmoji
 					emoji={'🍔'}
 					title="System"
@@ -214,6 +216,30 @@ const ToolsPanel = () => {
 };
 
 const Dock = (): h.JSX.Element => {
+	const isEditMode = useLastKnownCanvasState(
+		(s) => s.editMode,
+		UIStatePriority.UI
+	);
+
+	if (isEditMode) {
+		return (
+			<div class={styles}>
+				<DockPanel>
+					<DockEmoji
+						emoji={'🚫'}
+						title="Quit editing"
+						onClick={(ev) => {
+							dispatchToCanvas({
+								type: 'set-edit-mode',
+								to: false,
+							});
+						}}
+					/>
+				</DockPanel>
+			</div>
+		);
+	}
+
 	return (
 		<div class={styles}>
 			<MoneyPanel />

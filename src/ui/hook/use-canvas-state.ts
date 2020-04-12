@@ -1,17 +1,16 @@
 import sum from 'hash-sum';
 import { useEffect, useState } from 'preact/hooks';
-import { findEntity } from '../../game/entities';
-import { ID, LastKnownGameState } from '../../helper/defs';
+import { LastKnownCanvasState } from '../../helper/defs';
 import { UIStatePriority, Callback, UpdaterProps } from './use-global-state';
 
-let callbacks: Callback<LastKnownGameState, unknown>[] = [];
+let callbacks: Callback<LastKnownCanvasState, unknown>[] = [];
 
-const subscribeToStateUpdate = <S extends LastKnownGameState | any>(
+const subscribeToStateUpdate = <S extends LastKnownCanvasState | any>(
 	callback: (S) => void,
 	{
 		priority = UIStatePriority.Snail,
-		query = (s: LastKnownGameState) => (s as unknown) as S,
-	}: UpdaterProps<LastKnownGameState, S> = {}
+		query = (s: LastKnownCanvasState) => (s as unknown) as S,
+	}: UpdaterProps<LastKnownCanvasState, S> = {}
 ) => {
 	let cbEntry = {
 		priority,
@@ -27,20 +26,15 @@ const subscribeToStateUpdate = <S extends LastKnownGameState | any>(
 	};
 };
 
-export const useLastKnownEntityState = (
-	entityId: ID,
-	priority: UIStatePriority = UIStatePriority.Snail
-) => useLastKnownGameState((s) => findEntity(entityId, s), priority);
-
-export const useLastKnownGameState = <S = unknown>(
-	query: Required<UpdaterProps<LastKnownGameState, S>>['query'],
+export const useLastKnownCanvasState = <S = unknown>(
+	query: Required<UpdaterProps<LastKnownCanvasState, S>>['query'],
 	priority: UIStatePriority = UIStatePriority.Snail
 ): S => {
 	if (self.memory.id !== 'MAIN') {
 		throw 'no';
 	}
 	const [state, setState] = useState<S>(
-		query(self.memory.lastKnownGameState as LastKnownGameState)
+		query(self.memory.lastKnownCanvasState as LastKnownCanvasState)
 	);
 	useEffect(() => {
 		const cleanup = subscribeToStateUpdate(setState, { priority, query });
@@ -56,7 +50,7 @@ const hasher = (s: any) => {
 	return sum(s);
 };
 
-export const onReactStateUpdate = (newState: LastKnownGameState) => {
+export const onReactStateUpdate = (newState: LastKnownCanvasState) => {
 	const now = Date.now();
 
 	for (let cb of callbacks) {
