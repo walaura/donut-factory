@@ -17,18 +17,26 @@ import { onReactStateUpdate as onReactStateUpdate_CANVAS } from './hook/use-canv
 import { UI } from './react-root';
 
 let worker;
-let rendered = false;
+
 const renderSetup = () => {
 	if (self.memory.id !== 'MAIN') {
 		throw 'no';
 	}
+
+	let readyToRenderWithGame = false;
+	let readyToRenderWithCanvas = false;
 	let rendered = false;
+
 	let onTick = (state: GameState) => {
-		if (!rendered) {
-			render(h(UI, {}), (window as any).overlays);
-			rendered = true;
+		let readyToRender = readyToRenderWithGame && readyToRenderWithCanvas;
+		if (!rendered && readyToRender) {
+			requestAnimationFrame(() => {
+				render(h(UI, {}), (window as any).overlays);
+				rendered = true;
+			});
 		}
 		onReactStateUpdate_GAME(state);
+		readyToRenderWithGame = true;
 		if (worker) {
 			worker.postMessage({ action: 'TOCK', state } as LoopWorkerMessage);
 		}
@@ -138,6 +146,7 @@ const renderSetup = () => {
 			}
 			self.memory.lastKnownCanvasState = msg.rendererState;
 			onReactStateUpdate_CANVAS(self.memory.lastKnownCanvasState);
+			readyToRenderWithCanvas = true;
 		}
 	}, worker);
 
