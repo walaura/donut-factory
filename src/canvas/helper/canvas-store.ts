@@ -13,6 +13,9 @@ export const makeCanvas = ({ width, height }: Size, hashable: any) => (
 	if (memo in store) {
 		return store[memo];
 	}
+	if (!hashable) {
+		return memoizedOperation(makeCanvasOrOnScreenCanvas(width, height));
+	}
 	self.memory.store[memo] = memoizedOperation(
 		makeCanvasOrOnScreenCanvas(width, height)
 	);

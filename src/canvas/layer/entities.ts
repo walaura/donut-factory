@@ -1,3 +1,4 @@
+import { width as chipW, height as chipH } from './../sprite/chip';
 import { worldToViewport } from './../helper/latlong';
 import { entityIsRoad } from '../../entity/road';
 import { findEntity } from '../../game/entities';
@@ -9,6 +10,8 @@ import { mkAnimations } from '../helper/animation';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 import { mkAgents } from '../sprite/entity';
 import { CanvasRendererState } from '../../wk/canvas.defs';
+import { mkChip } from '../sprite/chip';
+import { Scaler } from '../sprite/scaler';
 
 const lerp = (start, end, t) => {
 	return start * (1 - t) + end * t;
@@ -47,6 +50,7 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 			const pixelRatio = 1.5;
 
 			let fontSize = useBouncyValue({ value: 0 }, 'ag:' + entity.id);
+			let flipper = useBouncyValue({ value: 0 }, 'ag:flip:' + entity.id);
 			let agentSize = zoom * 2.5 * pixelRatio;
 			if ('entityId' in selected && selected.entityId === entity.id) {
 				fontSize.up();
@@ -56,13 +60,13 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 			let prevAgent = prevState.entities[entity.id];
 			if (entity.type === EntityType.Vehicle && prevAgent && 'x' in prevAgent) {
 				if (entity.x - prevAgent.x >= -0.01) {
-					flip = true;
+					flipper.up();
 				}
 			}
 			ctx.drawImage(
 				mkAgent(entity, {
 					size: agentSize,
-					flip,
+					flip: flipper.value > 0,
 					scale: lerp(0, 0.5, fontSize.value),
 				}),
 				x - (agentSize / pixelRatio - zoom) / 2,
@@ -124,44 +128,22 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 				delete feedback[toast.id];
 				yDelta.discard();
 			}
-			ctx.font = '16px sans-serif';
-			ctx.globalAlpha = lerp(2, 0, yDelta.value);
-			let metrics = ctx.measureText(`${toast.text}`.toUpperCase());
-			let padding = 6;
 			let textBoxPosi = {
-				x: origin.x - padding,
-				y: origin.y - metrics.emHeightAscent - padding,
+				x: origin.x - 100,
+				y: origin.y,
 			};
-			let textBoxDimensions = {
-				x: metrics.width + padding * 2,
-				y: metrics.emHeightAscent + padding * 2,
-			};
-
-			ctx.fillStyle = '#13B477';
-			ctx.fillRect(
-				textBoxPosi.x,
-				textBoxPosi.y,
-				textBoxDimensions.x,
-				textBoxDimensions.y
+			ctx.globalAlpha = lerp(2, 0, yDelta.value);
+			ctx.drawImage(
+				Scaler({
+					width: chipW,
+					height: chipH,
+					offset: 10,
+					scale: lerp(1, 2, yDelta.value),
+					drawable: mkChip({ text: `${toast.text}` }),
+				}),
+				textBoxPosi.x - 10,
+				textBoxPosi.y - 10
 			);
-			ctx.beginPath();
-			ctx.arc(
-				textBoxPosi.x,
-				textBoxPosi.y + textBoxDimensions.y / 2,
-				textBoxDimensions.y / 2,
-				0,
-				2 * Math.PI
-			);
-			ctx.arc(
-				textBoxPosi.x + textBoxDimensions.x,
-				textBoxPosi.y + textBoxDimensions.y / 2,
-				textBoxDimensions.y / 2,
-				0,
-				2 * Math.PI
-			);
-			ctx.fill();
-			ctx.fillStyle = '#fff';
-			ctx.fillText(`${toast.text}`.toUpperCase(), ...xy2arr(origin));
 			ctx.globalAlpha = 1;
 		}
 
