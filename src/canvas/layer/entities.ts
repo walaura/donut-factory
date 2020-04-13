@@ -1,17 +1,18 @@
-import { width as chipW, height as chipH } from './../sprite/chip';
-import { worldToViewport } from './../helper/latlong';
+import { drawScaled } from './../sprite/scaler';
 import { entityIsRoad } from '../../entity/road';
 import { findEntity } from '../../game/entities';
-import { EntityType, WithID, WithCargo } from '../../helper/defs';
+import { EntityType, WithCargo, WithID } from '../../helper/defs';
 import { appendWithId } from '../../helper/generate';
-import { scale as mkScale, XY, xy2arr } from '../../helper/xy';
+import { XY, xyMap } from '../../helper/xy';
 import { OffscreenCanvasRenderer } from '../canvas.df';
 import { mkAnimations } from '../helper/animation';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
-import { mkAgents } from '../sprite/entity';
-import { CanvasRendererState } from '../../wk/canvas.defs';
 import { mkChip } from '../sprite/chip';
+import { mkAgents } from '../sprite/entity';
 import { Scaler } from '../sprite/scaler';
+import { numberAsCurrency } from './../../ui/helper/format';
+import { worldToViewport } from './../helper/latlong';
+import { height as chipH, width as chipW } from './../sprite/chip';
 
 const lerp = (start, end, t) => {
 	return start * (1 - t) + end * t;
@@ -91,13 +92,15 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 						) {
 							feedback = appendWithId(feedback, {
 								xy: entity,
-								text: findEntity(cargo.productId, state)?.name ?? '$$',
+								text: findEntity(cargo.productId, state)?.emoji ?? '$$',
 							});
 						}
 					}
 				}
 			}
-		} catch (e) {}
+		} catch (e) {
+			console.error('how to handle this');
+		}
 
 		// pop cool text
 		let lastUpdate = state.ledger[state.ledger.length - 1];
@@ -109,7 +112,7 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 			if (xy) {
 				feedback = appendWithId(feedback, {
 					xy,
-					text: state.ledger[state.ledger.length - 1].tx,
+					text: numberAsCurrency(state.ledger[state.ledger.length - 1].tx),
 				});
 			}
 		}
@@ -138,16 +141,19 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 				y: origin.y,
 			};
 			ctx.globalAlpha = lerp(2, 0, yDelta.value);
-			ctx.drawImage(
-				Scaler({
+			drawScaled(
+				ctx,
+				mkChip({
+					text: `${toast.text}`,
+					style: toast.text.length <= 2 ? 'transparent' : 'normal',
+				}),
+				{
 					width: chipW,
 					height: chipH,
 					offset: 10,
 					scale: lerp(1, 2, yDelta.value),
-					drawable: mkChip({ text: `${toast.text}` }),
-				}),
-				textBoxPosi.x - 10,
-				textBoxPosi.y - 10
+				},
+				xyMap(textBoxPosi, (val, k) => val[k] - 10)
 			);
 			ctx.globalAlpha = 1;
 		}

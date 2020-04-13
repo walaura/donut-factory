@@ -1,6 +1,6 @@
 import { h, JSX } from 'preact';
 import { css } from '../helper/style';
-import { Emoji } from './emoji';
+import { Emoji, EmojiOverlay } from './emoji';
 import { useLayoutHints } from '../hook/use-layout-hint';
 
 const dietStyles = css`
@@ -10,11 +10,15 @@ export const DietButton = ({
 	onClick,
 	...props
 }: {
-	onClick: (ev: MouseEvent) => void;
+	children;
+	onClick?: (ev: MouseEvent) => void;
 	className?: string;
 }) => (
 	<button
 		onMouseDown={(ev) => {
+			if (!onClick) {
+				return;
+			}
 			if (self.memory.id === 'MAIN') {
 				self.memory.ui.boop();
 			}
@@ -110,7 +114,7 @@ const visibleButtonLayoutStyles = {
 };
 type VisibleButtonProps = {
 	children;
-	onClick: JSX.HTMLAttributes<HTMLButtonElement>['onClick'];
+	onClick: (ev: MouseEvent) => void;
 } & (
 	| {
 			icon: string;
@@ -126,8 +130,7 @@ export const VisibleButton = ({ children, ...props }: VisibleButtonProps) => {
 	let layout = horizontal === 'narrower' ? 'square' : 'long';
 	return (
 		<DietButton onClick={props.onClick}>
-			<button
-				onMouseDown={props.onClick}
+			<div
 				className={[styles.shared, styles.animation, styles.visible].join(' ')}>
 				{'icon' in props ? (
 					<div class={visibleButtonLayoutStyles[layout]}>
@@ -136,13 +139,13 @@ export const VisibleButton = ({ children, ...props }: VisibleButtonProps) => {
 					</div>
 				) : 'state' in props ? (
 					<div class={visibleButtonLayoutStyles[layout]}>
-						<Emoji emoji={props.state ? '🔴' : '💚'} />
+						<EmojiOverlay emojis={!props.state ? ['✅', '🚫'] : ['✅']} />
 						<span>{children}</span>
 					</div>
 				) : (
 					children
 				)}
-			</button>
+			</div>
 		</DietButton>
 	);
 };

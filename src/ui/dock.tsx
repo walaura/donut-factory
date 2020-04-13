@@ -2,7 +2,7 @@ import { Fragment, h } from 'preact';
 import { dispatchToCanvas } from '../global/dispatch';
 import { DietButton } from './component/button';
 import { Emoji } from './component/emoji';
-import { numberWithCommas } from './helper/format';
+import { numberWithCommas, numberAsCurrency } from './helper/format';
 import { css } from './helper/style';
 import { useLastKnownGameState } from './hook/use-game-state';
 import { UIStatePriority } from './hook/use-global-state';
@@ -166,7 +166,7 @@ const MoneyPanel = () => {
 				}}>
 				<DockEmoji emoji="💰" title="Money" />
 				<DockText>
-					{numberWithCommas(
+					{numberAsCurrency(
 						ledger.map(({ tx }) => tx).reduce((a, b) => a + b, 0)
 					)}
 				</DockText>

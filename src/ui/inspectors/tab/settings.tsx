@@ -8,7 +8,7 @@ import { mergeEntity } from '../../../game/entities';
 import { Vehicle } from '../../../entity/vehicle';
 import { MiniGrid } from '../../component/primitives/mini-grid';
 import { VisibleButton } from '../../component/button';
-import { dispatchToGame } from '../../../global/dispatch';
+import { dispatchToGame, dispatchToCanvas } from '../../../global/dispatch';
 import { RowList } from '../../component/list/row-list';
 
 export const EntitySettingsTab = ({ entityId }: { entityId: ID }) => {
@@ -59,6 +59,7 @@ export const EntitySettingsTab = ({ entityId }: { entityId: ID }) => {
 	rows.push(
 		<MiniGrid>
 			<VisibleButton
+				icon="🚮"
 				onClick={() => {
 					dispatchToGame({
 						type: 'delete-entity',
@@ -67,6 +68,18 @@ export const EntitySettingsTab = ({ entityId }: { entityId: ID }) => {
 				}}>
 				Delete entity
 			</VisibleButton>
+			{entity && 'x' in entity && (
+				<VisibleButton
+					icon="🕴"
+					onClick={() => {
+						dispatchToCanvas({
+							type: 'set-edit-mode-target',
+							to: { entityId },
+						});
+					}}>
+					Move entity
+				</VisibleButton>
+			)}
 		</MiniGrid>
 	);
 	return <RowList padding="normal">{rows}</RowList>;

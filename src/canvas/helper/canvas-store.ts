@@ -3,7 +3,7 @@ import { makeCanvasOrOnScreenCanvas } from './offscreen';
 import { Size } from '../../helper/xy';
 
 export const makeCanvas = ({ width, height }: Size, hashable: any) => (
-	memoizedOperation
+	memoizedOperation: (cv: OffscreenCanvas) => OffscreenCanvas
 ) => {
 	if (self.memory.id !== 'CANVAS-WK') {
 		throw 'no';

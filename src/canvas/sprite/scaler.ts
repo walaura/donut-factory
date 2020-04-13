@@ -1,23 +1,39 @@
+import { XY } from '../../helper/xy';
 import { makeCanvas } from '../helper/canvas-store';
 
-const Scaler = ({
-	width = 100,
-	height = 100,
-	offset = 20,
-	scale = 0,
-	rotate = 0,
-	drawable,
-}) =>
-	makeCanvas(
+export type ScalerProps = {
+	width: number;
+	height: number;
+	offset: number;
+	scale?: number;
+	rotate?: number;
+	memoId?: any;
+};
+
+const Scaler = (
+	drawable: CanvasImageSource,
+	{
+		width = 100,
+		height = 100,
+		offset,
+		scale = 0,
+		rotate = 0,
+		memoId,
+	}: ScalerProps
+) => {
+	const realWidth = width + offset * 2;
+	const realHeight = height + offset * 2;
+
+	return makeCanvas(
 		{
-			width: width + 2 * offset,
-			height: height + 2 * offset,
+			width: realWidth,
+			height: realHeight,
 		},
-		null
+		memoId ? { width, height, scale, rotate, memoId } : null
 	)((canvas) => {
 		const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
-		const realWidth = width + 2 * offset;
-		const realHeight = height + 2 * offset;
+		ctx.clearRect(0, 0, realWidth, realHeight);
+
 		ctx.setTransform();
 		if (rotate) {
 			ctx.translate(realWidth / 2, realHeight / 2);
@@ -25,15 +41,36 @@ const Scaler = ({
 			ctx.translate(realWidth / -2, realHeight / -2);
 		}
 		if (scale) {
+			let fac = {
+				x: realWidth / Math.max(realWidth, realHeight),
+				y: realWidth / Math.max(realWidth, realHeight),
+			};
 			ctx.translate(realWidth / 2, realHeight / 2);
-			ctx.scale(scale, scale);
+			ctx.scale(scale / fac.x, scale / fac.y);
 			ctx.translate(realWidth / -2, realHeight / -2);
 		}
-		ctx.drawImage(drawable, offset, offset);
-
+		if (self.memory.id === 'CANVAS-WK' && self.memory.state?.debugMode) {
+			ctx.fillText(offset + '/' + width, 10, 10);
+			ctx.fillText(scale + '/' + rotate, 10, height);
+		}
+		ctx.drawImage(drawable, offset, offset, width, height);
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
-
 		return canvas;
 	});
+};
+
+export const drawScaled = (
+	ctx: OffscreenCanvasRenderingContext2D,
+	drawable: CanvasImageSource,
+	scalerProps: ScalerProps,
+	{ x, y }: XY
+) => {
+	if (!scalerProps.offset) {
+		scalerProps.offset = 20;
+	}
+
+	let scaled = Scaler(drawable, scalerProps);
+	ctx.drawImage(scaled, x - scalerProps.offset, y - scalerProps.offset);
+};
 
 export { Scaler };

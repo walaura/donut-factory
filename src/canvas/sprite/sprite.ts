@@ -1,10 +1,11 @@
+import { drawScaled, ScalerProps } from './scaler';
 import { XY } from '../../helper/xy';
 import { CanvasRendererStateViewport } from '../../wk/canvas.defs';
 import { makeCanvas } from '../helper/canvas-store';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 import { worldToViewport } from './../helper/latlong';
 
-export const SIZE = 60;
+export const SIZE = 40;
 const IMAGE_SIZE = 40;
 const OFFSET = (SIZE - IMAGE_SIZE) / 2;
 
@@ -16,7 +17,6 @@ const Sprites = {
 };
 
 export type SpriteKey = keyof typeof Sprites;
-export type MkSpriteProps = { rotate?: number; scale?: number };
 
 for (let key of Object.keys(Sprites)) {
 	fetch(Sprites[key])
@@ -30,58 +30,30 @@ for (let key of Object.keys(Sprites)) {
 		});
 }
 
-const mkSprite = (
-	key: SpriteKey,
-	{ rotate = 0, scale = 0 }: MkSpriteProps = {}
-) => {
+const Sprite = (key: SpriteKey) => {
 	if (typeof Sprites[key] === 'string') {
 		return EMPTY;
 	}
 	return makeCanvas(
 		{ width: SIZE, height: SIZE },
-		{ key, rotate, scale }
+		{ key }
 	)((canvas) => {
 		const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
-
-		ctx.clearRect(0, 0, SIZE, SIZE);
-
-		ctx.setTransform();
-		if (rotate) {
-			ctx.translate(SIZE / 2, SIZE / 2);
-			ctx.rotate(rotate);
-			ctx.translate(SIZE / -2, SIZE / -2);
-		}
-		if (scale) {
-			ctx.translate(SIZE / 2, SIZE / 2);
-			ctx.scale(1 + scale / 2.5, 1 + scale / 2.5);
-			ctx.translate(SIZE / -2, SIZE / -2);
-		}
-
-		ctx.drawImage(Sprites[key], OFFSET, OFFSET);
-
-		ctx.setTransform(1, 0, 0, 1, 0, 0);
-
+		ctx.drawImage(Sprites[key], 0, 0, SIZE, SIZE);
 		return canvas;
 	});
 };
 
-const mkDrawSprite = (ctx: OffscreenCanvasRenderingContext2D) => (
+const drawSprite = (
+	ctx: OffscreenCanvasRenderingContext2D,
 	key: SpriteKey,
-	props: MkSpriteProps,
-	pos: XY,
-	{ zoom }: CanvasRendererStateViewport
+	sp: ScalerProps,
+	pos: XY
 ) => {
-	const diff = SIZE / IMAGE_SIZE;
-	const paddedSize = zoom * diff;
-	const offset = (paddedSize - zoom) / 2;
-	let translatedPos = worldToViewport(pos);
-	ctx.drawImage(
-		mkSprite(key, props),
-		translatedPos.x - offset,
-		translatedPos.y - offset,
-		paddedSize,
-		paddedSize
-	);
+	if (typeof Sprites[key] === 'string') {
+		return;
+	}
+	drawScaled(ctx, Sprite(key), { ...sp, memoId: ['sp', key, sp] }, pos);
 };
 
-export { mkSprite, mkDrawSprite };
+export { Sprite, drawSprite };
