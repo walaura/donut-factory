@@ -1,7 +1,7 @@
 import { drawScaled } from './../sprite/scaler';
 import { entityIsRoad } from '../../entity/road';
 import { findEntity } from '../../game/entities';
-import { EntityType, WithCargo, WithID } from '../../helper/defs';
+import { EntityType, WithCargo, WithID, ID, Entity } from '../../helper/defs';
 import { appendWithId } from '../../helper/generate';
 import { XY, xyMap } from '../../helper/xy';
 import { OffscreenCanvasRenderer } from '../canvas.df';
@@ -13,6 +13,7 @@ import { Scaler } from '../sprite/scaler';
 import { numberAsCurrency } from './../../ui/helper/format';
 import { worldToViewport } from './../helper/latlong';
 import { height as chipH, width as chipW } from './../sprite/chip';
+import { Target } from '../../helper/target';
 
 const lerp = (start, end, t) => {
 	return start * (1 - t) + end * t;
@@ -33,13 +34,33 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 	const { animationTick, useBouncyValue, useAnimatedValue } = mkAnimations();
 
 	return ({ state, prevState, rendererState }) => {
+		const getEditModeTarget = (): Entity | null => {
+			if (
+				rendererState.editMode &&
+				rendererState.editModeTarget &&
+				'entityId' in rendererState.editModeTarget
+			) {
+				return findEntity(rendererState.editModeTarget.entityId, state);
+			}
+			return null;
+		};
+
 		const { selected, zoom } = rendererState;
 		ctx.clearRect(0, 0, width, height);
 		ctx.fillStyle = 'black';
+		let dragging = getEditModeTarget();
 
 		animationTick();
-		//agents
-		for (let entity of Object.values(state.entities)) {
+
+		let drawables = Object.values(state.entities);
+
+		/*
+		edit mode?
+		*/
+		if (dragging) {
+			drawables.push({ ...dragging, ...rendererState.gameCursor });
+		}
+		for (let entity of drawables) {
 			if (entityIsRoad(entity)) {
 				continue;
 			}
@@ -57,12 +78,14 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 				fontSize.up();
 			}
 			let { x, y } = worldToViewport(entity);
-			let flip = false;
 			let prevAgent = prevState.entities[entity.id];
 			if (entity.type === EntityType.Vehicle && prevAgent && 'x' in prevAgent) {
 				if (entity.x - prevAgent.x >= -0.01) {
 					flipper.up();
 				}
+			}
+			if (dragging && dragging.id === entity.id) {
+				ctx.globalAlpha = 0.25;
 			}
 			ctx.drawImage(
 				mkAgent(entity, {
@@ -75,6 +98,7 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 				agentSize / pixelRatio,
 				agentSize / pixelRatio
 			);
+			ctx.globalAlpha = 1;
 		}
 
 		// have they created shit this frame

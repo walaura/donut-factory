@@ -117,13 +117,20 @@ const renderSetup = () => {
 			}
 
 			let { gameCursor, editModeTarget } = self.memory.lastKnownCanvasState;
-			if (editModeTarget && 'roadEnd' in editModeTarget) {
+			if (editModeTarget && 'entityId' in editModeTarget) {
 				dispatchToCanvas({
 					type: 'set-edit-mode-target',
 					to: null,
 				});
-				mergeEntity<Road>(editModeTarget.entityId, {
-					[editModeTarget.roadEnd]: gameCursor,
+				if ('roadEnd' in editModeTarget) {
+					mergeEntity<Road>(editModeTarget.entityId, {
+						[editModeTarget.roadEnd]: gameCursor,
+					});
+					return;
+				}
+				mergeEntity(editModeTarget.entityId, {
+					x: gameCursor.x,
+					y: gameCursor.y,
 				});
 			}
 			return;
