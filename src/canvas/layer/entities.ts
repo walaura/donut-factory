@@ -40,10 +40,9 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 		ctx.clearRect(0, 0, width, height);
 		ctx.fillStyle = 'black';
 
-		let dragging = getGhostTargetIfAny();
-
 		animationTick();
 
+		let dragging = getGhostTargetIfAny();
 		let drawables = Object.values(state.entities);
 
 		/*

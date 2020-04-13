@@ -15,8 +15,14 @@ export const getGhostTargetIfAny = (): GhostTarget | null => {
 	if (!gameState) {
 		return null;
 	}
+	if (!rendererState.mode) {
+		return null;
+	}
+
+	if (rendererState.createModeTarget) {
+		return rendererState.createModeTarget;
+	}
 	if (
-		rendererState.mode === CanvasExceptionalMode.Edit &&
 		rendererState.editModeTarget &&
 		'entityId' in rendererState.editModeTarget
 	) {

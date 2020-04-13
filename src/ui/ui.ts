@@ -1,3 +1,4 @@
+import { addEntity } from './../game/entities';
 import 'preact/debug';
 import 'preact/devtools';
 import { h, render } from 'preact';
@@ -105,6 +106,25 @@ const renderSetup = () => {
 		if (!self.memory.lastKnownCanvasState) {
 			throw 'no';
 		}
+
+		let { gameCursor, editModeTarget } = self.memory.lastKnownCanvasState;
+
+		if (self.memory.lastKnownCanvasState.mode === CanvasExceptionalMode.Add) {
+			if (
+				self.memory.lastKnownCanvasState.createModeTarget &&
+				'x' in self.memory.lastKnownCanvasState.createModeTarget.ghost
+			) {
+				dispatchToCanvas({
+					type: 'set-mode',
+					to: null,
+				});
+				addEntity({
+					...self.memory.lastKnownCanvasState.createModeTarget.ghost,
+					x: gameCursor.x,
+					y: gameCursor.y,
+				});
+			}
+		}
 		if (self.memory.lastKnownCanvasState.mode === CanvasExceptionalMode.Edit) {
 			if (
 				!self.memory.lastKnownCanvasState.editModeTarget &&
@@ -118,10 +138,9 @@ const renderSetup = () => {
 				return;
 			}
 
-			let { gameCursor, editModeTarget } = self.memory.lastKnownCanvasState;
 			if (editModeTarget && 'entityId' in editModeTarget) {
 				dispatchToCanvas({
-					type: 'set-edit-mode-target',
+					type: 'set-mode',
 					to: null,
 				});
 				if ('roadEnd' in editModeTarget) {

@@ -12,6 +12,7 @@ import { getAgentStatus } from '../helper/status';
 import { useLastKnownGameState } from '../hook/use-game-state';
 import { UIStatePriority } from '../hook/use-global-state';
 import { useTaskbar } from '../hook/use-taskbar';
+import { dispatchToCanvas } from '../../global/dispatch';
 
 const Row = ({ entity }: { entity: Entity }) => {
 	const allOfIt = useLastKnownGameState((s) => s, UIStatePriority.Snail);
@@ -79,7 +80,11 @@ export const AllEntitities = () => {
 							<Padding>
 								<VisibleButton
 									onClick={() => {
-										addEntity(MkConsumer({ x: 20, y: 40 }));
+										let ghost = MkConsumer({ x: 20, y: 40 });
+										dispatchToCanvas({
+											type: 'set-create-mode-target',
+											to: { ghost },
+										});
 									}}>
 									Add fairy
 								</VisibleButton>

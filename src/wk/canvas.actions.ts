@@ -1,6 +1,6 @@
 import { listenFromWorker, MsgActions } from '../helper/message';
 import { CanvasRendererState, CanvasExceptionalMode } from './canvas.defs';
-import { Target } from '../helper/target';
+import { Target, GhostTarget } from '../helper/target';
 import { XY } from '../helper/xy';
 
 export type CanvasAction =
@@ -25,6 +25,10 @@ export type CanvasAction =
 	| {
 			type: 'set-edit-mode-target';
 			to: Target | null;
+	  }
+	| {
+			type: 'set-create-mode-target';
+			to: GhostTarget | null;
 	  }
 	| {
 			type: 'set-follow-target';
@@ -53,8 +57,15 @@ const editModeReducer: CanvasReducer<CanvasAction> = (action, state) => {
 		case 'set-edit-mode-target': {
 			return {
 				...state,
-				editMode: true,
+				mode: CanvasExceptionalMode.Edit,
 				editModeTarget: action.to,
+			};
+		}
+		case 'set-create-mode-target': {
+			return {
+				...state,
+				mode: CanvasExceptionalMode.Add,
+				createModeTarget: action.to,
 			};
 		}
 		case 'set-follow-target': {
@@ -84,6 +95,7 @@ const editModeReducer: CanvasReducer<CanvasAction> = (action, state) => {
 				...state,
 				mode: action.to,
 				editModeTarget: null,
+				createModeTarget: null,
 			};
 		case 'set-screen-cursor':
 			return { ...state, screenCursor: action.pos };

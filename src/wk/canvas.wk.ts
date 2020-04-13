@@ -7,8 +7,9 @@ self.memory = {
 		gameCursor: { x: 0, y: 0 },
 		screenCursor: { x: 0, y: 0 },
 		followTarget: null,
-		editMode: false,
 		editModeTarget: null,
+		createModeTarget: null,
+		mode: null,
 		debugMode: false,
 	},
 	canvasHandle: undefined,
@@ -47,15 +48,15 @@ listenFromWorker<CanvasRendererMessage>((message) => {
 			if (!self.memory.canvasHandle) {
 				return;
 			}
-			let state = message.state;
-			let prevState = self.memory.prevKnownGameState || state;
+			self.memory.lastKnownGameState = message.state;
 			self.memory.state = self.memory.canvasHandle.onFrame({
-				state,
-				prevState,
+				state: self.memory.lastKnownGameState,
+				prevState:
+					self.memory.prevKnownGameState ?? self.memory.lastKnownGameState,
 				rendererState: self.memory.state as CanvasRendererState,
 			});
 			fireTock();
-			self.memory.prevKnownGameState = state;
+			self.memory.prevKnownGameState = self.memory.lastKnownGameState;
 			return;
 		}
 		case MsgActions.SEND_CANVAS: {
