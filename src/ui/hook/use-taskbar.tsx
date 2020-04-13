@@ -33,7 +33,6 @@ export const useTaskbar = () => useContext(TaskbarContext);
 
 export const Taskbar = () => {
 	let { windows } = useContext(TaskbarContext);
-	console.log(windows);
 	return (
 		<div data-cssid="windows">
 			{windows.map((item) => (
