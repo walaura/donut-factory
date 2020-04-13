@@ -35,7 +35,9 @@ export const SystemMenu = () => {
 								<Padding>
 									<p>
 										Hey hi! This is Donut Factory. An experiment from{' '}
-										<a href="http://twitter.com/freezydorito">@freezydorito</a>{' '}
+										<a class="default" href="http://twitter.com/freezydorito">
+											@freezydorito
+										</a>{' '}
 										in building an OpenTTD clone from scratch.
 										<br />
 										<br />
@@ -44,10 +46,28 @@ export const SystemMenu = () => {
 										<br />
 										<br />
 										You can check out the source code at{' '}
-										<a href="https://github.com/walaura/donut-factory">
+										<a
+											class="default"
+											href="https://github.com/walaura/donut-factory">
 											github
 										</a>{' '}
 										too
+									</p>
+								</Padding>
+								<Padding>
+									<p>
+										Some of the UI sounds come from multiple royalty free
+										sources:{' '}
+										<ul>
+											<li>
+												<a
+													class="default"
+													target="_blank"
+													href="http://www.kenney.nl">
+													UI SFX set by Kenney Vleugels
+												</a>
+											</li>
+										</ul>
 									</p>
 								</Padding>
 								<Padding>

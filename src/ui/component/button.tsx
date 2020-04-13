@@ -6,8 +6,23 @@ import { useLayoutHints } from '../hook/use-layout-hint';
 const dietStyles = css`
 	display: contents;
 `;
-export const DietButton = (props) => (
-	<button {...props} className={[dietStyles, props.className].join(' ')} />
+export const DietButton = ({
+	onClick,
+	...props
+}: {
+	onClick: (ev: MouseEvent) => void;
+	className?: string;
+}) => (
+	<button
+		onMouseDown={(ev) => {
+			if (self.memory.id === 'MAIN') {
+				self.memory.ui.boop();
+			}
+			onClick(ev);
+		}}
+		{...props}
+		className={[dietStyles, props.className].join(' ')}
+	/>
 );
 
 const styles = {
@@ -107,23 +122,25 @@ export const VisibleButton = ({ children, ...props }: VisibleButtonProps) => {
 	const { horizontal } = useLayoutHints();
 	let layout = horizontal === 'narrower' ? 'square' : 'long';
 	return (
-		<button
-			onMouseDown={props.onClick}
-			className={[styles.shared, styles.animation, styles.visible].join(' ')}>
-			{'icon' in props ? (
-				<div class={visibleButtonLayoutStyles[layout]}>
-					<Emoji emoji={props.icon} />
-					<span>{children}</span>
-				</div>
-			) : 'state' in props ? (
-				<div class={visibleButtonLayoutStyles[layout]}>
-					<Emoji emoji={props.state ? '🔴' : '💚'} />
-					<span>{children}</span>
-				</div>
-			) : (
-				children
-			)}
-		</button>
+		<DietButton onClick={props.onClick}>
+			<button
+				onMouseDown={props.onClick}
+				className={[styles.shared, styles.animation, styles.visible].join(' ')}>
+				{'icon' in props ? (
+					<div class={visibleButtonLayoutStyles[layout]}>
+						<Emoji emoji={props.icon} />
+						<span>{children}</span>
+					</div>
+				) : 'state' in props ? (
+					<div class={visibleButtonLayoutStyles[layout]}>
+						<Emoji emoji={props.state ? '🔴' : '💚'} />
+						<span>{children}</span>
+					</div>
+				) : (
+					children
+				)}
+			</button>
+		</DietButton>
 	);
 };
 
@@ -131,15 +148,15 @@ export const RevealButton = ({
 	isActive = false,
 	...props
 }: JSX.HTMLAttributes<HTMLButtonElement> & { isActive?: boolean }) => (
-	<button
-		{...props}
-		class={[styles.shared, styles.reveal, styles.animation].join(' ')}>
-		<div class={[styles.shared, styles.visible].join(' ')}></div>
-		<div
-			class={css`
-				pointer-events: none;
-			`}>
-			{props.children}
-		</div>
-	</button>
+	<DietButton onClick={props.onClick}>
+		<button class={[styles.shared, styles.reveal, styles.animation].join(' ')}>
+			<div class={[styles.shared, styles.visible].join(' ')}></div>
+			<div
+				class={css`
+					pointer-events: none;
+				`}>
+				{props.children}
+			</div>
+		</button>
+	</DietButton>
 );

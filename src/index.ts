@@ -3,6 +3,10 @@ self.memory = {
 	lastKnownGameState: null,
 	lastKnownCanvasState: null,
 	workers: null,
+	ui: {
+		boop: () => {},
+		pushRoute: () => {},
+	},
 };
 
 import { listenFromWindow, postFromWindow } from './helper/message';

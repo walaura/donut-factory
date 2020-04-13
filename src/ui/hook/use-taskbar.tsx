@@ -33,11 +33,11 @@ export const useTaskbar = () => useContext(TaskbarContext);
 
 export const Taskbar = () => {
 	let { windows } = useContext(TaskbarContext);
-
+	console.log(windows);
 	return (
 		<div data-cssid="windows">
 			{windows.map((item) => (
-				<WindowHandleProvider item={item}>
+				<WindowHandleProvider key={item.id} item={item}>
 					<Item item={item} />
 				</WindowHandleProvider>
 			))}
@@ -109,21 +109,16 @@ export const TaskbarProvider = ({
 
 	useEffect(() => {
 		if (self.memory.id === 'MAIN') {
-			if (self.memory.ui) {
-				return;
-			}
-			self.memory.ui = {
-				pushRoute: ({ x, y }, route) => {
-					push(
-						{ route },
-						{
-							ev: {
-								clientX: x,
-								clientY: y,
-							},
-						}
-					);
-				},
+			self.memory.ui.pushRoute = ({ x, y }, route) => {
+				push(
+					{ route },
+					{
+						ev: {
+							clientX: x,
+							clientY: y,
+						},
+					}
+				);
 			};
 		}
 	}, []);

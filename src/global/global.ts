@@ -21,8 +21,9 @@ export type MainThreadMemory = {
 	lastKnownCanvasState: LastKnownCanvasState | null;
 	workers: Workers | null;
 	ui: {
+		boop: () => void;
 		pushRoute: (xy: XY, rt: SerializableRoute) => void;
-	} | null;
+	};
 };
 
 export type CanvasWorkerMemory = {

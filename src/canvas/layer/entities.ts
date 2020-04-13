@@ -77,23 +77,28 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 		}
 
 		// have they created shit this frame
-		for (let entity of Object.values(state.entities)) {
-			if ('cargo' in entity && 'produces' in entity) {
-				for (let cargo of Object.values(entity.cargo)) {
-					if (!entity.produces.includes(cargo.productId)) {
-						continue;
-					}
-					let previousCargo = (prevState.entities[entity.id] as WithCargo)
-						.cargo[cargo.productId];
-					if (Math.floor(cargo.quantity) > Math.floor(previousCargo.quantity)) {
-						feedback = appendWithId(feedback, {
-							xy: entity,
-							text: findEntity(cargo.productId, state)?.name ?? '$$',
-						});
+		try {
+			for (let entity of Object.values(state.entities)) {
+				if ('cargo' in entity && 'produces' in entity) {
+					for (let cargo of Object.values(entity.cargo)) {
+						if (!entity.produces.includes(cargo.productId)) {
+							continue;
+						}
+						let previousCargo = (prevState.entities[entity.id] as WithCargo)
+							.cargo[cargo.productId];
+						if (
+							Math.floor(cargo.quantity) > Math.floor(previousCargo.quantity)
+						) {
+							feedback = appendWithId(feedback, {
+								xy: entity,
+								text: findEntity(cargo.productId, state)?.name ?? '$$',
+							});
+						}
 					}
 				}
 			}
-		}
+		} catch (e) {}
+
 		// pop cool text
 		let lastUpdate = state.ledger[state.ledger.length - 1];
 		if (
@@ -114,7 +119,7 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 			const yDelta = useAnimatedValue(
 				{
 					value: 0,
-					speed: 100,
+					speed: 200,
 				},
 				'toast:' + toast.id
 			);

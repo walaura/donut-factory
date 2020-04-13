@@ -15,9 +15,14 @@ import { dispatchToCanvas } from './../global/dispatch';
 import { onReactStateUpdate as onReactStateUpdate_GAME } from './hook/use-game-state';
 import { onReactStateUpdate as onReactStateUpdate_CANVAS } from './hook/use-canvas-state';
 import { UI } from './react-root';
-
+import lol from './sounds/click.wav';
 let worker;
 
+var sound = document.createElement('audio');
+sound.id = 'audio-player';
+sound.src = lol;
+document.body.append(sound);
+sound.volume = 0.5;
 const renderSetup = () => {
 	if (self.memory.id !== 'MAIN') {
 		throw 'no';
@@ -62,6 +67,10 @@ const renderSetup = () => {
 			type: 'pan-delta',
 			pos: { x: ev.deltaX * -1, y: ev.deltaY * -1 },
 		});
+	};
+
+	self.memory.ui.boop = () => {
+		window['audio-player'].play();
 	};
 
 	$canvas.addEventListener('mousemove', ({ clientX: x, clientY: y }) => {
@@ -123,7 +132,8 @@ const renderSetup = () => {
 			self.memory.lastKnownCanvasState.selected &&
 			'entityId' in self.memory.lastKnownCanvasState.selected
 		) {
-			self.memory.ui?.pushRoute(ev, [
+			self.memory.ui.boop();
+			self.memory.ui.pushRoute(ev, [
 				'entity',
 				{ entityId: self.memory.lastKnownCanvasState.selected.entityId },
 			]);

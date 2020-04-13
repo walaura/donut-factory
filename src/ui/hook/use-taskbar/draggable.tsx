@@ -17,7 +17,7 @@ const style = css`
 	justify-content: stretch;
 	align-content: stretch;
 	will-change: transform;
-	z-index: ${STARTING_Z_INDEX};
+	z-index: ${STARTING_Z_INDEX * 10};
 	padding: ${PADDING};
 	transform: translate(calc(var(--left) - 1em), calc(var(--top) - 1em));
 	width: var(--width);

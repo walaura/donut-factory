@@ -64,6 +64,11 @@ pre {
 	--font-bold: 500;
 }
 
+a.default {
+	color: var(--action);
+	font-weight: bold;
+}
+
 x-draggable {
 	position: fixed;
 	top: 0;
