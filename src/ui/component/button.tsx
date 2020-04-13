@@ -13,21 +13,21 @@ export const DietButton = ({
 	children;
 	onClick?: (ev: MouseEvent) => void;
 	className?: string;
-}) => (
-	<button
-		onMouseDown={(ev) => {
-			if (!onClick) {
-				return;
-			}
-			if (self.memory.id === 'MAIN') {
-				self.memory.ui.boop();
-			}
-			onClick(ev);
-		}}
-		{...props}
-		className={[dietStyles, props.className].join(' ')}
-	/>
-);
+}) =>
+	onClick ? (
+		<button
+			onMouseDown={(ev) => {
+				if (self.memory.id === 'MAIN') {
+					self.memory.ui.boop();
+				}
+				onClick(ev);
+			}}
+			{...props}
+			className={[dietStyles, props.className].join(' ')}
+		/>
+	) : (
+		props.children
+	);
 
 const styles = {
 	shared: css`

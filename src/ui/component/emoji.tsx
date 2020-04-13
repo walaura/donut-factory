@@ -52,7 +52,7 @@ export const EmojiOverlay = ({
 	layout = 'normal',
 }: {
 	emojis: string[];
-	layout: keyof typeof overlayStyles;
+	layout?: keyof typeof overlayStyles;
 }) => {
 	return (
 		<div

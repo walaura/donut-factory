@@ -36,21 +36,15 @@ const DockEmoji = ({
 	title: string;
 }) => (
 	<div class={emojiStyles.root} title={title}>
-		{onClick ? (
-			<div class={emojiStyles.host}>
-				<DietButton onClick={onClick}>
-					{emoji instanceof Array ? (
-						<EmojiOverlay layout="badge" emojis={emoji}></EmojiOverlay>
-					) : (
-						<Emoji emoji={emoji} />
-					)}
-				</DietButton>
-			</div>
-		) : (
-			<div class={emojiStyles.host}>
-				<Emoji emoji={emoji} />
-			</div>
-		)}
+		<div class={emojiStyles.host}>
+			<DietButton onClick={onClick}>
+				{emoji instanceof Array ? (
+					<EmojiOverlay layout="badge" emojis={emoji}></EmojiOverlay>
+				) : (
+					<Emoji emoji={emoji} />
+				)}
+			</DietButton>
+		</div>
 	</div>
 );
 
