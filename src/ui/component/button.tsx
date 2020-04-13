@@ -42,6 +42,8 @@ const styles = {
 		transition: all 0.15s ease-out;
 		&:hover {
 			transform: scale(1.01);
+			box-shadow: var(--shadow-1);
+			filter: brightness(1.25);
 		}
 		&:active {
 			transition: all 0.075s ease-out;
@@ -50,9 +52,9 @@ const styles = {
 		}
 	`,
 	visible: css`
-		color: var(--bg-light);
+		color: var(--text-button);
 		padding: calc(var(--space-h) / 2);
-		background: var(--alt);
+		background: var(--bg-button);
 		box-shadow: var(--shadow-2);
 		font-weight: var(--font-bold);
 		margin: 0;
@@ -63,6 +65,7 @@ const styles = {
 		position: relative;
 		width: 100%;
 		box-sizing: content-box;
+		--bg-button: var(--bg-counter-wash);
 		& > div:last-child {
 			z-index: 4;
 			will-change: transform;
@@ -149,7 +152,7 @@ export const RevealButton = ({
 	...props
 }: JSX.HTMLAttributes<HTMLButtonElement> & { isActive?: boolean }) => (
 	<DietButton onClick={props.onClick}>
-		<button class={[styles.shared, styles.reveal, styles.animation].join(' ')}>
+		<div class={[styles.shared, styles.reveal, styles.animation].join(' ')}>
 			<div class={[styles.shared, styles.visible].join(' ')}></div>
 			<div
 				class={css`
@@ -157,6 +160,6 @@ export const RevealButton = ({
 				`}>
 				{props.children}
 			</div>
-		</button>
+		</div>
 	</DietButton>
 );

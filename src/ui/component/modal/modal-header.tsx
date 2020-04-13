@@ -1,7 +1,7 @@
 import { css } from '../../helper/style';
 import { h } from 'preact';
 import { Emoji } from '../emoji';
-import { DietButton } from '../button';
+import { DietButton, RevealButton } from '../button';
 import { useWindowHandles } from '../../hook/use-taskbar/handles';
 import { RouteIdentifiers } from '../../helper/route.defs.ts';
 import { Padding } from '../primitives/padding';
@@ -29,12 +29,18 @@ const styles = {
 		}
 	`,
 	close: css`
-		transform: scale(2) rotate(45deg);
-		display: grid;
-		align-items: center;
-		justify-content: center;
-		fill: currentColor;
-		min-width: var(--pressable);
+		min-width: calc(var(--pressable) * 0.75);
+		min-height: calc(var(--pressable) * 0.75);
+		padding: 0;
+		& svg {
+			transform: scale(2) rotate(45deg);
+			fill: currentColor;
+		}
+		& div {
+			display: grid;
+			align-items: center;
+			justify-content: center;
+		}
 	`,
 };
 
@@ -57,12 +63,14 @@ export const ModalHeader = ({ emoji, name }: RouteIdentifiers) => {
 			</div>
 			{closeHandle && (
 				<div className={styles.close}>
-					<DietButton onClick={closeHandle}>
-						<svg width="5px" height="5px" xmlns="http://www.w3.org/2000/svg">
-							<rect x="0" y="2" width="5" height="1"></rect>
-							<rect x="2" y="0" width="1" height="5"></rect>
-						</svg>
-					</DietButton>
+					<RevealButton onClick={closeHandle}>
+						<div className={styles.close}>
+							<svg width="5px" height="5px" xmlns="http://www.w3.org/2000/svg">
+								<rect x="0" y="2" width="5" height="1"></rect>
+								<rect x="2" y="0" width="1" height="5"></rect>
+							</svg>
+						</div>
+					</RevealButton>
 				</div>
 			)}
 		</header>

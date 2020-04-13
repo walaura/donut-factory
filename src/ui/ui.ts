@@ -22,7 +22,6 @@ var sound = document.createElement('audio');
 sound.id = 'audio-player';
 sound.src = lol;
 document.body.append(sound);
-sound.volume = 0.5;
 const renderSetup = () => {
 	if (self.memory.id !== 'MAIN') {
 		throw 'no';
@@ -70,7 +69,8 @@ const renderSetup = () => {
 	};
 
 	self.memory.ui.boop = () => {
-		window['audio-player'].play();
+		sound.volume = 0.3 + Math.random() * 0.2;
+		sound.play();
 	};
 
 	$canvas.addEventListener('mousemove', ({ clientX: x, clientY: y }) => {
