@@ -216,10 +216,7 @@ const ToolsPanel = () => {
 };
 
 const Dock = (): h.JSX.Element => {
-	const isEditMode = useLastKnownCanvasState(
-		(s) => s.editMode,
-		UIStatePriority.UI
-	);
+	const isEditMode = useLastKnownCanvasState((s) => s.mode, UIStatePriority.UI);
 
 	if (isEditMode) {
 		return (
@@ -227,8 +224,8 @@ const Dock = (): h.JSX.Element => {
 				<DockPanel
 					onClick={(ev) => {
 						dispatchToCanvas({
-							type: 'set-edit-mode',
-							to: false,
+							type: 'set-mode',
+							to: null,
 						});
 					}}>
 					<DockText>Stop Editing</DockText>

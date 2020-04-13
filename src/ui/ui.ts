@@ -15,7 +15,9 @@ import { dispatchToCanvas } from './../global/dispatch';
 import { onReactStateUpdate as onReactStateUpdate_GAME } from './hook/use-game-state';
 import { onReactStateUpdate as onReactStateUpdate_CANVAS } from './hook/use-canvas-state';
 import { UI } from './react-root';
+//@ts-ignore
 import lol from './sounds/click.wav';
+import { CanvasExceptionalMode } from '../wk/canvas.defs';
 let worker;
 
 var sound = document.createElement('audio');
@@ -103,7 +105,7 @@ const renderSetup = () => {
 		if (!self.memory.lastKnownCanvasState) {
 			throw 'no';
 		}
-		if (self.memory.lastKnownCanvasState.editMode === true) {
+		if (self.memory.lastKnownCanvasState.mode === CanvasExceptionalMode.Edit) {
 			if (
 				!self.memory.lastKnownCanvasState.editModeTarget &&
 				self.memory.lastKnownCanvasState.selected &&

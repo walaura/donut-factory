@@ -1,6 +1,6 @@
 import { createContext, h, JSX } from 'preact';
 import { useContext, useState } from 'preact/hooks';
-import { ID } from '../../../helper/defs';
+import { ID, DistributiveOmit } from '../../../helper/defs';
 import { getRouteIdentifiers } from '../../helper/route';
 import {
 	RouteIdentifiers,
@@ -34,10 +34,6 @@ export type DeflatedTaskbarItemType = DistributiveOmit<
 	TaskbarItemType,
 	'id' | 'container' | 'position' | 'size'
 >;
-
-type DistributiveOmit<T, K extends keyof T> = T extends unknown
-	? Omit<T, K>
-	: never;
 
 const defaultIdentifiers = {
 	name: 'No title',

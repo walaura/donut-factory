@@ -97,3 +97,7 @@ export type LastKnownCanvasState = Readonly<CanvasRendererState>;
 export type DeepPartial<T> = T extends object
 	? { [K in keyof T]?: DeepPartial<T[K]> }
 	: T;
+
+export type DistributiveOmit<T, K extends keyof T> = T extends unknown
+	? Omit<T, K>
+	: never;

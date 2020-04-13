@@ -14,6 +14,8 @@ import { numberAsCurrency } from './../../ui/helper/format';
 import { worldToViewport } from './../helper/latlong';
 import { height as chipH, width as chipW } from './../sprite/chip';
 import { Target } from '../../helper/target';
+import { CanvasExceptionalMode } from '../../wk/canvas.defs';
+import { getGhostTargetIfAny } from '../helper/ghost';
 
 const lerp = (start, end, t) => {
 	return start * (1 - t) + end * t;
@@ -34,21 +36,11 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 	const { animationTick, useBouncyValue, useAnimatedValue } = mkAnimations();
 
 	return ({ state, prevState, rendererState }) => {
-		const getEditModeTarget = (): Entity | null => {
-			if (
-				rendererState.editMode &&
-				rendererState.editModeTarget &&
-				'entityId' in rendererState.editModeTarget
-			) {
-				return findEntity(rendererState.editModeTarget.entityId, state);
-			}
-			return null;
-		};
-
 		const { selected, zoom } = rendererState;
 		ctx.clearRect(0, 0, width, height);
 		ctx.fillStyle = 'black';
-		let dragging = getEditModeTarget();
+
+		let dragging = getGhostTargetIfAny();
 
 		animationTick();
 
@@ -58,7 +50,7 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 		edit mode?
 		*/
 		if (dragging) {
-			drawables.push({ ...dragging, ...rendererState.gameCursor });
+			drawables.push({ ...dragging.ghost, ...rendererState.gameCursor });
 		}
 		for (let entity of drawables) {
 			if (entityIsRoad(entity)) {
@@ -84,7 +76,7 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 					flipper.up();
 				}
 			}
-			if (dragging && dragging.id === entity.id) {
+			if (dragging && dragging.ghost.id === entity.id) {
 				ctx.globalAlpha = 0.25;
 			}
 			ctx.drawImage(

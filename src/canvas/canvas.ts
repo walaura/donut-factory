@@ -23,6 +23,7 @@ import { viewportToWorld, worldToViewport, worldToAbs } from './helper/latlong';
 import { bgLayerRenderer } from './layer/bg';
 import { entityLayerRenderer } from './layer/entities';
 import { roadLayerRenderer } from './layer/road';
+import { CanvasExceptionalMode } from '../wk/canvas.defs';
 
 const findSelected = ({
 	state,
@@ -42,7 +43,7 @@ const findSelected = ({
 					potentiallySelected.push({
 						entityId: entity.id,
 						roadEnd,
-						score: rendererState.editMode ? 2 : 0.1,
+						score: rendererState.mode === CanvasExceptionalMode.Edit ? 2 : 0.1,
 					});
 				}
 			});

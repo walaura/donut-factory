@@ -1,6 +1,6 @@
 import { entityIsRoad, Road, RoadEnd } from '../../entity/road';
 import { getDistanceToPoint } from '../../helper/pathfinding';
-import { Target } from '../../helper/target';
+import { Target, GhostTarget } from '../../helper/target';
 import { XY } from '../../helper/xy';
 import { OffscreenCanvasRenderer } from '../canvas.df';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
@@ -9,6 +9,9 @@ import { drawSprite } from '../sprite/sprite';
 import { worldToViewport } from './../helper/latlong';
 import { findEntity } from '../../game/entities';
 import { mkDirtyStore } from '../helper/dirty-store';
+import { CanvasExceptionalMode } from '../../wk/canvas.defs';
+import { Entity } from '../../helper/defs';
+import { getGhostTargetIfAny } from '../helper/ghost';
 
 const angle = (p1: XY, p2: XY) => Math.atan2(p2.y - p1.y, p2.x - p1.x);
 
@@ -68,27 +71,14 @@ const roadLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 	return ({ state, rendererState }) => {
 		ctx.clearRect(0, 0, width, height);
 
-		const getEditModeTargetIfThisRoad = (
-			entity: Road
-		): (Target & { roadEnd: RoadEnd }) | null => {
-			if (
-				rendererState.editMode &&
-				rendererState.editModeTarget &&
-				'entityId' in rendererState.editModeTarget &&
-				'roadEnd' in rendererState.editModeTarget &&
-				rendererState.editModeTarget.entityId === entity.id
-			) {
-				return rendererState.editModeTarget;
-			}
-			return null;
-		};
-
 		/*create layers*/
 		let roads: Road[] = [];
 		let ghosts: Road[] = [];
+
+		let thisGhost = getGhostTargetIfAny();
 		for (let entity of Object.values(state.entities)) {
 			if (entityIsRoad(entity)) {
-				if (getEditModeTargetIfThisRoad(entity)) {
+				if (entity.id === thisGhost?.ghost.id) {
 					ghosts.push(entity);
 					dirtyRoads.add(entity);
 				} else {
@@ -128,10 +118,14 @@ const roadLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 
 		/* now the caps */
 		for (let road of roads) {
-			let editModeTarget = getEditModeTargetIfThisRoad(road);
 			[RoadEnd.end, RoadEnd.start].forEach((thisEnd) => {
 				let scale = 1;
-				if (editModeTarget !== null && thisEnd === editModeTarget.roadEnd) {
+				if (
+					thisGhost?.ghost.id !== road.id &&
+					thisGhost &&
+					'roadEnd' in thisGhost &&
+					thisEnd === thisGhost.roadEnd
+				) {
 					scale = 1.75;
 				}
 				drawCap(road[thisEnd], scale);

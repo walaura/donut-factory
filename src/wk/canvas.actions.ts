@@ -1,12 +1,12 @@
 import { listenFromWorker, MsgActions } from '../helper/message';
-import { CanvasRendererState } from './canvas.defs';
+import { CanvasRendererState, CanvasExceptionalMode } from './canvas.defs';
 import { Target } from '../helper/target';
 import { XY } from '../helper/xy';
 
 export type CanvasAction =
 	| {
-			type: 'set-edit-mode';
-			to: boolean;
+			type: 'set-mode';
+			to: CanvasExceptionalMode | null;
 	  }
 	| {
 			type: 'set-screen-cursor';
@@ -39,17 +39,15 @@ export type CanvasReducer<A extends CanvasAction> = (
 const editModeReducer: CanvasReducer<CanvasAction> = (action, state) => {
 	switch (action.type) {
 		case 'toggle-edit-mode': {
-			if (state.editMode) {
+			if (state.mode !== CanvasExceptionalMode.Edit) {
 				return {
 					...state,
-					editMode: false,
-					editModeTarget: null,
+					mode: CanvasExceptionalMode.Edit,
 				};
 			}
 			return {
 				...state,
-				editMode: true,
-				editModeTarget: null,
+				mode: null,
 			};
 		}
 		case 'set-edit-mode-target': {
@@ -81,17 +79,12 @@ const editModeReducer: CanvasReducer<CanvasAction> = (action, state) => {
 				},
 			};
 		}
-		case 'set-edit-mode':
-			return action.to === true
-				? {
-						...state,
-						editMode: true,
-						editModeTarget: null,
-				  }
-				: {
-						...state,
-						editMode: false,
-				  };
+		case 'set-mode':
+			return {
+				...state,
+				mode: action.to,
+				editModeTarget: null,
+			};
 		case 'set-screen-cursor':
 			return { ...state, screenCursor: action.pos };
 	}

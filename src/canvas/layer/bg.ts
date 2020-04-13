@@ -26,10 +26,10 @@ const bgLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 	const canvas = makeCanvasOrOnScreenCanvas(width, height);
 	const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
 	return ({ rendererState }) => {
-		const { zoom, viewport, editMode, debugMode } = rendererState;
+		const { zoom, viewport, mode, debugMode } = rendererState;
 		ctx.clearRect(0, 0, width, height);
 		ctx.globalAlpha = 1;
-		ctx.fillStyle = editMode ? blueprint : grass;
+		ctx.fillStyle = mode ? blueprint : grass;
 		ctx.fillRect(0, 0, width, height);
 		let rows = new Array(Math.ceil(height / chunkSize) + 1).fill(null);
 		let columns = new Array(Math.ceil(width / chunkSize) + 1).fill(null);
