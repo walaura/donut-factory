@@ -1,34 +1,34 @@
 import { h, JSX } from 'preact';
 import { useEffect } from 'preact/hooks';
-import { Load, Order } from '../../entity/composables/with-orders';
-import { entityIsRoad, RoadEnd } from '../../entity/road';
-import { mergeEntity } from '../../game/entities';
-import { dispatchToCanvas } from '../../global/dispatch';
+import { Load, Order } from '../../../entity/composables/with-orders';
+import { entityIsRoad, RoadEnd } from '../../../entity/road';
+import { mergeEntity } from '../../../game/entities';
+import { dispatchToCanvas } from '../../../global/dispatch';
 import {
 	Entity,
 	EntityType,
 	ID,
 	WithCargo,
 	WithColor,
-} from '../../helper/defs';
-import { VisibleButton } from '../component/button';
-import { RowList } from '../component/list/row-list';
-import { Pre } from '../component/primitives/pre';
-import { Accesory } from '../component/primitives/accesory';
-import { MiniGrid } from '../component/primitives/mini-grid';
-import { Form } from '../component/row/form';
-import { Info } from '../component/row/info';
-import { Tabs } from '../component/tabs';
-import { shortNumber } from '../helper/format';
-import { useEntityStatus } from '../helper/status';
-import { useLastKnownEntityState } from '../hook/use-game-state';
-import { useTaskbar } from '../hook/use-taskbar';
-import { useTaskbarItem } from '../hook/use-taskbar/item';
-import { AttachWindow } from '../windows/attach';
+} from '../../../helper/defs';
+import { VisibleButton } from '../../component/button';
+import { RowList } from '../../component/list/row-list';
+import { Pre } from '../../component/primitives/pre';
+import { Accesory } from '../../component/primitives/accesory';
+import { MiniGrid } from '../../component/primitives/mini-grid';
+import { Form } from '../../component/row/form';
+import { Info } from '../../component/row/info';
+import { Tabs } from '../../component/tabs';
+import { shortNumber } from '../../helper/format';
+import { useEntityStatus } from '../../helper/status';
+import { useLastKnownEntityState } from '../../hook/use-game-state';
+import { useTaskbar } from '../../hook/use-taskbar';
+import { useTaskbarItem } from '../../hook/use-taskbar/item';
+import { AttachWindow } from '../attach';
 import { OrderInfoTab } from './tab/orders';
 import { PathInfoTab } from './tab/path';
 import { EntitySettingsTab } from './tab/settings';
-import { Padding } from '../component/primitives/padding';
+import { Padding } from '../../component/primitives/padding';
 
 const OrderLoadRow = ({ order }: { order: Order & { load: Load } }) => {
 	const { push } = useTaskbar();

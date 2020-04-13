@@ -1,6 +1,6 @@
 import { h } from 'preact';
-import { EntityInspector } from '../inspectors/entity-inspector';
-import { MoneyInspector } from '../inspectors/money-inspector';
+import { EntityInspector } from '../windows/inspectors/entity-inspector';
+import { MoneyInspector } from '../windows/inspectors/money-inspector';
 import { AllEntitities } from '../windows/all-entities';
 import { SystemMenu } from '../windows/system';
 import {

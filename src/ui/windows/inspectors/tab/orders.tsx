@@ -1,24 +1,24 @@
 import { h } from 'preact';
-import { ID, EntityType } from '../../../helper/defs';
-import { RevealButton, VisibleButton } from '../../component/button';
-import { RowList } from '../../component/list/row-list';
-import { Info } from '../../component/row/info';
-import { useLastKnownEntityState } from '../../hook/use-game-state';
-import { useTaskbar } from '../../hook/use-taskbar';
-import { useEntityStatus } from '../../helper/status';
-import { Flex } from '../../component/list/flex-list';
-import { Padding } from '../../component/primitives/padding';
-import { MiniGrid } from '../../component/primitives/mini-grid';
-import { useTaskbarItem } from '../../hook/use-taskbar/item';
-import { AttachWindow, usePushAttachWindow } from '../../windows/attach';
-import { mergeEntity } from '../../../game/entities';
+import { ID, EntityType } from '../../../../helper/defs';
+import { RevealButton, VisibleButton } from '../../../component/button';
+import { RowList } from '../../../component/list/row-list';
+import { Info } from '../../../component/row/info';
+import { useLastKnownEntityState } from '../../../hook/use-game-state';
+import { useTaskbar } from '../../../hook/use-taskbar';
+import { useEntityStatus } from '../../../helper/status';
+import { Flex } from '../../../component/list/flex-list';
+import { Padding } from '../../../component/primitives/padding';
+import { MiniGrid } from '../../../component/primitives/mini-grid';
+import { useTaskbarItem } from '../../../hook/use-taskbar/item';
+import { AttachWindow, usePushAttachWindow } from '../../attach';
+import { mergeEntity } from '../../../../game/entities';
 import {
 	Order,
 	Load,
 	clearOrders,
 	linkOrder,
-} from '../../../entity/composables/with-orders';
-import { Scroll } from '../../component/primitives/scroll';
+} from '../../../../entity/composables/with-orders';
+import { Scroll } from '../../../component/primitives/scroll';
 const OrderInfoRow = ({
 	active,
 	orderId,

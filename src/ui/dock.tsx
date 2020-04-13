@@ -1,7 +1,7 @@
 import { Fragment, h } from 'preact';
 import { dispatchToCanvas } from '../global/dispatch';
 import { DietButton } from './component/button';
-import { Emoji } from './component/emoji';
+import { Emoji, EmojiOverlay } from './component/emoji';
 import { numberWithCommas, numberAsCurrency } from './helper/format';
 import { css } from './helper/style';
 import { useLastKnownGameState } from './hook/use-game-state';
@@ -32,14 +32,18 @@ const DockEmoji = ({
 	onClick,
 }: {
 	onClick?: (ev: MouseEvent) => void;
-	emoji: string;
+	emoji: string | string[];
 	title: string;
 }) => (
 	<div class={emojiStyles.root} title={title}>
 		{onClick ? (
 			<div class={emojiStyles.host}>
 				<DietButton onClick={onClick}>
-					<Emoji emoji={emoji} />
+					{emoji instanceof Array ? (
+						<EmojiOverlay layout="badge" emojis={emoji}></EmojiOverlay>
+					) : (
+						<Emoji emoji={emoji} />
+					)}
 				</DietButton>
 			</div>
 		) : (
@@ -181,7 +185,7 @@ const ToolsPanel = () => {
 		<Fragment>
 			<DockPanel>
 				<DockEmoji
-					emoji={'👩‍🔧'}
+					emoji={['👩‍🔧', '📋']}
 					title="Staffing"
 					onClick={(ev) => {
 						push(
@@ -195,9 +199,22 @@ const ToolsPanel = () => {
 					}}
 				/>
 				<DockEmoji
+					emoji={['👩‍🔧', '➕']}
+					title="Hire"
+					onClick={(ev) => {
+						push(
+							{ route: ['allEntities', undefined] },
+							{
+								ev,
+								size: { width: 600, height: 450 },
+							}
+						);
+					}}
+				/>
+				<DockEmoji
 					emoji={'✏️'}
 					title="Edit mode"
-					onClick={(ev) => {
+					onClick={() => {
 						dispatchToCanvas({
 							type: 'toggle-edit-mode',
 						});

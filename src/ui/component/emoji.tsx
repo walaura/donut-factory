@@ -31,6 +31,15 @@ const styles = {
 	`,
 };
 
+const overlayStyles = {
+	normal: '',
+	badge: css`
+		& > *:last-child {
+			transform: translate(40%, 40%);
+		}
+	`,
+};
+
 export const Emoji = ({ emoji }: { emoji: string }) => {
 	return (
 		<div class={styles.base} data-cssid="emoji">
@@ -38,9 +47,17 @@ export const Emoji = ({ emoji }: { emoji: string }) => {
 		</div>
 	);
 };
-export const EmojiOverlay = ({ emojis }: { emojis: string[] }) => {
+export const EmojiOverlay = ({
+	emojis,
+	layout = 'normal',
+}: {
+	emojis: string[];
+	layout: keyof typeof overlayStyles;
+}) => {
 	return (
-		<div class={styles.overlay} data-cssid="emoji">
+		<div
+			class={[styles.overlay, overlayStyles[layout]].join(' ')}
+			data-cssid="emoji">
 			{emojis.map((emoji) => (
 				<Emoji emoji={emoji} />
 			))}

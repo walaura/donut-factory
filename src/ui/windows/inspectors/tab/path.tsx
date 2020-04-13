@@ -1,14 +1,14 @@
 import { h, Fragment } from 'preact';
-import { ID } from '../../../helper/defs';
-import { RowList } from '../../component/list/row-list';
-import { Pre } from '../../component/primitives/pre';
-import { Info } from '../../component/row/info';
-import { useLastKnownEntityState } from '../../hook/use-game-state';
-import { Target } from '../../../helper/target';
-import { XY } from '../../../helper/xy';
-import { RevealButton } from '../../component/button';
-import { useTaskbar } from '../../hook/use-taskbar';
-import { SerializableRoute } from '../../helper/route.defs.ts';
+import { ID } from '../../../../helper/defs';
+import { RowList } from '../../../component/list/row-list';
+import { Pre } from '../../../component/primitives/pre';
+import { Info } from '../../../component/row/info';
+import { useLastKnownEntityState } from '../../../hook/use-game-state';
+import { Target } from '../../../../helper/target';
+import { XY } from '../../../../helper/xy';
+import { RevealButton } from '../../../component/button';
+import { useTaskbar } from '../../../hook/use-taskbar';
+import { SerializableRoute } from '../../../helper/route.defs.ts';
 const PathInfoTabEntityRow = ({
 	target,
 }: {

@@ -1,15 +1,15 @@
 import { h } from 'preact';
-import { LedgerRecord } from '../../helper/defs';
-import { Info } from '../component/row/info';
-import { Flex } from '../component/list/flex-list';
-import { RowList } from '../component/list/row-list';
-import { Padding } from '../component/primitives/padding';
-import { Wash } from '../component/wash';
-import { clock, longDate, numberWithCommas } from '../helper/format';
-import { css } from '../helper/style';
-import { useLastKnownGameState } from '../hook/use-game-state';
-import { UIStatePriority } from '../hook/use-global-state';
-import { Scroll } from '../component/primitives/scroll';
+import { LedgerRecord } from '../../../helper/defs';
+import { Info } from '../../component/row/info';
+import { Flex } from '../../component/list/flex-list';
+import { RowList } from '../../component/list/row-list';
+import { Padding } from '../../component/primitives/padding';
+import { Wash } from '../../component/wash';
+import { clock, longDate, numberWithCommas } from '../../helper/format';
+import { css } from '../../helper/style';
+import { useLastKnownGameState } from '../../hook/use-game-state';
+import { UIStatePriority } from '../../hook/use-global-state';
+import { Scroll } from '../../component/primitives/scroll';
 
 const currency = '$';
 

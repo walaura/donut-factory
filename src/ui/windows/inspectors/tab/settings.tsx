@@ -1,15 +1,15 @@
-import { ID, EntityType } from '../../../helper/defs';
+import { ID, EntityType } from '../../../../helper/defs';
 import { JSX, h } from 'preact';
-import { useLastKnownEntityState } from '../../hook/use-game-state';
-import { UIStatePriority } from '../../hook/use-global-state';
-import { Form } from '../../component/row/form';
-import { Select } from '../../component/row/select';
-import { mergeEntity } from '../../../game/entities';
-import { Vehicle } from '../../../entity/vehicle';
-import { MiniGrid } from '../../component/primitives/mini-grid';
-import { VisibleButton } from '../../component/button';
-import { dispatchToGame, dispatchToCanvas } from '../../../global/dispatch';
-import { RowList } from '../../component/list/row-list';
+import { useLastKnownEntityState } from '../../../hook/use-game-state';
+import { UIStatePriority } from '../../../hook/use-global-state';
+import { Form } from '../../../component/row/form';
+import { Select } from '../../../component/row/select';
+import { mergeEntity } from '../../../../game/entities';
+import { Vehicle } from '../../../../entity/vehicle';
+import { MiniGrid } from '../../../component/primitives/mini-grid';
+import { VisibleButton } from '../../../component/button';
+import { dispatchToGame, dispatchToCanvas } from '../../../../global/dispatch';
+import { RowList } from '../../../component/list/row-list';
 
 export const EntitySettingsTab = ({ entityId }: { entityId: ID }) => {
 	let rows: (string | JSX.Element)[] = [];
