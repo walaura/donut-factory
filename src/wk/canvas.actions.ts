@@ -1,3 +1,4 @@
+import { getMemory } from './../global/memory';
 import { listenFromWorker, MsgActions } from '../helper/message';
 import { CanvasRendererState, CanvasExceptionalMode } from './canvas.defs';
 import { Target, GhostTarget } from '../helper/target';
@@ -107,14 +108,11 @@ const reducers: CanvasReducer<CanvasAction>[] = [editModeReducer];
 export const commitActions = (
 	prevState: CanvasRendererState
 ): CanvasRendererState => {
-	if (self.memory.id !== 'CANVAS-WK') {
-		throw 'Only the canvas thread can commit canvas mutations';
-	}
+	let mm = getMemory('CANVAS-WK');
 
 	let canvasState = { ...prevState };
-
-	while (self.memory.actionQueue.length) {
-		let action = self.memory.actionQueue.pop();
+	while (mm.memory.actionQueue.length) {
+		let action = mm.memory.actionQueue.pop();
 		if (!action) {
 			return canvasState;
 		}
@@ -129,13 +127,15 @@ export const commitActions = (
 	return canvasState;
 };
 
-if (self.memory.id === 'CANVAS-WK') {
-	listenFromWorker((message) => {
-		if (self.memory.id !== 'CANVAS-WK') {
-			throw 'Listening from wrong place';
-		}
-		if (message.action === MsgActions.PushCanvasAction) {
-			self.memory.actionQueue.push(message.value);
-		}
-	});
-}
+export const listen = () => {
+	if (self.memory.id === 'CANVAS-WK') {
+		listenFromWorker((message) => {
+			if (self.memory.id !== 'CANVAS-WK') {
+				throw 'Listening from wrong place';
+			}
+			if (message.action === MsgActions.PushCanvasAction) {
+				self.memory.actionQueue.push(message.value);
+			}
+		});
+	}
+};

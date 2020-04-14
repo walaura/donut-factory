@@ -1,4 +1,3 @@
-import { numberWithCommas } from './format';
 const roundTo = (number, len = 10) => {
 	return Math.round(number * len) / len;
 };
@@ -13,14 +12,14 @@ export const shortNumber = (number: number): string => {
 	return round.toFixed(1);
 };
 
-export function numberAsCurrency(x) {
-	return '$ ' + numberWithCommas(x);
-}
-
 export function numberWithCommas(x) {
 	return roundTo(x, 2)
 		.toString()
 		.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+export function numberAsCurrency(x) {
+	return '$ ' + numberWithCommas(x);
 }
 
 export const clock = (dt) => {

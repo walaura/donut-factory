@@ -11,6 +11,7 @@ import {
 	MsgActions,
 	postFromWorker,
 } from '../helper/message';
+import { listen } from './game.actions';
 
 const fireTock = () => {
 	if (self.memory.id !== 'GAME-WK') {
@@ -22,6 +23,7 @@ const fireTock = () => {
 	});
 };
 
+listen();
 listenFromWorker((message) => {
 	if (self.memory.id !== 'GAME-WK') {
 		throw 'no';

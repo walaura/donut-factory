@@ -7,7 +7,6 @@ export enum MsgActions {
 	'CANVAS_RESPONSE' = 'CANVAS_RESPONSE',
 	'TOCK' = 'TOCK',
 	'TICK' = 'TICK',
-	'PAUSE' = 'PAUSE',
 	'START' = 'START',
 	'PushGameAction' = 'COMMIT_ACTION',
 	'PushCanvasAction' = 'COMMIT_CV_ACTION',

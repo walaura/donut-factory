@@ -2,16 +2,15 @@ import { GhostTarget } from '../../helper/target';
 import { CanvasExceptionalMode } from '../../wk/canvas.defs';
 import { findEntity } from '../../game/entities';
 import { Road } from '../../entity/road';
+import { getMemory } from '../../global/memory';
 
 export const getGhostTargetIfAny = (): GhostTarget | null => {
-	if (self.memory.id !== 'CANVAS-WK') {
+	let mm = getMemory('CANVAS-WK');
+	if (!mm.memory.state) {
 		throw 'no';
 	}
-	if (!self.memory.state) {
-		throw 'no';
-	}
-	let rendererState = self.memory.state;
-	let gameState = self.memory.lastKnownGameState;
+	let rendererState = mm.memory.state;
+	let gameState = mm.memory.lastKnownGameState;
 	if (!gameState) {
 		return null;
 	}

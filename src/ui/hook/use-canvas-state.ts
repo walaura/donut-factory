@@ -1,3 +1,4 @@
+import { getMemory } from './../../global/memory';
 import sum from 'hash-sum';
 import { useEffect, useState } from 'preact/hooks';
 import { LastKnownCanvasState } from '../../helper/defs';
@@ -30,11 +31,9 @@ export const useLastKnownCanvasState = <S = unknown>(
 	query: Required<UpdaterProps<LastKnownCanvasState, S>>['query'],
 	priority: UIStatePriority = UIStatePriority.Snail
 ): S => {
-	if (self.memory.id !== 'MAIN') {
-		throw 'no';
-	}
+	let mm = getMemory('MAIN');
 	const [state, setState] = useState<S>(
-		query(self.memory.lastKnownCanvasState as LastKnownCanvasState)
+		query(mm.memory.lastKnownCanvasState as LastKnownCanvasState)
 	);
 	useEffect(() => {
 		const cleanup = subscribeToStateUpdate(setState, { priority, query });

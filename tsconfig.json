@@ -6,6 +6,8 @@
 		"moduleResolution": "node",
 		"strictNullChecks": true,
 		"lib": ["esnext", "dom", "webworker"],
-		"target": "es6"
+		"module": "esnext",
+		"target": "es6",
+		"noEmitOnError": false
 	}
 }

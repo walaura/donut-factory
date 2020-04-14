@@ -3,6 +3,7 @@ self.memory = {
 	lastKnownGameState: null,
 	lastKnownCanvasState: null,
 	workers: null,
+	simulatedWorkers: {},
 	ui: {
 		boop: () => {},
 		pushRoute: () => {},

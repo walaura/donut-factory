@@ -1,5 +1,6 @@
 import { XY, xyMap, xyRound } from '../../helper/xy';
 import { CanvasRendererState } from '../../wk/canvas.defs';
+import { getCanvasViewportState } from './viewport';
 
 /*
 [WORLD] (example - 10,20)
@@ -27,17 +28,13 @@ to anything yet it just sorta works
 */
 export const worldToAbs = (xy: XY) =>
 	xyMap(xy, (xy, k) => {
-		if (self.memory.id !== 'CANVAS-WK') {
-			throw 'no';
-		}
-		return xy[k] * (self.memory.state as CanvasRendererState).zoom;
+		let { zoom } = getCanvasViewportState();
+		return xy[k] * zoom;
 	});
 export const absToViewport = (xy: XY) =>
 	xyMap(xy, (xy, k) => {
-		if (self.memory.id !== 'CANVAS-WK') {
-			throw 'no';
-		}
-		return xy[k] + (self.memory.state as CanvasRendererState).viewport[k];
+		let { viewport } = getCanvasViewportState();
+		return xy[k] + viewport[k];
 	});
 export const worldToViewport = (xy: XY) => absToViewport(worldToAbs(xy));
 
@@ -46,17 +43,13 @@ export const worldToViewport = (xy: XY) => absToViewport(worldToAbs(xy));
 */
 export const viewportToAbs = (xy: XY) =>
 	xyMap(xy, (xy, k) => {
-		if (self.memory.id !== 'CANVAS-WK') {
-			throw 'no';
-		}
-		return xy[k] - (self.memory.state as CanvasRendererState).viewport[k];
+		let { viewport } = getCanvasViewportState();
+		return xy[k] - viewport[k];
 	});
 export const absToWorld = (xy: XY) =>
 	xyMap(xy, (xy, k) => {
-		if (self.memory.id !== 'CANVAS-WK') {
-			throw 'no';
-		}
-		return xy[k] / (self.memory.state as CanvasRendererState).zoom;
+		let { zoom } = getCanvasViewportState();
+		return xy[k] / zoom;
 	});
 export const viewportToWorld = (xy: XY) =>
 	xyRound(absToWorld(viewportToAbs(xy)));

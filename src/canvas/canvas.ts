@@ -64,7 +64,7 @@ const findSelected = ({
 	return result;
 };
 
-export const renderCanvasLayers = (
+export const renderLayersToCanvas = (
 	canvas: OffscreenCanvas,
 	{ width, height }: OffScreenCanvasProps
 ): {

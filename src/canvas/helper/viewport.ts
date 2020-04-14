@@ -1,15 +1,15 @@
 import { CanvasRendererStateViewport } from '../../wk/canvas.defs';
+import { getMemory } from '../../global/memory';
 
 export const getCanvasViewportState = (): CanvasRendererStateViewport => {
-	if (self.memory.id !== 'CANVAS-WK') {
+	let mm = getMemory('CANVAS-WK');
+
+	if (!mm.memory.state) {
 		throw 'no';
 	}
-	if (!self.memory.state) {
+	if (!('zoom' in mm.memory.state)) {
 		throw 'no';
 	}
-	if (!('zoom' in self.memory.state)) {
-		throw 'no';
-	}
-	let { viewport, zoom } = self.memory.state;
+	let { viewport, zoom } = mm.memory.state;
 	return { viewport, zoom };
 };

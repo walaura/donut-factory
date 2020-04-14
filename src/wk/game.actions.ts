@@ -70,14 +70,16 @@ export const commitActions = (prevState: GameState): GameState => {
 	return gameState;
 };
 
-if (self.memory.id === 'GAME-WK') {
-	listenFromWorker((message) => {
-		if (self.memory.id === 'GAME-WK') {
-			if (message.action === MsgActions.PushGameAction) {
-				self.memory.actionQueue.push(message.value);
+export const listen = () => {
+	if (self.memory.id === 'GAME-WK') {
+		listenFromWorker((message) => {
+			if (self.memory.id === 'GAME-WK') {
+				if (message.action === MsgActions.PushGameAction) {
+					self.memory.actionQueue.push(message.value);
+				}
+			} else {
+				throw 'Listening from wrong place';
 			}
-		} else {
-			throw 'Listening from wrong place';
-		}
-	});
-}
+		});
+	}
+};

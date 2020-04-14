@@ -19,7 +19,8 @@ import { UI } from './react-root';
 //@ts-ignore
 import lol from './sounds/click.wav';
 import { CanvasExceptionalMode } from '../wk/canvas.defs';
-import { renderCanvasLayers } from '../canvas/canvas';
+import { renderLayersToCanvas } from '../canvas/canvas';
+import { getMemory } from '../global/memory';
 let worker;
 
 var sound = document.createElement('audio');
@@ -34,13 +35,50 @@ const renderSetup = () => {
 	let readyToRenderWithGame = false;
 	let readyToRenderWithCanvas = false;
 	let rendered = false;
-
+	let loadedFallbackCanvas = false;
 	let onTick = (state: GameState) => {
 		let readyToRender = readyToRenderWithGame && readyToRenderWithCanvas;
 		if (!rendered && readyToRender) {
 			requestAnimationFrame(() => {
 				render(h(UI, {}), (window as any).overlays);
 				rendered = true;
+			});
+		}
+		if (
+			!('transferControlToOffscreen' in $canvas) &&
+			!loadedFallbackCanvas &&
+			readyToRenderWithGame
+		) {
+			let mm = getMemory('MAIN');
+			mm.memory.simulatedWorkers['CANVAS-WK'] = {};
+
+			import('./../wk/canvas.wk').then((pack) => {
+				pack.register();
+
+				let mm = getMemory('MAIN');
+				let handle = renderLayersToCanvas($canvas, {
+					width: $canvas.width / pixelRatio,
+					height: $canvas.height / pixelRatio,
+				});
+				let frame = handle.onFrame({
+					state: mm.memory.lastKnownGameState,
+					prevState: mm.memory.lastKnownGameState,
+					rendererState: {
+						selected: { xy: { x: 0, y: 0 } },
+						viewport: { x: 0, y: 0 },
+						zoom: 20,
+						gameCursor: { x: 0, y: 0 },
+						screenCursor: { x: 0, y: 0 },
+						followTarget: null,
+						editModeTarget: null,
+						createModeTarget: null,
+						mode: null,
+						debugMode: false,
+					},
+				});
+				mm.memory.lastKnownCanvasState = frame;
+				readyToRenderWithCanvas = true;
+				loadedFallbackCanvas = true;
 			});
 		}
 		onReactStateUpdate_GAME(state);
@@ -58,27 +96,6 @@ const renderSetup = () => {
 	$canvas.style.height = window.innerHeight + 'px';
 
 	if (!('transferControlToOffscreen' in $canvas)) {
-		let handle = renderCanvasLayers($canvas, {
-			width: $canvas.width / pixelRatio,
-			height: $canvas.height / pixelRatio,
-		});
-		let frame = handle.onFrame({
-			state: self.memory.lastKnownGameState,
-			prevState: self.memory.lastKnownGameState;
-			rendererState: {		selected: { xy: { x: 0, y: 0 } },
-			viewport: { x: 0, y: 0 },
-			zoom: 20,
-			gameCursor: { x: 0, y: 0 },
-			screenCursor: { x: 0, y: 0 },
-			followTarget: null,
-			editModeTarget: null,
-			createModeTarget: null,
-			mode: null,
-			debugMode: false,
-		}
-		});
-		self.memory.lastKnownCanvasState = frame;
-		readyToRenderWithCanvas = true;
 		return onTick;
 	}
 
@@ -212,4 +229,4 @@ const renderSetup = () => {
 	return onTick;
 };
 
-export default renderSetup
+export default renderSetup;

@@ -1,5 +1,5 @@
 import sum from 'hash-sum';
-import * as postcss from 'postcss';
+import { parse, atRule, AtRule, Rule } from 'postcss';
 
 const makeWrapper = (className) => {
 	let selector = ['style', className].join('-');
@@ -34,14 +34,12 @@ export const keyframes = parseNSaveRawCss(
 	(className, raw) => {
 		//@ts-ignore
 		let cssRaw = String.raw(...raw);
-		let ast = postcss.parse(cssRaw);
-		return postcss
-			.atRule({
-				name: 'keyframes',
-				params: className,
-				nodes: ast.nodes,
-			})
-			.toString();
+		let ast = parse(cssRaw);
+		return atRule({
+			name: 'keyframes',
+			params: className,
+			nodes: ast.nodes,
+		}).toString();
 	}
 );
 
@@ -72,8 +70,8 @@ export const css = parseNSaveRawCss(
 	(className, raw) => {
 		//@ts-ignore
 		let cssRaw = String.raw(...raw);
-		let rules: (postcss.Rule | postcss.AtRule)[] = [];
-		let ast = postcss.parse(`!root! {${cssRaw}}`);
+		let rules: (Rule | AtRule)[] = [];
+		let ast = parse(`!root! {${cssRaw}}`);
 		ast.walkAtRules((r) => {
 			rules.push(r);
 			r.remove();

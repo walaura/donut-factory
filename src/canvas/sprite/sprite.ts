@@ -12,8 +12,8 @@ const OFFSET = (SIZE - IMAGE_SIZE) / 2;
 const EMPTY = makeCanvasOrOnScreenCanvas(SIZE, SIZE);
 
 const Sprites = {
-	road: '/static/road.png',
-	cap: '/static/cap.png',
+	road: '/sprite/road.png',
+	cap: '/sprite/cap.png',
 };
 
 export type SpriteKey = keyof typeof Sprites;
