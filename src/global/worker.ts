@@ -11,7 +11,8 @@ const getWorker = (worker: keyof Workers) => {
 	}
 
 	self.memory.workers = {
-		canvas: new Worker('./../wk/canvas.wk.ts'),
+		canvas:
+			'OffscreenCanvas' in self ? new Worker('./../wk/canvas.wk.ts') : null,
 		game: new Worker('./../wk/game.wk.ts'),
 	};
 

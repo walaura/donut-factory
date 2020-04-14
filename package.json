@@ -10,6 +10,10 @@
 		"make": "npm run OH-PARCEL-COME-ON && parcel build ./src/index.html",
 		"circles": "madge --circular --extensions ts ./src"
 	},
+	"staticFiles": {
+		"staticPath": "static",
+		"watcherGlob": "**"
+},
 	"author": "walaura",
 	"license": "ISC",
 	"dependencies": {
@@ -21,6 +25,7 @@
 		"madge": "^3.8.0",
 		"nanoid": "^3.0.2",
 		"parcel": "^1.12.4",
+		"parcel-plugin-static-files-copy": "^2.3.1",
 		"perlin-noise": "0.0.1",
 		"postcss": "^7.0.27",
 		"postcss-nested": "^4.2.1",

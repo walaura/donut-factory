@@ -19,6 +19,7 @@ import { UI } from './react-root';
 //@ts-ignore
 import lol from './sounds/click.wav';
 import { CanvasExceptionalMode } from '../wk/canvas.defs';
+import { renderCanvasLayers } from '../canvas/canvas';
 let worker;
 
 var sound = document.createElement('audio');
@@ -57,6 +58,27 @@ const renderSetup = () => {
 	$canvas.style.height = window.innerHeight + 'px';
 
 	if (!('transferControlToOffscreen' in $canvas)) {
+		let handle = renderCanvasLayers($canvas, {
+			width: $canvas.width / pixelRatio,
+			height: $canvas.height / pixelRatio,
+		});
+		let frame = handle.onFrame({
+			state: self.memory.lastKnownGameState,
+			prevState: self.memory.lastKnownGameState;
+			rendererState: {		selected: { xy: { x: 0, y: 0 } },
+			viewport: { x: 0, y: 0 },
+			zoom: 20,
+			gameCursor: { x: 0, y: 0 },
+			screenCursor: { x: 0, y: 0 },
+			followTarget: null,
+			editModeTarget: null,
+			createModeTarget: null,
+			mode: null,
+			debugMode: false,
+		}
+		});
+		self.memory.lastKnownCanvasState = frame;
+		readyToRenderWithCanvas = true;
 		return onTick;
 	}
 
@@ -167,7 +189,6 @@ const renderSetup = () => {
 			]);
 		}
 	});
-
 	worker = getWorker('canvas');
 	worker.postMessage(
 		{
@@ -191,4 +212,4 @@ const renderSetup = () => {
 	return onTick;
 };
 
-export default renderSetup;
+export default renderSetup
