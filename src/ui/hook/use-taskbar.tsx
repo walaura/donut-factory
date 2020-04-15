@@ -1,16 +1,15 @@
 import { h } from 'preact';
 import { useContext, useEffect, useState } from 'preact/hooks';
 import { ID } from '../../helper/defs';
+import { XY } from '../../helper/xy';
 import { Modal } from '../component/modal/modal';
+import { TaskbarContext } from './use-taskbar/context';
 import { WindowHandleProvider } from './use-taskbar/handles';
 import {
 	DeflatedTaskbarItemType,
 	Item,
-	TaskbarItemRenderer,
 	TaskbarItemType,
 } from './use-taskbar/item';
-import { XY, Size } from '../../helper/xy';
-import { TaskbarContext } from './use-taskbar/context';
 const shortid = require('shortid');
 
 export const Taskbar = () => {

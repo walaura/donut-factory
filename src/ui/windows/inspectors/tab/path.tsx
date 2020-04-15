@@ -8,7 +8,9 @@ import { Target } from '../../../../helper/target';
 import { XY } from '../../../../helper/xy';
 import { RevealButton } from '../../../component/button';
 import { useTaskbar } from '../../../hook/use-taskbar/context';
-import { SerializableRoute } from '../../../helper/route.defs.ts';
+
+type SerializableRoute = import('../../../helper/route.defs.ts').SerializableRoute;
+
 const PathInfoTabEntityRow = ({
 	target,
 }: {

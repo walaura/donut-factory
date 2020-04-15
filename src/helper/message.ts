@@ -1,9 +1,9 @@
 import { Scopes } from '../global/global';
 import { getWorker } from '../global/worker';
-import { CanvasAction } from '../wk/canvas.actions';
-import { GameAction } from '../wk/game.actions';
 import { getMemory } from './../global/memory';
 import { GameState, LastKnownCanvasState } from './defs';
+type CanvasAction = import('../wk/canvas.actions').CanvasAction;
+type GameAction = import('../wk/game.actions').GameAction;
 
 export enum MsgActions {
 	'SEND_CANVAS' = 'SEND_CANVAS',

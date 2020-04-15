@@ -8,9 +8,10 @@
 		"OH-PARCEL-COME-ON": "npm run gitlog && node ./lol.js",
 		"start": "npm run OH-PARCEL-COME-ON && parcel ./src/index.html",
 		"make": "npm run OH-PARCEL-COME-ON && parcel build ./src/index.html",
-		"circles": "madge --circular --extensions ts ./src"
+		"circles": "dpdm --circular --warning=false ./src"
 	},
 	"madge": {
+		"tsConfig": "tsconfig.json",
 		"detectiveOptions": {
 			"ts": {
 				"skipTypeImports": true
@@ -23,9 +24,6 @@
 	},
 	"author": "walaura",
 	"license": "ISC",
-	"resolutions": {
-		"madge/dependency-tree/precinct/detective-typescript": "5.2.0"
-	},
 	"dependencies": {
 		"@babel/preset-env": "^7.9.5",
 		"@rollup/plugin-commonjs": "^11.1.0",

@@ -3,10 +3,11 @@ import { EntityInspector } from '../windows/inspectors/entity-inspector';
 import { MoneyInspector } from '../windows/inspectors/money-inspector';
 import { AllEntitities } from '../windows/all-entities';
 import { SystemMenu } from '../windows/system';
+import { getRendererForRouter } from './route.helpers';
 
-type RouteIdentifiers = import('./route.defs.ts').RouteIdentifiers;
-type RouteRenderer<X> = import('./route.defs.ts').RouteRenderer<X>;
-type SerializableRoute = import('./route.defs.ts').SerializableRoute;
+export type RouteIdentifiers = import('./route.defs.ts').RouteIdentifiers;
+export type RouteRenderer<X> = import('./route.defs.ts').RouteRenderer<X>;
+export type SerializableRoute = import('./route.defs.ts').SerializableRoute;
 
 const ledger: RouteRenderer<typeof MoneyInspector> = {
 	id: 'ledger',
@@ -39,20 +40,3 @@ const system: RouteRenderer<typeof SystemMenu> = {
 export const routeRenderers = { ledger, allEntities, system, entity };
 
 export type RouteRenderers = typeof routeRenderers;
-
-export const getRouteIdentifiers = (
-	route: SerializableRoute
-): RouteIdentifiers => {
-	const { emoji, name } = getRendererForRouter(route);
-	return { emoji, name };
-};
-
-export const getRendererForRouter = ([id]: SerializableRoute): RouteRenderer<
-	typeof routeRenderers[typeof id]['root']
-> => routeRenderers[id];
-
-export const renderRoute = (route: SerializableRoute) => {
-	const Root = getRendererForRouter(route).root;
-	//@ts-ignore
-	return <Root {...route[1]} />;
-};

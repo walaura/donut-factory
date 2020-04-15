@@ -1,8 +1,8 @@
-import { getMemory } from './../global/memory';
-import { listenFromWorker, MsgActions, mkChannel } from '../helper/message';
-import { CanvasRendererState, CanvasExceptionalMode } from './canvas.defs';
-import { Target, GhostTarget } from '../helper/target';
+import { mkChannel, MsgActions } from '../helper/message';
+import { GhostTarget, Target } from '../helper/target';
 import { XY } from '../helper/xy';
+import { getMemory } from './../global/memory';
+import { CanvasExceptionalMode, CanvasRendererState } from './canvas.defs';
 
 export type CanvasAction =
 	| {

@@ -3,21 +3,20 @@ import { useContext } from 'preact/hooks';
 import { ID } from '../../../helper/defs';
 import { Size } from '../../../helper/xy';
 
-type TaskbarItemType = import('./item').TaskbarItemType;
-type DeflatedTaskbarItemType = import('./item').DeflatedTaskbarItemType;
-type TaskbarItemRenderer = import('./item').TaskbarItemRenderer;
-
 type PushProps = {
-	prefersContainer?: TaskbarItemRenderer;
+	prefersContainer?: import('./item').TaskbarItemRenderer;
 	ev?: Pick<MouseEvent, 'clientX' | 'clientY'>;
 	size?: Size;
 };
 
 export type TaskbarContext = {
-	windows: TaskbarItemType[];
+	windows: import('./item').TaskbarItemType[];
 	focusStack: ID[];
 	focus: (itemId: ID) => void;
-	push: (item: DeflatedTaskbarItemType, props: PushProps) => void;
+	push: (
+		item: import('./item').DeflatedTaskbarItemType,
+		props: PushProps
+	) => void;
 	closeWindow: (id: ID) => void;
 };
 
