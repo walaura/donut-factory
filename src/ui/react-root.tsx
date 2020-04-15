@@ -3,7 +3,7 @@ import { Dock } from './dock';
 import { Taskbar, TaskbarProvider } from './hook/use-taskbar';
 import { CompatError } from './compat-error';
 
-export const UI = () => {
+const UI = () => {
 	return (
 		<TaskbarProvider>
 			<Taskbar />
@@ -12,3 +12,6 @@ export const UI = () => {
 		</TaskbarProvider>
 	);
 };
+
+const aa = 12;
+export { UI, aa };

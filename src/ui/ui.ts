@@ -13,7 +13,6 @@ import { addEntity } from './../game/entities';
 import { dispatchToCanvas } from './../global/dispatch';
 import { onReactStateUpdate as onReactStateUpdate_CANVAS } from './hook/use-canvas-state';
 import { onReactStateUpdate as onReactStateUpdate_GAME } from './hook/use-game-state';
-import { UI } from './react-root';
 //@ts-ignore
 import lol from './sounds/click.wav';
 
@@ -23,11 +22,7 @@ sound.src = lol;
 document.body.append(sound);
 
 const setupCanvas = ($canvas, width, height, pixelRatio) => {
-	let clock = registerCanvasClock($canvas, {
-		width: $canvas.width / pixelRatio,
-		height: $canvas.height / pixelRatio,
-	});
-	clock;
+	registerCanvasClock;
 };
 
 const canvasSetup = () => {
@@ -55,9 +50,12 @@ const renderSetup = () => {
 	let onTick = (state: GameState) => {
 		let readyToRender = readyToRenderWithGame && readyToRenderWithCanvas;
 		if (!rendered && readyToRender) {
-			requestAnimationFrame(() => {
-				render(h(UI, {}), (window as any).overlays);
-				rendered = true;
+			import('./react-root').then((root) => {
+				requestAnimationFrame(() => {
+					console.log(root);
+					render(h(root.UI, {}), (window as any).overlays);
+					rendered = true;
+				});
 			});
 		}
 		onReactStateUpdate_GAME(state);

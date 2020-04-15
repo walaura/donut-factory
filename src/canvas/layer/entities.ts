@@ -1,21 +1,18 @@
-import { drawScaled } from './../sprite/scaler';
 import { entityIsRoad } from '../../entity/road';
 import { findEntity } from '../../game/entities';
-import { EntityType, WithCargo, WithID, ID, Entity } from '../../helper/defs';
+import { EntityType, WithCargo, WithID } from '../../helper/defs';
 import { appendWithId } from '../../helper/generate';
 import { XY, xyMap } from '../../helper/xy';
 import { OffscreenCanvasRenderer } from '../canvas.df';
 import { mkAnimations } from '../helper/animation';
+import { getGhostTargetIfAny } from '../helper/ghost';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 import { mkChip } from '../sprite/chip';
 import { mkAgents } from '../sprite/entity';
-import { Scaler } from '../sprite/scaler';
 import { numberAsCurrency } from './../../ui/helper/format';
 import { worldToViewport } from './../helper/latlong';
 import { height as chipH, width as chipW } from './../sprite/chip';
-import { Target } from '../../helper/target';
-import { CanvasExceptionalMode } from '../../wk/canvas.defs';
-import { getGhostTargetIfAny } from '../helper/ghost';
+import { drawScaled } from './../sprite/scaler';
 
 const lerp = (start, end, t) => {
 	return start * (1 - t) + end * t;
