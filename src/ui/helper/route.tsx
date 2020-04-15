@@ -15,7 +15,7 @@ export type RouteIdentifiers = {
 	name: string;
 };
 
-export type RouteRenderer = WithID &
+export type RouteRenderer<Root extends (args: any) => any> = WithID &
 	RouteIdentifiers & {
-		root: () => Promise<() => JSX.Element>;
+		root: () => Promise<(props: Parameters<Root>[0]) => JSX.Element>;
 	};

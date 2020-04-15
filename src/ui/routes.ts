@@ -1,6 +1,6 @@
 import { RouteRenderer } from './helper/route';
 
-const ledger: RouteRenderer = {
+const ledger: RouteRenderer<typeof import('./windows/inspectors/money-inspector').MoneyInspector> = {
 	id: 'ledger',
 	emoji: '💰',
 	name: 'Money',
@@ -10,14 +10,14 @@ const ledger: RouteRenderer = {
 		),
 };
 
-const allEntities: RouteRenderer = {
+const allEntities: RouteRenderer<typeof import('./windows/all-entities').AllEntitities> = {
 	id: 'allEntities',
 	emoji: '👩‍🔧',
 	name: 'Staffing',
 	root: () => import('./windows/all-entities').then((m) => m.AllEntitities),
 };
 
-const entity: RouteRenderer = {
+const entity: RouteRenderer<typeof import('./windows/inspectors/entity-inspector').EntityInspector> = {
 	id: 'entity',
 	emoji: '🔵',
 	name: 'Inspector',
@@ -27,7 +27,7 @@ const entity: RouteRenderer = {
 		),
 };
 
-const system: RouteRenderer = {
+const system: RouteRenderer<typeof import('./windows/system').SystemMenu> = {
 	id: 'system',
 	emoji: '🍔',
 	name: 'Info & Settings',
