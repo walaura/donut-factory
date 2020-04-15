@@ -7,7 +7,7 @@ import {
 	SerializableRoute,
 } from '../../helper/route.defs.ts';
 import { RouteFromProvider, RouteProvider } from '../use-route';
-import { useTaskbar } from '../use-taskbar';
+import { useTaskbar } from './context';
 import { XY, Size } from '../../../helper/xy';
 
 export type TaskbarItemRenderer = (

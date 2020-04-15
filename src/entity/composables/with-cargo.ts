@@ -1,5 +1,6 @@
-import { WithCargo, ID, Entity } from '../../helper/defs';
-import { GameReducer, GameAction } from '../../wk/game.actions';
+import { Entity, ID, WithCargo } from '../../helper/defs';
+
+type GameReducer<A> = import('../../wk/game.actions').GameReducer<A>;
 
 export const getCargoQuantity = (productId, state: WithCargo): number =>
 	state.cargo[productId]?.quantity ?? 0;

@@ -1,10 +1,9 @@
-import { XY, Size } from '../../../helper/xy';
-import { useEffect, useRef, useState, PropRef } from 'preact/hooks';
 import { h } from 'preact';
-import { css } from '../../helper/style';
-import { DetailsModal } from '../../component/modal/details-modal';
-import { useTaskbar } from '../use-taskbar';
+import { PropRef, useEffect, useRef, useState } from 'preact/hooks';
 import { ID } from '../../../helper/defs';
+import { Size, XY } from '../../../helper/xy';
+import { css } from '../../helper/style';
+import { useTaskbar } from './context';
 
 const PADDING = 20;
 const STARTING_Z_INDEX = 100;

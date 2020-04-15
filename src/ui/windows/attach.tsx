@@ -9,7 +9,7 @@ import { Wash } from '../component/wash';
 import { getAgentStatus } from '../helper/status';
 import { useLastKnownGameState } from '../hook/use-game-state';
 import { useTaskbarItem } from '../hook/use-taskbar/item';
-import { useTaskbar } from '../hook/use-taskbar';
+import { useTaskbar } from '../hook/use-taskbar/context';
 import { Scroll } from '../component/primitives/scroll';
 
 const Row = ({

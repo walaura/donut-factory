@@ -22,7 +22,7 @@ import { Tabs } from '../../component/tabs';
 import { shortNumber } from '../../helper/format';
 import { useEntityStatus } from '../../helper/status';
 import { useLastKnownEntityState } from '../../hook/use-game-state';
-import { useTaskbar } from '../../hook/use-taskbar';
+import { useTaskbar } from '../../hook/use-taskbar/context';
 import { useTaskbarItem } from '../../hook/use-taskbar/item';
 import { AttachWindow } from '../attach';
 import { OrderInfoTab } from './tab/orders';

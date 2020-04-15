@@ -3,11 +3,10 @@ import { EntityInspector } from '../windows/inspectors/entity-inspector';
 import { MoneyInspector } from '../windows/inspectors/money-inspector';
 import { AllEntitities } from '../windows/all-entities';
 import { SystemMenu } from '../windows/system';
-import {
-	RouteIdentifiers,
-	RouteRenderer,
-	SerializableRoute,
-} from './route.defs.ts';
+
+type RouteIdentifiers = import('./route.defs.ts').RouteIdentifiers;
+type RouteRenderer<X> = import('./route.defs.ts').RouteRenderer<X>;
+type SerializableRoute = import('./route.defs.ts').SerializableRoute;
 
 const ledger: RouteRenderer<typeof MoneyInspector> = {
 	id: 'ledger',

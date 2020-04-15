@@ -16,7 +16,7 @@ import { Scroll } from '../../../component/primitives/scroll';
 import { Info } from '../../../component/row/info';
 import { useEntityStatus } from '../../../helper/status';
 import { useLastKnownEntityState } from '../../../hook/use-game-state';
-import { useTaskbar } from '../../../hook/use-taskbar';
+import { useTaskbar } from '../../../hook/use-taskbar/context';
 import { usePushAttachWindow } from '../../attach';
 const OrderInfoRow = ({
 	active,

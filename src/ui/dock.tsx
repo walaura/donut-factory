@@ -6,7 +6,7 @@ import { numberWithCommas, numberAsCurrency } from './helper/format';
 import { css } from './helper/style';
 import { useLastKnownGameState } from './hook/use-game-state';
 import { UIStatePriority } from './hook/use-global-state';
-import { useTaskbar } from './hook/use-taskbar';
+import { useTaskbar } from './hook/use-taskbar/context';
 import { DetailsModal } from './component/modal/details-modal';
 import { useLastKnownCanvasState } from './hook/use-canvas-state';
 import { Pre } from './component/primitives/pre';

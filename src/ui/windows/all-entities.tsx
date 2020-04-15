@@ -11,7 +11,7 @@ import { Tabs } from '../component/tabs';
 import { getAgentStatus } from '../helper/status';
 import { useLastKnownGameState } from '../hook/use-game-state';
 import { UIStatePriority } from '../hook/use-global-state';
-import { useTaskbar } from '../hook/use-taskbar';
+import { useTaskbar } from '../hook/use-taskbar/context';
 import { dispatchToCanvas } from '../../global/dispatch';
 
 const Row = ({ entity }: { entity: Entity }) => {

@@ -1,4 +1,4 @@
-import { createContext, h } from 'preact';
+import { h } from 'preact';
 import { useContext, useEffect, useState } from 'preact/hooks';
 import { ID } from '../../helper/defs';
 import { Modal } from '../component/modal/modal';
@@ -10,26 +10,8 @@ import {
 	TaskbarItemType,
 } from './use-taskbar/item';
 import { XY, Size } from '../../helper/xy';
+import { TaskbarContext } from './use-taskbar/context';
 const shortid = require('shortid');
-
-type PushProps = {
-	prefersContainer?: TaskbarItemRenderer;
-	ev?: Pick<MouseEvent, 'clientX' | 'clientY'>;
-	size?: Size;
-};
-
-export type TaskbarContext = {
-	windows: TaskbarItemType[];
-	focusStack: ID[];
-	focus: (itemId: ID) => void;
-	push: (item: DeflatedTaskbarItemType, props: PushProps) => void;
-	closeWindow: (id: ID) => void;
-};
-
-const TaskbarContext = createContext<TaskbarContext>(
-	(null as any) as TaskbarContext
-);
-export const useTaskbar = () => useContext(TaskbarContext);
 
 export const Taskbar = () => {
 	let { windows } = useContext(TaskbarContext);

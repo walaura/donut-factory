@@ -1,9 +1,8 @@
 import { createContext, h } from 'preact';
 import { useContext } from 'preact/hooks';
-
-import { useTaskbar } from '../use-taskbar';
+import { useTaskbar } from './context';
 import { Draggable, DragHandle } from './draggable';
-import { TaskbarItemType } from './item';
+type TaskbarItemType = import('./item').TaskbarItemType;
 
 const WindowHandlesContext = createContext<WindowHandles>(
 	(null as any) as WindowHandles
