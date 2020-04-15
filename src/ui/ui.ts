@@ -14,17 +14,11 @@ import { onReactStateUpdate as onReactStateUpdate_CANVAS } from './hook/use-canv
 import { onReactStateUpdate as onReactStateUpdate_GAME } from './hook/use-game-state';
 //@ts-ignore
 import lol from './sounds/click.wav';
-import { renderLayersToCanvas } from '../canvas/canvas';
 
 var sound = document.createElement('audio');
 sound.id = 'audio-player';
 sound.src = lol;
 document.body.append(sound);
-
-/*
-this prevents parcel from crapping out when resolving imports???
-*/
-renderLayersToCanvas;
 
 const canvasSetup = () => {
 	if (!('OffscreenCanvas' in self)) {
@@ -53,7 +47,6 @@ const renderSetup = () => {
 		if (!rendered && readyToRender) {
 			import('./react-root').then((root) => {
 				requestAnimationFrame(() => {
-					console.log(root);
 					render(h(root.UI, {}), (window as any).overlays);
 					rendered = true;
 				});
@@ -178,7 +171,7 @@ const renderSetup = () => {
 	});
 
 	canvasSetup().then(() => {
-		let offscreenCanvas = $canvas;
+		let offscreenCanvas: HTMLCanvasElement | OffscreenCanvas = $canvas;
 		if ('transferControlToOffscreen' in $canvas) {
 			offscreenCanvas = $canvas.transferControlToOffscreen();
 		}
@@ -202,6 +195,7 @@ const renderSetup = () => {
 					canvas: offscreenCanvas,
 					pixelRatio,
 				},
+				//@ts-ignore
 				[offscreenCanvas]
 			);
 	});

@@ -5,6 +5,6 @@ lineReplace({
 	text: '',
 	addNewLine: true,
 	callback: () => {
-		console.log('unfucked parcel');
+		console.log('🚚🍩🚚🍩🚚🍩🚚🍩');
 	},
 });

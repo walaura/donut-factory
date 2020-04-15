@@ -13,9 +13,9 @@ import {
 } from '../../../helper/defs';
 import { VisibleButton } from '../../component/button';
 import { RowList } from '../../component/list/row-list';
-import { Pre } from '../../component/primitives/pre';
 import { Accesory } from '../../component/primitives/accesory';
 import { MiniGrid } from '../../component/primitives/mini-grid';
+import { Pre } from '../../component/primitives/pre';
 import { Form } from '../../component/row/form';
 import { Info } from '../../component/row/info';
 import { Tabs } from '../../component/tabs';
@@ -28,7 +28,6 @@ import { AttachWindow } from '../attach';
 import { OrderInfoTab } from './tab/orders';
 import { PathInfoTab } from './tab/path';
 import { EntitySettingsTab } from './tab/settings';
-import { Padding } from '../../component/primitives/padding';
 
 const OrderLoadRow = ({ order }: { order: Order & { load: Load } }) => {
 	const { push } = useTaskbar();

@@ -1,5 +1,5 @@
 import { createContext, h, JSX } from 'preact';
-import { useContext, useState } from 'preact/hooks';
+import { useContext, useState, useEffect } from 'preact/hooks';
 import { getRendererForRouter } from '../helper/route.helpers';
 import { RouteIdentifiers, SerializableRoute } from '../helper/route.defs.ts';
 
@@ -18,6 +18,19 @@ const RouterContext = createContext<SecretRouterContext>(
 	(null as any) as SecretRouterContext
 );
 
+const RouteLoader = ({ loader, props }) => {
+	const [Loaded, setLoaded] = useState<(() => JSX.Element) | null>(null);
+	useEffect(() => {
+		loader().then((p) => {
+			setLoaded(() => p);
+		});
+	});
+	if (Loaded) {
+		return <Loaded {...props} />;
+	}
+	return null;
+};
+
 export const RouteProvider = ({
 	children,
 	route,
@@ -30,11 +43,9 @@ export const RouteProvider = ({
 		emoji: renderer.emoji,
 		name: renderer.name,
 	});
-
-	const RootComponent = renderer.root;
+	const root = <RouteLoader loader={renderer.root} props={route[1]} />;
 	//@ts-ignore
-	const root = h(RootComponent, route[1]);
-
+	//const root = h(RootComponent, route[1]);
 	return (
 		<RouterContext.Provider value={{ root, identifiers, setIdentifiers }}>
 			{children}

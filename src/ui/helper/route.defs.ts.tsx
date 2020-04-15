@@ -3,10 +3,12 @@ import { WithID } from '../../helper/defs';
 
 type RouteRenderers = import('./route').RouteRenderers;
 
+type ThenArg<T> = T extends PromiseLike<infer U> ? U : T;
+
 export type SerializableRoute<
 	K = keyof RouteRenderers
 > = K extends keyof RouteRenderers
-	? [K, Parameters<RouteRenderers[K]['root']>[0]]
+	? [K, Parameters<ThenArg<ReturnType<RouteRenderers[K]['root']>>>[0]]
 	: never;
 
 export type RouteIdentifiers = {
@@ -14,9 +16,7 @@ export type RouteIdentifiers = {
 	name: string;
 };
 
-export type RouteRendererHostProps<Props> = RouteIdentifiers & {
-	root: (props: Props) => JSX.Element;
-};
-
 export type RouteRenderer<Root extends (args: any) => any> = WithID &
-	RouteRendererHostProps<Parameters<Root>[0]>;
+	RouteIdentifiers & {
+		root: () => Promise<(props: Parameters<Root>[0]) => JSX.Element>;
+	};

@@ -11,6 +11,8 @@ export const getRouteIdentifiers = (
 	return { emoji, name };
 };
 
+type ThenArg<T> = T extends PromiseLike<infer U> ? U : T;
+
 export const getRendererForRouter = ([id]: SerializableRoute): RouteRenderer<
-	typeof routeRenderers[typeof id]['root']
+	ThenArg<ReturnType<typeof routeRenderers[typeof id]['root']>>
 > => routeRenderers[id];
