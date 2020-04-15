@@ -1,4 +1,4 @@
-import type {
+import {
 	ID,
 	BaseEntity,
 	EntityType,
@@ -8,7 +8,7 @@ import type {
 import { addId } from '../../helper/generate';
 type GameReducer<X> = import('../../wk/game.actions').GameReducer<X>;
 import { dispatchToGame } from '../../global/dispatch';
-import type { OrderType } from './with-orders.df';
+import { OrderType } from './with-orders.df';
 
 export interface Load {
 	product: ID;

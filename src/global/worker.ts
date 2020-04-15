@@ -17,8 +17,8 @@ const getWorker = (worker: WorkerScopes): Worker => {
 
 	self.memory.workers = {
 		'CANVAS-WK':
-			'OffscreenCanvas' in self ? new Worker('./../wk/canvas.wk.ts') : 'NEVER',
-		'GAME-WK': new Worker('./../wk/game.wk.ts'),
+			'OffscreenCanvas' in self ? new Worker('./canvas.wk.donut.js') : 'NEVER',
+		'GAME-WK': new Worker('./game.wk.donut.js'),
 	};
 
 	return getWorker(worker);

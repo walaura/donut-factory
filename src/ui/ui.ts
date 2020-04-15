@@ -13,8 +13,8 @@ import { dispatchToCanvas } from './../global/dispatch';
 import { onReactStateUpdate as onReactStateUpdate_CANVAS } from './hook/use-canvas-state';
 import { onReactStateUpdate as onReactStateUpdate_GAME } from './hook/use-game-state';
 //@ts-ignore
-import lol from './sounds/click.wav';
-
+//import lol from './sounds/click.wav';
+let lol = '';
 var sound = document.createElement('audio');
 sound.id = 'audio-player';
 sound.src = lol;
