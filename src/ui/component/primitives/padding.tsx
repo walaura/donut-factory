@@ -31,7 +31,20 @@ const Padding = ({
 	type?: keyof typeof metrics;
 	size?: PaddingSize;
 }) => {
-	return <div class={metrics[type][size]}>{children}</div>;
+	return (
+		<div
+			class={
+				css`
+					box-sizing: border-box;
+					display: flex;
+					height: inherit;
+				` +
+				' ' +
+				metrics[type][size]
+			}>
+			{children}
+		</div>
+	);
 };
 
 export { Padding };

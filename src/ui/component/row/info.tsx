@@ -10,13 +10,18 @@ const styles = {
 		min-height: calc(var(--pressable) * 0.75);
 		align-items: ${center ? 'center' : 'flex-start'};
 	`,
-	icon: css`
-		width: calc(var(--pressable) - var(--space-h));
+	icon: (large: boolean) => css`
+		width: ${large
+			? `calc(2 * var(--pressable) - var(--space-h))`
+			: `calc(var(--pressable) - var(--space-h))`};
 		margin-top: 0;
 		display: grid;
 		justify-content: flex-end;
 		padding-right: var(--space-h);
-		transform: translateX(-10%) translateY(20%);
+		transform-origin: top right;
+		transform: ${large
+			? 'scale(2) translateY(20%)'
+			: 'translateX(-10%) translateY(30%)'};
 		flex: 0 0 auto;
 		line-height: 1;
 	`,
@@ -36,9 +41,11 @@ const Info = ({
 	heading,
 	children,
 	center = false,
+	large = false,
 }: {
 	icon?: string;
 	center?: boolean;
+	large?: boolean;
 	heading?: JSX.Element | string | null;
 	children?: preact.ComponentChildren;
 }) => {
@@ -49,7 +56,7 @@ const Info = ({
 	return (
 		<div class={styles.flex(center)}>
 			{icon && (
-				<div class={styles.icon}>
+				<div class={styles.icon(large)}>
 					<Emoji emoji={icon} />
 				</div>
 			)}

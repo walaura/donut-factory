@@ -72,34 +72,6 @@ export const AllEntitities = () => {
 						/>
 					),
 				},
-				{
-					name: 'Build/Hire',
-					emoji: '⛑',
-					contents: (
-						<RowList>
-							<Padding>
-								<VisibleButton
-									onClick={() => {
-										let ghost = MkConsumer({ x: 20, y: 40 });
-										dispatchToCanvas({
-											type: 'set-create-mode-target',
-											to: { ghost },
-										});
-									}}>
-									Add fairy
-								</VisibleButton>
-							</Padding>
-							<Padding>
-								<VisibleButton
-									onClick={() => {
-										addEntity(MkMover());
-									}}>
-									Add truck
-								</VisibleButton>
-							</Padding>
-						</RowList>
-					),
-				},
 			]}
 		</Tabs>
 	);

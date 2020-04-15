@@ -1,5 +1,6 @@
 import { ID, GameState, Entity, DeepPartial } from '../helper/defs';
 import { dispatchToGame } from '../global/dispatch';
+import { addId } from '../helper/generate';
 type GameReducer<X> = import('../wk/game.actions').GameReducer<X>;
 
 export const findEntity = (id: ID, gameState: GameState): Entity | null => {
@@ -23,7 +24,10 @@ export const mergeEntity = <S extends Entity = Entity>(
 export const addEntity = (entity: Entity) => {
 	dispatchToGame({
 		type: 'add-entity',
-		entity,
+		entity: {
+			...entity,
+			...addId(),
+		},
 	});
 };
 

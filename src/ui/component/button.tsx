@@ -45,13 +45,12 @@ const styles = {
 	animation: css`
 		transition: all 0.15s ease-out;
 		&:hover {
-			transform: scale(1.01);
-			box-shadow: var(--shadow-1);
-			filter: brightness(1.25);
+			box-shadow: var(--shadow-2);
+			filter: brightness(1.1);
 		}
 		&:active {
 			transition: all 0.075s ease-out;
-			transform: scale(1.05) translateY(1%);
+			transform: scale(1.01);
 			box-shadow: var(--shadow-1);
 		}
 	`,

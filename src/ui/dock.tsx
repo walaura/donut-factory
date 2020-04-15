@@ -197,7 +197,7 @@ const ToolsPanel = () => {
 					title="Hire"
 					onClick={(ev) => {
 						push(
-							{ route: ['allEntities', undefined] },
+							{ route: ['hire', undefined] },
 							{
 								ev,
 								size: { width: 600, height: 450 },

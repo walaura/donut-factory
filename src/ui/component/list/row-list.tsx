@@ -8,18 +8,29 @@ const styles = css`
 	}
 `;
 
+const gridStyles = css`
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-gap: 1px;
+	& > * {
+		box-shadow: 0 0 0 1px var(--divider);
+	}
+`;
+
 export const RowList = ({
 	children,
 	padding = undefined,
+	grid = false,
 }: {
 	children: preact.ComponentChildren;
+	grid?: boolean;
 	padding?: undefined | null | PaddingSize;
 }) => {
 	if (!(children instanceof Array)) {
 		children = [children];
 	}
 	return (
-		<div class={styles}>
+		<div class={[styles, grid && gridStyles].join(' ')}>
 			{'map' in children &&
 				children.map((child) =>
 					padding ? (

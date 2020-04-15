@@ -34,6 +34,13 @@ const system: RouteRenderer<typeof import('./windows/system').SystemMenu> = {
 	root: () => import('./windows/system').then((m) => m.SystemMenu),
 };
 
-export const routeRenderers = { ledger, allEntities, system, entity };
+const hire: RouteRenderer<typeof import('./windows/hire').Hire> = {
+	id: 'hire',
+	emoji: '👩‍🔧',
+	name: 'Hire',
+	root: () => import('./windows/hire').then((m) => m.Hire),
+};
+
+export const routeRenderers = { ledger, allEntities, system, entity, hire };
 
 export type RouteRenderers = typeof routeRenderers;
