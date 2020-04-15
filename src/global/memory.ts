@@ -42,9 +42,14 @@ export const registerGlobal = <Scope extends WorkerMemory['id']>(
 ) => {
 	if ('memory' in self && 'id' in self.memory) {
 		if (id !== 'MAIN' && self.memory.id === 'MAIN') {
-			let simulated = getSimulatedMemoryMaybe<Scope>(id);
+			let simulated =
+				self.memory.simulatedWorkers[id as Exclude<Scope, 'MAIN'>];
 			if (simulated != null) {
-				simulated.memory = { id, ...initialMemory };
+				self.memory.simulatedWorkers[id as Exclude<Scope, 'MAIN'>] = {
+					id,
+					__isSimulated: true,
+					...initialMemory,
+				};
 				return;
 			}
 			throw `Failed to create sim memory for [${id}]`;

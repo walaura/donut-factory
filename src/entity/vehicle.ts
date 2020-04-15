@@ -31,13 +31,13 @@ import { entityIsRoad } from './road';
 import { findEntity, addEntity } from '../game/entities';
 import {
 	cancelCurrentOrder,
-	OrderType,
 	deliverCurrentOrder,
 	mkMoveOrder,
 	mkLoadOrder,
 	mkUnloadOrder,
 	Order,
 } from './composables/with-orders';
+import { OrderType } from './composables/with-orders.df';
 import { popPath } from './composables/with-path';
 import { entityIsProduct } from './product';
 import { addId, addPosition } from '../helper/generate';

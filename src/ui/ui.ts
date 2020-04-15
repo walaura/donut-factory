@@ -1,37 +1,39 @@
-import { registerCanvasClock } from './../wk/canvas.clock';
-import { addEntity } from './../game/entities';
+import { h, render } from 'preact';
 import 'preact/debug';
 import 'preact/devtools';
-import { h, render } from 'preact';
 import { Road } from '../entity/road';
 import { mergeEntity } from '../game/entities';
+import { getMemory } from '../global/memory';
 import { getWorker } from '../global/worker';
 import { GameState } from '../helper/defs';
-import {
-	CanvasRendererMessage,
-	listenFromWindow,
-	LoopWorkerMessage,
-	MsgActions,
-	mkChannel,
-} from '../helper/message';
+import { LoopWorkerMessage, mkChannel, MsgActions } from '../helper/message';
+import { registerCanvasClock } from '../wk/canvas.clock';
+import { CanvasExceptionalMode } from '../wk/canvas.defs';
+import { addEntity } from './../game/entities';
 import { dispatchToCanvas } from './../global/dispatch';
-import { onReactStateUpdate as onReactStateUpdate_GAME } from './hook/use-game-state';
 import { onReactStateUpdate as onReactStateUpdate_CANVAS } from './hook/use-canvas-state';
+import { onReactStateUpdate as onReactStateUpdate_GAME } from './hook/use-game-state';
 import { UI } from './react-root';
 //@ts-ignore
 import lol from './sounds/click.wav';
-import { CanvasExceptionalMode } from '../wk/canvas.defs';
-import { renderLayersToCanvas } from '../canvas/canvas';
-import { getMemory } from '../global/memory';
-let worker;
 
 var sound = document.createElement('audio');
 sound.id = 'audio-player';
 sound.src = lol;
 document.body.append(sound);
 
+const setupCanvas = ($canvas, width, height, pixelRatio) => {
+	let clock = registerCanvasClock($canvas, {
+		width: $canvas.width / pixelRatio,
+		height: $canvas.height / pixelRatio,
+	});
+	clock;
+};
+
 const canvasSetup = () => {
 	if (!('OffscreenCanvas' in self)) {
+		let mm = getMemory('MAIN');
+		mm.memory.simulatedWorkers['CANVAS-WK'] = {};
 		return import('./../wk/canvas.wk').then((pack) => {
 			pack.register();
 		});
@@ -62,7 +64,7 @@ const renderSetup = () => {
 		readyToRenderWithGame = true;
 		if (readyToRenderWithCanvas) {
 			let channel = mkChannel('MAIN', 'CANVAS-WK');
-			channel.post({ action: 'TOCK', state });
+			channel.post({ action: 'TOCK', state } as LoopWorkerMessage);
 		}
 	};
 
@@ -81,12 +83,10 @@ const renderSetup = () => {
 			pos: { x: ev.deltaX * -1, y: ev.deltaY * -1 },
 		});
 	};
-
 	self.memory.ui.boop = () => {
 		sound.volume = 0.3 + Math.random() * 0.2;
 		sound.play();
 	};
-
 	$canvas.addEventListener('mousemove', ({ clientX: x, clientY: y }) => {
 		dispatchToCanvas({
 			type: 'set-screen-cursor',
@@ -109,7 +109,6 @@ const renderSetup = () => {
 	window.addEventListener('mouseup', () => {
 		mouseIsDown = false;
 	});
-
 	$canvas.addEventListener('mousedown', (ev) => {
 		if (self.memory.id !== 'MAIN') {
 			throw 'no';
@@ -186,14 +185,6 @@ const renderSetup = () => {
 		}
 
 		let channel = mkChannel('MAIN', 'CANVAS-WK');
-		channel.transfer(
-			{
-				action: MsgActions.SEND_CANVAS,
-				canvas: offscreenCanvas,
-				pixelRatio,
-			},
-			[offscreenCanvas]
-		);
 		channel.listen((msg) => {
 			let mm = getMemory('MAIN');
 			if (msg.action === MsgActions.CANVAS_RESPONSE) {
@@ -205,8 +196,16 @@ const renderSetup = () => {
 				readyToRenderWithCanvas = true;
 			}
 		});
+		channel.transfer &&
+			channel.transfer(
+				{
+					action: MsgActions.SEND_CANVAS,
+					canvas: offscreenCanvas,
+					pixelRatio,
+				},
+				[offscreenCanvas]
+			);
 	});
-
 	return onTick;
 };
 

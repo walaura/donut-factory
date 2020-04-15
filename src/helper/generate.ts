@@ -1,6 +1,5 @@
-import { WithXY, Entity, BaseEntity, WithEmoji } from './defs';
-import { WithID } from './defs';
-import { XY } from './xy';
+import type { BaseEntity, WithEmoji, WithID, WithXY } from './defs';
+import type { XY } from './xy';
 const shortid = require('shortid');
 
 export const appendWithId = <T, What>(

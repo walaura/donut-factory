@@ -1,9 +1,9 @@
-import { getMemory } from './../global/memory';
+import { Scopes } from '../global/global';
+import { getWorker } from '../global/worker';
 import { CanvasAction } from '../wk/canvas.actions';
 import { GameAction } from '../wk/game.actions';
+import { getMemory } from './../global/memory';
 import { GameState, LastKnownCanvasState } from './defs';
-import { WorkerMemory, Scopes, WorkerScopes } from '../global/global';
-import { getWorker } from '../global/worker';
 
 export enum MsgActions {
 	'SEND_CANVAS' = 'SEND_CANVAS',
@@ -97,6 +97,53 @@ type Transfer<MessageType> = (
 	objects: Transferable[]
 ) => void;
 
+const fromIsMain = <S>(from): from is Extract<S, 'MAIN'> => from === 'MAIN';
+
+const simulateChannel = <From extends Scopes, To extends Scopes>(
+	from: From,
+	to: To
+): {
+	listen: Listen<WorkerMessage>;
+	post: Post;
+	transfer?: Transfer<WorkerMessage>;
+} => {
+	let mainMm = getMemory('MAIN');
+	const post = (msg) => {
+		if (
+			mainMm.memory.simulatedWorkersMessageQueue[to as Exclude<Scopes, 'MAIN'>]
+		) {
+			let q =
+				mainMm.memory.simulatedWorkersMessageQueue[
+					to as Exclude<Scopes, 'MAIN'>
+				];
+			for (let cb of q) {
+				cb(msg);
+			}
+		}
+	};
+
+	return {
+		post,
+		transfer: (msg, _) => {
+			post(msg);
+		},
+		listen: (cb) => {
+			if (
+				!mainMm.memory.simulatedWorkersMessageQueue[
+					from as Exclude<Scopes, 'MAIN'>
+				]
+			) {
+				mainMm.memory.simulatedWorkersMessageQueue[
+					from as Exclude<Scopes, 'MAIN'>
+				] = [];
+			}
+			mainMm.memory.simulatedWorkersMessageQueue[
+				from as Exclude<Scopes, 'MAIN'>
+			].push(cb);
+		},
+	};
+};
+
 export const mkChannel = <
 	From extends Scopes,
 	To extends Exclude<Scopes, From>
@@ -106,26 +153,34 @@ export const mkChannel = <
 ): {
 	listen: Listen<WorkerMessage>;
 	post: Post;
-	transfer: From extends 'MAIN' ? Transfer<WorkerMessage> : undefined;
+	transfer?: Transfer<WorkerMessage>;
 } => {
-	let listen, post, transfer;
-	if (from === 'MAIN') {
+	if (fromIsMain<From>(from)) {
 		let worker;
 		try {
 			worker = getWorker(to as Exclude<Scopes, 'MAIN'>);
 		} catch (e) {}
 		if (!worker) {
+			let mm = getMemory(to);
+			if (mm) {
+				return simulateChannel(from, to);
+			}
 			throw `Worker [${to}] not found from [${from}]`;
 		}
-		post = (msg) => {
-			return worker.postMessage(msg);
+		return {
+			post: (msg) => {
+				return worker.postMessage(msg);
+			},
+			transfer: (msg, transferables) => {
+				worker.postMessage(msg, transferables);
+			},
+			listen: (cb) => listenFromWindow(cb, worker),
 		};
-		transfer = (msg, transferables) => worker.postMessage(msg, transferables);
-		listen = (cb) => listenFromWindow(cb, worker);
-	} else {
-		post = (...args) => self.postMessage(...args);
-		listen = listenFromWorker;
 	}
 
-	return { listen, post, transfer };
+	let mm = getMemory(from);
+	if ('__isSimulated' in mm.memory) {
+		return simulateChannel(from, to);
+	}
+	return { post: (msg) => self.postMessage(msg), listen: listenFromWorker };
 };

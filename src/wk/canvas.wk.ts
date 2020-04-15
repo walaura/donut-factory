@@ -1,19 +1,12 @@
-import {
-	MsgActions,
-	postFromWorker,
-	CanvasRendererMessage,
-	listenFromWorker,
-	mkChannel,
-} from '../helper/message';
-import { renderLayersToCanvas } from '../canvas/canvas';
-import { CanvasRendererState } from './canvas.defs';
+import { getMemory, registerGlobal } from '../global/memory';
+import { mkChannel, MsgActions, postFromWorker } from '../helper/message';
 import { listen } from './canvas.actions';
-import { registerGlobal, getMemory } from '../global/memory';
 import { registerCanvasClock } from './canvas.clock';
 
 const fireTock = () => {
 	let mm = getMemory('CANVAS-WK');
-	postFromWorker({
+	let channel = mkChannel('CANVAS-WK', 'MAIN');
+	channel.post({
 		action: MsgActions.CANVAS_RESPONSE,
 		rendererState: JSON.parse(JSON.stringify(mm.memory.state)),
 	});

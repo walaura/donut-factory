@@ -8,12 +8,7 @@ import {
 import { addId } from '../../helper/generate';
 import { GameReducer } from '../../wk/game.actions';
 import { dispatchToGame } from '../../global/dispatch';
-
-export enum OrderType {
-	Move = 'Move',
-	Load = 'Load',
-	Unload = 'Unload',
-}
+import { OrderType } from './with-orders.df';
 
 export interface Load {
 	product: ID;

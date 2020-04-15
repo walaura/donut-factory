@@ -1,4 +1,5 @@
-import { Order, OrderType } from '../../entity/composables/with-orders';
+import { Order } from '../../entity/composables/with-orders';
+import { OrderType } from '../../entity/composables/with-orders.df';
 import { findEntity } from '../../game/entities';
 import { EntityType, GameState, ID } from '../../helper/defs';
 import { $t } from '../component/type';

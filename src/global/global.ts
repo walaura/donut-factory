@@ -19,6 +19,7 @@ export type MainThreadMemory = {
 	lastKnownCanvasState: LastKnownCanvasState | null;
 	workers: { [key in WorkerScopes]: Worker | 'NEVER' } | null;
 	simulatedWorkers: { [key in WorkerScopes]?: any };
+	simulatedWorkersMessageQueue: { [key in WorkerScopes]?: any };
 	ui: {
 		boop: () => void;
 		pushRoute: (xy: XY, rt: SerializableRoute) => void;
@@ -36,14 +37,16 @@ export type CanvasWorkerMemory = {
 	};
 };
 
-export type WorkerMemory =
-	| MainThreadMemory
-	| CanvasWorkerMemory
-	| {
-			id: 'GAME-WK';
-			state: GameState | null;
-			actionQueue: GameAction[];
-	  };
+export type WorkerMemory = ({ __isSimulated: true } | {}) &
+	(
+		| MainThreadMemory
+		| CanvasWorkerMemory
+		| {
+				id: 'GAME-WK';
+				state: GameState | null;
+				actionQueue: GameAction[];
+		  }
+	);
 
 export const expectWorkerMemory = () => {
 	if (!self.memory) {

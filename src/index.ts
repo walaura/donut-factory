@@ -4,6 +4,7 @@ self.memory = {
 	lastKnownCanvasState: null,
 	workers: null,
 	simulatedWorkers: {},
+	simulatedWorkersMessageQueue: {},
 	ui: {
 		boop: () => {},
 		pushRoute: () => {},
