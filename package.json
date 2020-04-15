@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "dist/index.html",
 	"scripts": {
-		"gitlog": "./node_modules/.bin/git-json > .git.json",
+		"gitlog": "./node_modules/.bin/git-json > git-log.json",
 		"OH-PARCEL-COME-ON": "npm run gitlog && node ./lol.js",
 		"start": "npm run OH-PARCEL-COME-ON && parcel ./src/index.html",
 		"make": "npm run OH-PARCEL-COME-ON && parcel build ./src/index.html",

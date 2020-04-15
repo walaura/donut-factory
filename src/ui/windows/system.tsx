@@ -13,8 +13,7 @@ import { Scroll } from '../component/primitives/scroll';
 import { MiniGrid } from '../component/primitives/mini-grid';
 import { useLastKnownCanvasState } from '../hook/use-canvas-state';
 import { dispatchToCanvas } from '../../global/dispatch';
-
-const gitlog = require('../../../.git.json');
+import gitlog from '../../../git-log.json';
 
 const AllState = () => {
 	const state = useLastKnownGameState((s) => s);

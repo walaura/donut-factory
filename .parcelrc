@@ -5,6 +5,9 @@
 	"transformers": {
 		"*.png": [
 			"@parcel/transformer-raw"
+		],
+		"*.wav": [
+			"@parcel/transformer-raw"
 		]
 	}
 }
