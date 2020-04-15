@@ -7,7 +7,6 @@ import { getMemory } from '../global/memory';
 import { getWorker } from '../global/worker';
 import { GameState } from '../helper/defs';
 import { LoopWorkerMessage, mkChannel, MsgActions } from '../helper/message';
-import { registerCanvasClock } from '../wk/canvas.clock';
 import { CanvasExceptionalMode } from '../wk/canvas.defs';
 import { addEntity } from './../game/entities';
 import { dispatchToCanvas } from './../global/dispatch';
@@ -15,15 +14,17 @@ import { onReactStateUpdate as onReactStateUpdate_CANVAS } from './hook/use-canv
 import { onReactStateUpdate as onReactStateUpdate_GAME } from './hook/use-game-state';
 //@ts-ignore
 import lol from './sounds/click.wav';
+import { renderLayersToCanvas } from '../canvas/canvas';
 
 var sound = document.createElement('audio');
 sound.id = 'audio-player';
 sound.src = lol;
 document.body.append(sound);
 
-const setupCanvas = ($canvas, width, height, pixelRatio) => {
-	registerCanvasClock;
-};
+/*
+this prevents parcel from crapping out when resolving imports???
+*/
+renderLayersToCanvas;
 
 const canvasSetup = () => {
 	if (!('OffscreenCanvas' in self)) {
