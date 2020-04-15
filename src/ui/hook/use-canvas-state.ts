@@ -22,7 +22,6 @@ const subscribeToStateUpdate = <S extends LastKnownCanvasState | any>(
 	};
 	callbacks.push(cbEntry);
 	return () => {
-		console.log('cleanup fired', callbacks.length);
 		callbacks = callbacks.filter((entry) => entry !== cbEntry);
 	};
 };

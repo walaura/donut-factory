@@ -1,6 +1,9 @@
+import { getMemory } from './../global/memory';
 import { CanvasAction } from '../wk/canvas.actions';
 import { GameAction } from '../wk/game.actions';
 import { GameState, LastKnownCanvasState } from './defs';
+import { WorkerMemory, Scopes, WorkerScopes } from '../global/global';
+import { getWorker } from '../global/worker';
 
 export enum MsgActions {
 	'SEND_CANVAS' = 'SEND_CANVAS',
@@ -15,7 +18,7 @@ export enum MsgActions {
 export type CanvasRendererMessage =
 	| {
 			action: MsgActions.SEND_CANVAS;
-			canvas: OffscreenCanvas;
+			canvas: HTMLCanvasElement | OffscreenCanvas;
 			pixelRatio: number;
 	  }
 	| {
@@ -85,4 +88,44 @@ export const listenFromWindow = <M = WorkerMessage>(
 		}
 		onAction(data);
 	};
+};
+
+type Post = Worker['postMessage'];
+type Listen<MessageType> = (cb: (msg: MessageType) => void) => void;
+type Transfer<MessageType> = (
+	msg: MessageType,
+	objects: Transferable[]
+) => void;
+
+export const mkChannel = <
+	From extends Scopes,
+	To extends Exclude<Scopes, From>
+>(
+	from: From,
+	to: To
+): {
+	listen: Listen<WorkerMessage>;
+	post: Post;
+	transfer: From extends 'MAIN' ? Transfer<WorkerMessage> : undefined;
+} => {
+	let listen, post, transfer;
+	if (from === 'MAIN') {
+		let worker;
+		try {
+			worker = getWorker(to as Exclude<Scopes, 'MAIN'>);
+		} catch (e) {}
+		if (!worker) {
+			throw `Worker [${to}] not found from [${from}]`;
+		}
+		post = (msg) => {
+			return worker.postMessage(msg);
+		};
+		transfer = (msg, transferables) => worker.postMessage(msg, transferables);
+		listen = (cb) => listenFromWindow(cb, worker);
+	} else {
+		post = (...args) => self.postMessage(...args);
+		listen = listenFromWorker;
+	}
+
+	return { listen, post, transfer };
 };

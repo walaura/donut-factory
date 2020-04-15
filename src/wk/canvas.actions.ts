@@ -1,5 +1,5 @@
 import { getMemory } from './../global/memory';
-import { listenFromWorker, MsgActions } from '../helper/message';
+import { listenFromWorker, MsgActions, mkChannel } from '../helper/message';
 import { CanvasRendererState, CanvasExceptionalMode } from './canvas.defs';
 import { Target, GhostTarget } from '../helper/target';
 import { XY } from '../helper/xy';
@@ -128,14 +128,11 @@ export const commitActions = (
 };
 
 export const listen = () => {
-	if (self.memory.id === 'CANVAS-WK') {
-		listenFromWorker((message) => {
-			if (self.memory.id !== 'CANVAS-WK') {
-				throw 'Listening from wrong place';
-			}
-			if (message.action === MsgActions.PushCanvasAction) {
-				self.memory.actionQueue.push(message.value);
-			}
-		});
-	}
+	let channel = mkChannel('CANVAS-WK', 'MAIN');
+	channel.listen((message) => {
+		let mm = getMemory('CANVAS-WK');
+		if (message.action === MsgActions.PushCanvasAction) {
+			mm.memory.actionQueue.push(message.value);
+		}
+	});
 };

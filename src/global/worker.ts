@@ -1,19 +1,24 @@
-import { Workers } from './global';
-import { wrongContext } from './invariant';
+import { WorkerScopes } from './global';
 
-const getWorker = (worker: keyof Workers) => {
+const getWorker = (worker: WorkerScopes): Worker => {
 	if (self.memory.id !== 'MAIN') {
-		throw wrongContext('MAIN', self.memory.id);
+		throw 'Wrong context';
 	}
-
-	if (self.memory.workers && self.memory.workers[worker]) {
-		return self.memory.workers[worker];
+	if (self.memory.workers && self.memory.workers[worker] === 'NEVER') {
+		throw 'cant get this one soz';
+	}
+	if (
+		self.memory.workers &&
+		self.memory.workers[worker] != null &&
+		self.memory.workers[worker] !== 'NEVER'
+	) {
+		return self.memory.workers[worker] as Worker;
 	}
 
 	self.memory.workers = {
-		canvas:
-			'OffscreenCanvas' in self ? new Worker('./../wk/canvas.wk.ts') : null,
-		game: new Worker('./../wk/game.wk.ts'),
+		'CANVAS-WK':
+			'OffscreenCanvas' in self ? new Worker('./../wk/canvas.wk.ts') : 'NEVER',
+		'GAME-WK': new Worker('./../wk/game.wk.ts'),
 	};
 
 	return getWorker(worker);

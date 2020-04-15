@@ -10,17 +10,15 @@ import { CanvasAction } from '../wk/canvas.actions';
 import { SerializableRoute } from '../ui/helper/route.defs.ts';
 import { XY } from '../helper/xy';
 
-export type Workers = {
-	game: Worker;
-	canvas: Worker;
-};
+export type Scopes = WorkerMemory['id'];
+export type WorkerScopes = Exclude<Scopes, 'MAIN'>;
 
 export type MainThreadMemory = {
 	id: 'MAIN';
 	lastKnownGameState: LastKnownGameState | null;
 	lastKnownCanvasState: LastKnownCanvasState | null;
-	workers: Workers | null;
-	simulatedWorkers: { [key in Exclude<WorkerMemory['id'], 'MAIN'>]?: any };
+	workers: { [key in WorkerScopes]: Worker | 'NEVER' } | null;
+	simulatedWorkers: { [key in WorkerScopes]?: any };
 	ui: {
 		boop: () => void;
 		pushRoute: (xy: XY, rt: SerializableRoute) => void;
@@ -29,7 +27,6 @@ export type MainThreadMemory = {
 
 export type CanvasWorkerMemory = {
 	id: 'CANVAS-WK';
-	canvasHandle: ReturnType<typeof renderLayersToCanvas> | undefined;
 	lastKnownGameState: LastKnownGameState | null;
 	prevKnownGameState: LastKnownGameState | null;
 	state: CanvasRendererState | null;

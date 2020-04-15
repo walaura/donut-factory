@@ -1,3 +1,4 @@
+import { registerCanvasClock } from './../wk/canvas.clock';
 import { addEntity } from './../game/entities';
 import 'preact/debug';
 import 'preact/devtools';
@@ -11,6 +12,7 @@ import {
 	listenFromWindow,
 	LoopWorkerMessage,
 	MsgActions,
+	mkChannel,
 } from '../helper/message';
 import { dispatchToCanvas } from './../global/dispatch';
 import { onReactStateUpdate as onReactStateUpdate_GAME } from './hook/use-game-state';
@@ -27,6 +29,18 @@ var sound = document.createElement('audio');
 sound.id = 'audio-player';
 sound.src = lol;
 document.body.append(sound);
+
+const canvasSetup = () => {
+	if (!('OffscreenCanvas' in self)) {
+		return import('./../wk/canvas.wk').then((pack) => {
+			pack.register();
+		});
+	} else {
+		getWorker('CANVAS-WK');
+		return Promise.resolve();
+	}
+};
+
 const renderSetup = () => {
 	if (self.memory.id !== 'MAIN') {
 		throw 'no';
@@ -44,47 +58,11 @@ const renderSetup = () => {
 				rendered = true;
 			});
 		}
-		if (
-			!('transferControlToOffscreen' in $canvas) &&
-			!loadedFallbackCanvas &&
-			readyToRenderWithGame
-		) {
-			let mm = getMemory('MAIN');
-			mm.memory.simulatedWorkers['CANVAS-WK'] = {};
-
-			import('./../wk/canvas.wk').then((pack) => {
-				pack.register();
-
-				let mm = getMemory('MAIN');
-				let handle = renderLayersToCanvas($canvas, {
-					width: $canvas.width / pixelRatio,
-					height: $canvas.height / pixelRatio,
-				});
-				let frame = handle.onFrame({
-					state: mm.memory.lastKnownGameState,
-					prevState: mm.memory.lastKnownGameState,
-					rendererState: {
-						selected: { xy: { x: 0, y: 0 } },
-						viewport: { x: 0, y: 0 },
-						zoom: 20,
-						gameCursor: { x: 0, y: 0 },
-						screenCursor: { x: 0, y: 0 },
-						followTarget: null,
-						editModeTarget: null,
-						createModeTarget: null,
-						mode: null,
-						debugMode: false,
-					},
-				});
-				mm.memory.lastKnownCanvasState = frame;
-				readyToRenderWithCanvas = true;
-				loadedFallbackCanvas = true;
-			});
-		}
 		onReactStateUpdate_GAME(state);
 		readyToRenderWithGame = true;
-		if (worker) {
-			worker.postMessage({ action: 'TOCK', state } as LoopWorkerMessage);
+		if (readyToRenderWithCanvas) {
+			let channel = mkChannel('MAIN', 'CANVAS-WK');
+			channel.post({ action: 'TOCK', state });
 		}
 	};
 
@@ -94,12 +72,6 @@ const renderSetup = () => {
 	$canvas.height = window.innerHeight * pixelRatio;
 	$canvas.style.width = window.innerWidth + 'px';
 	$canvas.style.height = window.innerHeight + 'px';
-
-	if (!('transferControlToOffscreen' in $canvas)) {
-		return onTick;
-	}
-
-	const offscreenCanvas = $canvas.transferControlToOffscreen();
 
 	$canvas.onwheel = function (ev) {
 		ev.preventDefault();
@@ -206,25 +178,34 @@ const renderSetup = () => {
 			]);
 		}
 	});
-	worker = getWorker('canvas');
-	worker.postMessage(
-		{
-			action: MsgActions.SEND_CANVAS,
-			canvas: offscreenCanvas,
-			pixelRatio,
-		} as CanvasRendererMessage,
-		[offscreenCanvas]
-	);
-	listenFromWindow<CanvasRendererMessage>((msg) => {
-		if (msg.action === MsgActions.CANVAS_RESPONSE) {
-			if (self.memory.id !== 'MAIN') {
-				throw 'no';
-			}
-			self.memory.lastKnownCanvasState = msg.rendererState;
-			onReactStateUpdate_CANVAS(self.memory.lastKnownCanvasState);
-			readyToRenderWithCanvas = true;
+
+	canvasSetup().then(() => {
+		let offscreenCanvas = $canvas;
+		if ('transferControlToOffscreen' in $canvas) {
+			offscreenCanvas = $canvas.transferControlToOffscreen();
 		}
-	}, worker);
+
+		let channel = mkChannel('MAIN', 'CANVAS-WK');
+		channel.transfer(
+			{
+				action: MsgActions.SEND_CANVAS,
+				canvas: offscreenCanvas,
+				pixelRatio,
+			},
+			[offscreenCanvas]
+		);
+		channel.listen((msg) => {
+			let mm = getMemory('MAIN');
+			if (msg.action === MsgActions.CANVAS_RESPONSE) {
+				if (mm.memory.id !== 'MAIN') {
+					throw 'no';
+				}
+				mm.memory.lastKnownCanvasState = msg.rendererState;
+				onReactStateUpdate_CANVAS(msg.rendererState);
+				readyToRenderWithCanvas = true;
+			}
+		});
+	});
 
 	return onTick;
 };

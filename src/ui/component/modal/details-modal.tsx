@@ -66,7 +66,6 @@ export const DetailsModal = ({
 				<div data-alt-colors>
 					<TaskbarProvider
 						pusher={(pushee, others) => {
-							console.log(item);
 							setItem(inflateTaskbarItem(pushee, others));
 						}}>
 						{children}

@@ -25,13 +25,16 @@ listenFromWindow((data) => {
 			self.memory.lastKnownGameState = data.state;
 			return;
 	}
-}, getWorker('game'));
+}, getWorker('GAME-WK'));
 let initialState = null;
 try {
 	//@ts-ignore
 	initialState = JSON.parse(localStorage.getItem('autosave'));
 } catch {}
-postFromWindow({ action: MsgActions.START, initialState }, getWorker('game'));
+postFromWindow(
+	{ action: MsgActions.START, initialState },
+	getWorker('GAME-WK')
+);
 
 const renderGame = renderSetup();
 let lastAutosave = Date.now();
@@ -42,7 +45,7 @@ const loopWithState = (state: GameState) => {
 		window.localStorage.setItem('autosave', JSON.stringify(state));
 	}
 	if (!state.paused) {
-		postFromWindow({ action: MsgActions.TICK }, getWorker('game'));
+		postFromWindow({ action: MsgActions.TICK }, getWorker('GAME-WK'));
 	}
 };
 const loop = () => {
