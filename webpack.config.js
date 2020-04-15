@@ -26,6 +26,14 @@ module.exports = {
 	module: {
 		rules: [
 			{
+				test: /\.(png|wav)$/i,
+				use: [
+					{
+						loader: 'file-loader',
+					},
+				],
+			},
+			{
 				test: /\.(t|j)sx?$/,
 				use: [
 					{

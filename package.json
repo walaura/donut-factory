@@ -26,6 +26,7 @@
 	"dependencies": {
 		"@types/node": "^13.11.0",
 		"deepmerge": "^4.2.2",
+		"file-loader": "^6.0.0",
 		"git2json": "0.0.1",
 		"hash-sum": "^2.0.0",
 		"html-webpack-plugin": "^4.2.0",
@@ -38,11 +39,11 @@
 		"preact": "^10.4.0",
 		"shortid": "^2.2.15",
 		"ts-loader": "^7.0.0",
+		"typescript": "^3.8.3",
 		"uniqid": "^5.2.0",
+		"webpack": "^4.42.1",
 		"webpack-cli": "^3.3.11",
 		"webpack-dev-server": "^3.10.3",
-		"typescript": "^3.8.3",
-		"webpack": "^4.42.1",
 		"worker-loader": "^2.0.0"
 	},
 	"browserslist": [

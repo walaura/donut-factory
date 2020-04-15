@@ -4,6 +4,8 @@ import { CanvasRendererStateViewport } from '../../wk/canvas.defs';
 import { makeCanvas } from '../helper/canvas-store';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 import { worldToViewport } from './../helper/latlong';
+import road from './img/road.png';
+import cap from './img/cap.png';
 
 export const SIZE = 40;
 const IMAGE_SIZE = 40;
@@ -12,8 +14,8 @@ const OFFSET = (SIZE - IMAGE_SIZE) / 2;
 const EMPTY = makeCanvasOrOnScreenCanvas(SIZE, SIZE);
 
 const Sprites = {
-	road: '/sprite/road.png',
-	cap: '/sprite/cap.png',
+	road,
+	cap,
 };
 
 export type SpriteKey = keyof typeof Sprites;

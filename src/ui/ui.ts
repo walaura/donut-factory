@@ -12,10 +12,9 @@ import { addEntity } from './../game/entities';
 import { dispatchToCanvas } from './../global/dispatch';
 import { onReactStateUpdate as onReactStateUpdate_CANVAS } from './hook/use-canvas-state';
 import { onReactStateUpdate as onReactStateUpdate_GAME } from './hook/use-game-state';
-import { addId } from '../helper/generate';
 //@ts-ignore
-//import lol from './sounds/click.wav';
-let lol = '';
+import lol from './sounds/click.wav';
+
 var sound = document.createElement('audio');
 sound.id = 'audio-player';
 sound.src = lol;

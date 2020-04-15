@@ -227,13 +227,13 @@ const ToolsPanel = () => {
 };
 
 const Dock = (): h.JSX.Element => {
-	const isEditMode = useLastKnownCanvasState((s) => s.mode, UIStatePriority.UI);
-
+	//const isEditMode = useLastKnownCanvasState((s) => s.mode, UIStatePriority.UI);
+	const isEditMode = false;
 	if (isEditMode) {
 		return (
 			<div class={styles}>
 				<DockPanel
-					onClick={(ev) => {
+					onClick={() => {
 						dispatchToCanvas({
 							type: 'set-mode',
 							to: null,
