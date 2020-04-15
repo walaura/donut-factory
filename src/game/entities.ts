@@ -24,10 +24,7 @@ export const mergeEntity = <S extends Entity = Entity>(
 export const addEntity = (entity: Entity) => {
 	dispatchToGame({
 		type: 'add-entity',
-		entity: {
-			...entity,
-			...addId(),
-		},
+		entity: entity,
 	});
 };
 

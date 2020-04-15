@@ -1,18 +1,14 @@
 import { h } from 'preact';
-import { MkConsumer } from '../../entity/consumer';
-import { MkMover } from '../../entity/vehicle';
-import { addEntity } from '../../game/entities';
 import { Entity, entityHasXY, LastKnownGameState } from '../../helper/defs';
-import { RevealButton, VisibleButton } from '../component/button';
-import { Info } from '../component/row/info';
+import { RevealButton } from '../component/button';
 import { RowList } from '../component/list/row-list';
 import { Padding } from '../component/primitives/padding';
+import { Info } from '../component/row/info';
 import { Tabs } from '../component/tabs';
 import { getAgentStatus } from '../helper/status';
 import { useLastKnownGameState } from '../hook/use-game-state';
 import { UIStatePriority } from '../hook/use-global-state';
 import { useTaskbar } from '../hook/use-taskbar/context';
-import { dispatchToCanvas } from '../../global/dispatch';
 
 const Row = ({ entity }: { entity: Entity }) => {
 	const allOfIt = useLastKnownGameState((s) => s, UIStatePriority.Snail);

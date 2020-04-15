@@ -1,20 +1,15 @@
 import { h, render } from 'preact';
 import 'preact/debug';
 import 'preact/devtools';
-import { Road } from '../entity/road';
-import { mergeEntity } from '../game/entities';
 import { getMemory } from '../global/memory';
 import { getWorker } from '../global/worker';
 import { GameState } from '../helper/defs';
 import { LoopWorkerMessage, mkChannel, MsgActions } from '../helper/message';
-import { CanvasExceptionalMode } from '../wk/canvas.defs';
-import { addEntity } from './../game/entities';
-import { dispatchToCanvas } from './../global/dispatch';
+import { register } from './canvas/events';
 import { onReactStateUpdate as onReactStateUpdate_CANVAS } from './hook/use-canvas-state';
 import { onReactStateUpdate as onReactStateUpdate_GAME } from './hook/use-game-state';
 //@ts-ignore
 import lol from './sounds/click.wav';
-import { register } from './canvas/events';
 
 var sound = document.createElement('audio');
 sound.id = 'audio-player';

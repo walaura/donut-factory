@@ -2,6 +2,7 @@ import { dispatchToCanvas } from '../../global/dispatch';
 import { CanvasExceptionalMode } from '../../wk/canvas.defs';
 import { addEntity, mergeEntity } from '../../game/entities';
 import { Road } from '../../entity/road';
+import { addId } from '../../helper/generate';
 
 export const register = ($canvas: HTMLCanvasElement) => {
 	$canvas.addEventListener('wheel', (ev) => {
@@ -56,6 +57,7 @@ export const register = ($canvas: HTMLCanvasElement) => {
 				});
 				addEntity({
 					...self.memory.lastKnownCanvasState.createModeTarget.ghost,
+					...addId(),
 					x: gameCursor.x,
 					y: gameCursor.y,
 				});

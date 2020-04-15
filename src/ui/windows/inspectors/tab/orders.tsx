@@ -4,8 +4,9 @@ import {
 	linkOrder,
 	Load,
 	Order,
+	mkMoveOrder,
 } from '../../../../entity/composables/with-orders';
-import { mergeEntity } from '../../../../game/entities';
+import { mergeEntity, addEntity } from '../../../../game/entities';
 import { EntityType, ID } from '../../../../helper/defs';
 import { RevealButton, VisibleButton } from '../../../component/button';
 import { Flex } from '../../../component/list/flex-list';
@@ -69,12 +70,10 @@ export const OrderInfoTab = ({ entityId }: { entityId: ID }) => {
 						icon={'✨'}
 						onClick={() => {
 							pushAttach({
-								onAttach: (product) => {
-									mergeEntity<Order & { load: Load }>(entityId, {
-										load: {
-											product,
-										},
-									});
+								onAttach: (targetId) => {
+									let order = mkMoveOrder(targetId);
+									addEntity(order);
+									linkOrder(entityId, order.id);
 								},
 								filter: (entity) => {
 									return entity.type !== EntityType.Order;

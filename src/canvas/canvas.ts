@@ -30,7 +30,7 @@ const findSelected = ({
 	rendererState,
 }: Pick<OnFrameProps, 'state' | 'rendererState'>) => {
 	const { gameCursor, zoom } = rendererState;
-	const distanceThreshold = 0.25;
+	const distanceThreshold = 0.1;
 	let potentiallySelected: StatefulTarget[] = [];
 	for (let entity of Object.values(state.entities)) {
 		if (!('x' in entity) && !entityIsRoad(entity)) {
