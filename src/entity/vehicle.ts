@@ -1,49 +1,39 @@
-import { chaseLinear } from './../helper/movement';
-import { XY, xy } from '../helper/xy';
+import { addEntity, findEntity } from '../game/entities';
+import { addFunds } from '../game/ledger';
+import { dispatchToGame } from '../global/dispatch';
+type HandlerFn = import('../global/handlers').HandlerFn;
 import {
-	getDistanceToPoint,
-	mkFindTarget,
-	mkFindPath,
-} from '../helper/pathfinding';
-import { Target } from '../helper/target';
-import { getCargoQuantity, buildCargoStore } from './composables/with-cargo';
-import {
-	GameState,
 	entityHasXY,
-	WithXY,
-	WithHandler,
+	EntityType,
+	GameState,
+	ID,
 	WithCargo,
 	WithColor,
-	WithPath,
+	WithHandler,
 	WithOrders,
-	EntityType,
-	ID,
+	WithPath,
+	WithXY,
 } from '../helper/defs';
-import {
-	Movement,
-	addSpeedToMovement,
-	chase,
-	applyMovement,
-	isAtPos,
-} from '../helper/movement';
-import { HandlerFn } from '../global/handlers';
-import { entityIsRoad } from './road';
-import { findEntity, addEntity } from '../game/entities';
+import { addId, addPosition } from '../helper/generate';
+import { addSpeedToMovement, applyMovement, isAtPos } from '../helper/movement';
+import { makeConsumerName } from '../helper/names';
+import { mkFindPath, mkFindTarget } from '../helper/pathfinding';
+import { Target } from '../helper/target';
+import { xy } from '../helper/xy';
+import { chaseLinear } from './../helper/movement';
+import { buildCargoStore, getCargoQuantity } from './composables/with-cargo';
 import {
 	cancelCurrentOrder,
 	deliverCurrentOrder,
-	mkMoveOrder,
 	mkLoadOrder,
+	mkMoveOrder,
 	mkUnloadOrder,
 	Order,
 } from './composables/with-orders';
 import { OrderType } from './composables/with-orders.df';
 import { popPath } from './composables/with-path';
 import { entityIsProduct } from './product';
-import { addId, addPosition } from '../helper/generate';
-import { makeConsumerName } from '../helper/names';
-import { addFunds } from '../game/ledger';
-import { dispatchToGame } from '../global/dispatch';
+import { entityIsRoad } from './road';
 
 export const mkHeldTotal = (state: Vehicle) =>
 	Object.keys(state.cargo)

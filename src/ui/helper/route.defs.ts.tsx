@@ -1,11 +1,12 @@
 import { JSX } from 'preact';
 import { WithID } from '../../helper/defs';
-import { routeRenderers } from './route';
+
+type RouteRenderers = import('./route').RouteRenderers;
 
 export type SerializableRoute<
-	K = keyof typeof routeRenderers
-> = K extends keyof typeof routeRenderers
-	? [K, Parameters<typeof routeRenderers[K]['root']>[0]]
+	K = keyof RouteRenderers
+> = K extends keyof RouteRenderers
+	? [K, Parameters<RouteRenderers[K]['root']>[0]]
 	: never;
 
 export type RouteIdentifiers = {

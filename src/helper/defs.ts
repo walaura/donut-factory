@@ -1,12 +1,13 @@
-import type { Vehicle } from '../entity/vehicle';
-import type { HandlerName } from '../global/handlers';
-import type { Target } from './target';
-import type { XY } from './xy';
-import type { OrderQueue, Order } from '../entity/composables/with-orders';
-import type { Product } from '../entity/product';
-import type { UnitAgent } from '../entity/factory';
-import type { Road } from '../entity/road';
-import type { CanvasRendererState } from '../wk/canvas.defs';
+type HandlerName = import('../global/handlers').HandlerName;
+type Vehicle = import('../entity/vehicle').Vehicle;
+type Product = import('../entity/product').Product;
+type UnitAgent = import('../entity/factory').UnitAgent;
+type Target = import('./target').Target;
+type XY = import('./xy').XY;
+type CanvasRendererState = import('../wk/canvas.defs').CanvasRendererState;
+type Road = import('../entity/road').Road;
+type OrderQueue = import('../entity/composables/with-orders').OrderQueue;
+type Order = import('../entity/composables/with-orders').Order;
 
 export type ID = string;
 

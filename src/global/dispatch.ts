@@ -1,12 +1,8 @@
+import { mkChannel, MsgActions } from '../helper/message';
 import { getMemory } from './memory';
-import { GameAction } from '../wk/game.actions';
-import {
-	postFromWindow,
-	MsgActions,
-	CanvasRendererMessage,
-	mkChannel,
-} from '../helper/message';
-import { CanvasAction } from '../wk/canvas.actions';
+
+type CanvasAction = import('../wk/canvas.actions').CanvasAction;
+type GameAction = import('../wk/game.actions').GameAction;
 
 export const dispatchToGame = (action: GameAction) => {
 	try {

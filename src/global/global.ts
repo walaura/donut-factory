@@ -1,14 +1,14 @@
 import {
 	GameState,
-	LastKnownGameState,
 	LastKnownCanvasState,
+	LastKnownGameState,
 } from '../helper/defs';
-import { GameAction } from '../wk/game.actions';
-import { renderLayersToCanvas } from '../canvas/canvas';
-import { CanvasRendererState } from '../wk/canvas.defs';
-import { CanvasAction } from '../wk/canvas.actions';
-import { SerializableRoute } from '../ui/helper/route.defs.ts';
 import { XY } from '../helper/xy';
+
+type GameAction = import('../wk/game.actions').GameAction;
+type CanvasAction = import('../wk/canvas.actions').CanvasAction;
+type CanvasRendererState = import('../wk/canvas.defs').CanvasRendererState;
+type SerializableRoute = import('../ui/helper/route.defs.ts').SerializableRoute;
 
 export type Scopes = WorkerMemory['id'];
 export type WorkerScopes = Exclude<Scopes, 'MAIN'>;

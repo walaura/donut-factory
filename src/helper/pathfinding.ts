@@ -1,9 +1,9 @@
 import { GameState, Entity } from './defs';
-import { Vehicle } from '../entity/vehicle';
 import { XY } from './xy';
 import { findEntity } from '../game/entities';
 import { RoadEnd, Road } from '../entity/road';
 import { NestedStatefulTarget, StatefulTarget, Target } from './target';
+type Vehicle = import('../entity/vehicle').Vehicle;
 
 const unnestTargets = (
 	what: NestedStatefulTarget[]

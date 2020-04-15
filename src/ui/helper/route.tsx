@@ -39,6 +39,8 @@ const system: RouteRenderer<typeof SystemMenu> = {
 
 export const routeRenderers = { ledger, allEntities, system, entity };
 
+export type RouteRenderers = typeof routeRenderers;
+
 export const getRouteIdentifiers = (
 	route: SerializableRoute
 ): RouteIdentifiers => {
