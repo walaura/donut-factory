@@ -59,8 +59,8 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 
 			const pixelRatio = 1.5;
 
-			let fontSize = useBouncyValue({ value: 0 }, 'ag:' + entity.id);
-			let flipper = useBouncyValue({ value: 0 }, 'ag:flip:' + entity.id);
+			let fontSize = useBouncyValue('ag:' + entity.id);
+			let flipper = useBouncyValue('ag:flip:' + entity.id);
 			let agentSize = zoom * 2.5 * pixelRatio;
 			if ('entityId' in selected && selected.entityId === entity.id) {
 				fontSize.up();
@@ -131,20 +131,17 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 
 		// overlays
 		for (let toast of Object.values(feedback)) {
-			const yDelta = useAnimatedValue(
+			const yDelta = useAnimatedValue('toast:' + toast.id, [
 				{
-					value: 0,
-					speed: 200,
+					to: 1,
+					strength: 0.01,
 				},
-				'toast:' + toast.id
-			);
+			]);
 			const origin = worldToViewport({
 				x: toast.xy.x + Math.cos(lerp(0, Math.PI * 5, yDelta.value)) / 7.5,
 				y: toast.xy.y + lerp(0, -10, yDelta.value),
 			});
-			if (yDelta.value < yDelta.max) {
-				yDelta.up();
-			} else {
+			if (yDelta.value >= 1) {
 				delete feedback[toast.id];
 				yDelta.discard();
 			}
@@ -152,7 +149,7 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 				x: origin.x - 100,
 				y: origin.y,
 			};
-			ctx.globalAlpha = lerp(2, 0, yDelta.value);
+			ctx.globalAlpha = lerp(1, 0, yDelta.value);
 			drawScaled(
 				ctx,
 				mkChip({

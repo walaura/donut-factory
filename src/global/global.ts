@@ -8,7 +8,7 @@ import { XY } from '../helper/xy';
 type GameAction = import('../wk/game.actions').GameAction;
 type CanvasAction = import('../wk/canvas.actions').CanvasAction;
 type CanvasRendererState = import('../wk/canvas.defs').CanvasRendererState;
-type SerializableRoute = import('../ui/helper/route.defs.ts').SerializableRoute;
+type SerializableRoute = import('../ui/helper/route').SerializableRoute;
 
 export type Scopes = WorkerMemory['id'];
 export type WorkerScopes = Exclude<Scopes, 'MAIN'>;

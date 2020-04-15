@@ -1,8 +1,8 @@
-import { routeRenderers } from './route';
+import { routeRenderers } from '../routes';
 
-type RouteIdentifiers = import('./route.defs.ts').RouteIdentifiers;
-type RouteRenderer<X> = import('./route.defs.ts').RouteRenderer<X>;
-type SerializableRoute = import('./route.defs.ts').SerializableRoute;
+type RouteIdentifiers = import('./route').RouteIdentifiers;
+type RouteRenderer = import('./route').RouteRenderer;
+type SerializableRoute = import('./route').SerializableRoute;
 
 export const getRouteIdentifiers = (
 	route: SerializableRoute

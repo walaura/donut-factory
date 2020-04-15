@@ -1,13 +1,13 @@
 import { createContext, h, JSX } from 'preact';
 import { useContext, useState } from 'preact/hooks';
 import { ID, DistributiveOmit } from '../../../helper/defs';
-import { getRouteIdentifiers } from "../../helper/route.helpers";
+import { getRouteIdentifiers } from '../../helper/route.helpers';
 import { RouteFromProvider, RouteProvider } from '../use-route';
 import { useTaskbar } from './context';
 import { XY, Size } from '../../../helper/xy';
 
-type RouteIdentifiers = import('../../helper/route.defs.ts').RouteIdentifiers;
-type SerializableRoute = import('../../helper/route.defs.ts').SerializableRoute;
+type RouteIdentifiers = import('../../helper/route').RouteIdentifiers;
+type SerializableRoute = import('../../helper/route').SerializableRoute;
 
 export type TaskbarItemRenderer = (
 	props: RouteIdentifiers & { children: JSX.Element }

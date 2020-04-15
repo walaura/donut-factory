@@ -1,6 +1,6 @@
 import { LedgerRecord } from '../helper/defs';
-import { GameReducer } from '../wk/game.actions';
 import { dispatchToGame } from '../global/dispatch';
+type GameReducer<X> = import('../wk/game.actions').GameReducer<X>;
 
 export type LedgerAction = {
 	type: 'ledger-add-funds';

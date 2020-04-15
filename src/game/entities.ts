@@ -1,6 +1,6 @@
 import { ID, GameState, Entity, DeepPartial } from '../helper/defs';
-import { GameReducer } from '../wk/game.actions';
 import { dispatchToGame } from '../global/dispatch';
+type GameReducer<X> = import('../wk/game.actions').GameReducer<X>;
 
 export const findEntity = (id: ID, gameState: GameState): Entity | null => {
 	if (gameState.entities[id]) {

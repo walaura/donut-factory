@@ -3,7 +3,7 @@ import { h } from 'preact';
 import { Emoji } from '../emoji';
 import { DietButton, RevealButton } from '../button';
 import { useWindowHandles } from '../../hook/use-taskbar/handles';
-import { RouteIdentifiers } from '../../helper/route.defs.ts';
+import { RouteIdentifiers } from '../../helper/route';
 import { Padding } from '../primitives/padding';
 
 const styles = {

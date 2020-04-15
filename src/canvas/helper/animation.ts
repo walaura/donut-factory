@@ -1,65 +1,49 @@
 import { WithID, ID } from '../../helper/defs';
 import { clamp } from './math';
 
-interface StaticAnimation extends WithID {
-	min: number;
-	max: number;
-	value: number;
-	speed: number;
-	force: 1 | -1 | 0;
-}
+const ease = (t) =>
+	t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
 
-interface BouncyAnimation extends StaticAnimation {
-	original: number;
+interface Force {
+	to: number;
+	strength: number;
 }
-
-type Animation = BouncyAnimation | StaticAnimation;
+interface Animation extends WithID {
+	_value: number;
+	frameForces: Force[];
+	constantForces: Force[];
+}
 
 interface AnimatedValue {
+	addForce: (to: Force['to'], strength: Force['strength']) => void;
 	up: () => void;
-	down: () => void;
 	discard: () => void;
 	value: number;
-	min: number;
-	max: number;
 }
-
-type Optional<T, TOptional extends keyof T> = Omit<T, TOptional> &
-	Partial<Pick<T, TOptional>>;
-
-const isBouncy = (
-	animation: Partial<Animation>
-): animation is BouncyAnimation => {
-	return 'original' in animation;
-};
 
 export const mkAnimations = () => {
 	let animations: { [key in string]: Animation } = {};
 
-	const useBaseAnimatedValue = <A extends Animation>(
-		animation: Partial<Omit<A, 'force' | 'id'>>,
+	const useBaseAnimatedValue = (
+		animation: Omit<Animation, 'id' | '_value' | 'frameForces'>,
 		id: ID
 	): AnimatedValue => {
 		if (!animations[id]) {
 			animations[id] = {
-				value: animation.value ?? 1,
-				original: isBouncy(animation) ? animation.original : undefined,
-				force: 0,
-				speed: animation.speed ?? 10,
-				min: animation.min ?? 0,
-				max: animation.max ?? 1,
 				id,
+				_value: 0,
+				frameForces: [],
+				...animation,
 			};
 		}
+		const addForce = (to, strength) => {
+			animations[id].frameForces.push({ to, strength });
+		};
 		return {
-			value: animations[id].value,
-			min: animations[id].min,
-			max: animations[id].max,
+			value: ease(animations[id]._value),
+			addForce,
 			up: () => {
-				animations[id].force = 1;
-			},
-			down: () => {
-				animations[id].force = -1;
+				addForce(1, 0.1);
 			},
 			discard: () => {
 				delete animations[id];
@@ -67,44 +51,32 @@ export const mkAnimations = () => {
 		};
 	};
 
-	const useAnimatedValue = (
-		animation: Optional<
-			Omit<StaticAnimation, 'force' | 'id' | 'original'>,
-			'speed' | 'min' | 'max'
-		>,
-		id: ID
-	) => useBaseAnimatedValue(animation, id);
+	const useAnimatedValue = (id: ID, constantForces: Force[] = []) =>
+		useBaseAnimatedValue({ constantForces }, id);
 
-	const useBouncyValue = (
-		bounce: Optional<
-			Omit<BouncyAnimation, 'force' | 'id' | 'original'>,
-			'speed' | 'min' | 'max'
-		>,
-		id: ID
-	) =>
-		useBaseAnimatedValue<BouncyAnimation>(
-			{ ...bounce, original: bounce.value },
+	const useBouncyValue = (id: ID) =>
+		useBaseAnimatedValue(
+			{
+				constantForces: [{ to: 0, strength: 0.025 }],
+			},
 			id
 		);
 
 	const animationTick = () => {
-		for (let bounce of Object.values(animations)) {
-			let forceThisFrame = bounce.force;
-			bounce.force = 0;
-			if (forceThisFrame) {
-				bounce.value = clamp(
-					bounce,
-					bounce.value + forceThisFrame / bounce.speed
-				);
-				continue;
-			}
-			if (isBouncy(bounce)) {
-				if (bounce.value > bounce.original) {
-					bounce.value = clamp(bounce, bounce.value - 1 / bounce.speed);
-				} else if (bounce.value < bounce.original) {
-					bounce.value = clamp(bounce, bounce.value + 1 / bounce.speed);
+		for (let number of Object.values(animations)) {
+			let forces = [...number.constantForces, ...number.frameForces];
+
+			for (let force of forces) {
+				let newnumber = number._value;
+				if (force.to > number._value) {
+					newnumber = Math.min(newnumber + force.strength, force.to);
 				}
+				if (force.to < number._value) {
+					newnumber = Math.max(newnumber - force.strength, force.to);
+				}
+				number._value = newnumber;
 			}
+			number.frameForces = [];
 		}
 	};
 

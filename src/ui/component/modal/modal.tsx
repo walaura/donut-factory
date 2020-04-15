@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { RouteIdentifiers } from '../../helper/route.defs.ts';
+import { RouteIdentifiers } from '../../helper/route';
 import { css, keyframes } from '../../helper/style';
 import { ModalHeader } from './modal-header';
 

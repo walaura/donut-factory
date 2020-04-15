@@ -9,7 +9,7 @@ import { XY } from '../../../../helper/xy';
 import { RevealButton } from '../../../component/button';
 import { useTaskbar } from '../../../hook/use-taskbar/context';
 
-type SerializableRoute = import('../../../helper/route.defs.ts').SerializableRoute;
+type SerializableRoute = import('../../../helper/route').SerializableRoute;
 
 const PathInfoTabEntityRow = ({
 	target,

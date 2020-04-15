@@ -6,13 +6,13 @@ import {
 	WithColor,
 	EntityType,
 } from '../helper/defs';
-import { HandlerFn } from '../global/handlers';
 import { findEntity } from '../game/entities';
 import { addCargo } from './composables/with-cargo';
 import { Product } from './product';
 import { XY } from '../helper/xy';
 import { addId, addPosition } from '../helper/generate';
 import { makeFactoryName } from '../helper/names';
+type HandlerFn<X> = import('../global/handlers').HandlerFn<X>;
 
 export const factoryHandler: HandlerFn<UnitAgent> = (
 	tick,

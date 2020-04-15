@@ -1,7 +1,7 @@
 import { createContext, h, JSX } from 'preact';
 import { useContext, useState, useEffect } from 'preact/hooks';
 import { getRendererForRouter } from '../helper/route.helpers';
-import { RouteIdentifiers, SerializableRoute } from '../helper/route.defs.ts';
+import { RouteIdentifiers, SerializableRoute } from '../helper/route';
 
 type SecretRouterContext = {
 	root: JSX.Element;

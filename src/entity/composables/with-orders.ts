@@ -6,7 +6,7 @@ import type {
 	WithOrders,
 } from '../../helper/defs';
 import { addId } from '../../helper/generate';
-import type { GameReducer } from '../../wk/game.actions';
+type GameReducer<X> = import('../../wk/game.actions').GameReducer<X>;
 import { dispatchToGame } from '../../global/dispatch';
 import type { OrderType } from './with-orders.df';
 
