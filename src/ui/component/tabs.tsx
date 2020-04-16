@@ -1,7 +1,7 @@
 import { h, JSX } from 'preact';
 import { useState } from 'preact/hooks';
 import { css } from '../helper/style';
-import { DietButton } from './button';
+import { DietButton, RevealButton } from './button';
 import { Flex } from './list/flex-list';
 import { Wash } from './wash';
 import { Emoji } from './emoji';
@@ -46,15 +46,6 @@ const tabbarStyles = {
 			overflow: hidden;
 		}
 		transition: 0.1s ease-in-out;
-		& button:focus {
-			outline: none;
-		}
-		& button > * {
-			transition: 0.25s ease-in-out;
-		}
-		& button:active > * {
-			transform: scale(1.25);
-		}
 		& button[data-active='true'] > * > * {
 			background-image: linear-gradient(
 				to bottom,
@@ -76,6 +67,7 @@ const tabbarStyles = {
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		width: 100%;
 		padding: 0;
 	`,
 };
@@ -97,7 +89,7 @@ const Tabbar = ({
 					return null;
 				}
 				return (
-					<DietButton
+					<RevealButton
 						data-active={i === activeTab}
 						onClick={() => onChange(i)}
 						title={t.name}>
@@ -112,7 +104,7 @@ const Tabbar = ({
 								<Emoji emoji={t.emoji} />
 							</span>
 						</Wash>
-					</DietButton>
+					</RevealButton>
 				);
 			})}
 		</nav>

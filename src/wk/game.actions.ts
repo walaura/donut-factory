@@ -3,8 +3,8 @@ import { OrderAction, orderReducer } from '../entity/composables/with-orders';
 import { EntityAction, entityReducer } from '../game/entities';
 import { LedgerAction, ledgerReducer } from '../game/ledger';
 import { DeepPartial, Entity, GameState, ID } from '../helper/defs';
-import { listenFromWorker, MsgActions } from '../global/message';
-import { expectWorkerMemory } from '../global/global';
+import { MsgActions, mkChannel } from '../global/message';
+import { getMemory } from '../global/memory';
 const deepmerge = require('deepmerge');
 
 export type GameAction =
@@ -35,15 +35,12 @@ const reducers: GameReducer<GameAction>[] = [
 ];
 
 export const commitActions = (prevState: GameState): GameState => {
-	expectWorkerMemory();
-	if (self.memory.id !== 'GAME-WK') {
-		throw 'Only the worker thread can commit mutations';
-	}
+	let mm = getMemory('GAME-WK');
 
 	let gameState = { ...prevState };
 
-	while (self.memory.actionQueue.length) {
-		let action = self.memory.actionQueue.pop();
+	while (mm.memory.actionQueue.length) {
+		let action = mm.memory.actionQueue.pop();
 		if (!action) {
 			return gameState;
 		}
@@ -71,15 +68,12 @@ export const commitActions = (prevState: GameState): GameState => {
 };
 
 export const listen = () => {
-	if (self.memory.id === 'GAME-WK') {
-		listenFromWorker((message) => {
-			if (self.memory.id === 'GAME-WK') {
-				if (message.action === MsgActions.PushGameAction) {
-					self.memory.actionQueue.push(message.value);
-				}
-			} else {
-				throw 'Listening from wrong place';
-			}
-		});
-	}
+	let channel = mkChannel('GAME-WK', 'MAIN');
+
+	channel.listen((message) => {
+		let mm = getMemory('GAME-WK');
+		if (message.action === MsgActions.PushGameAction) {
+			mm.memory.actionQueue.push(message.value);
+		}
+	});
 };

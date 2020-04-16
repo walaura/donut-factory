@@ -5,6 +5,12 @@ import { useLayoutHints } from '../hook/use-layout-hint';
 
 const dietStyles = css`
 	display: contents;
+	&:focus:not(.focus-visible) {
+		outline: 0;
+	}
+	&:focus-visible {
+		box-shadow: 0 0 0 3px var(--main);
+	}
 `;
 export const DietButton = ({
 	onClick,
@@ -43,14 +49,14 @@ const styles = {
 		}
 	`,
 	animation: css`
-		transition: all 0.15s ease-out;
+		transition: all 0.05s ease-out;
+		transform: scale(1.000001);
 		&:hover {
 			box-shadow: var(--shadow-2);
-			filter: brightness(1.1);
+			filter: brightness(1.05);
 		}
 		&:active {
-			transition: all 0.075s ease-out;
-			transform: scale(1.01);
+			transform: scale(1.025);
 			box-shadow: var(--shadow-1);
 		}
 	`,
@@ -68,10 +74,14 @@ const styles = {
 		position: relative;
 		width: 100%;
 		box-sizing: content-box;
+		display: flex;
+		align-items: stretch;
+		justify-content: stretch;
 		--bg-button: var(--bg-counter-wash);
 		& > div:last-child {
 			z-index: 4;
 			will-change: transform;
+			width: 100%;
 		}
 		& > div:first-child {
 			opacity: 0;

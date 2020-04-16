@@ -50,9 +50,3 @@ export type WorkerMemory = ({ __isSimulated: true } | {}) &
 				actionQueue: GameAction[];
 		  }
 	);
-
-export const expectWorkerMemory = () => {
-	if (!self.memory) {
-		throw 'Must be registered';
-	}
-};

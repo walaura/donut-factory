@@ -22,15 +22,15 @@ const parseNSaveRawCss = (
 	}
 	let cssResult = parser(className, raw);
 	if (cssResult instanceof Array) {
-		$styles.innerText = cssResult.join('\n');
+		$styles.innerHTML = cssResult.join('\n');
 	} else {
-		$styles.innerText = cssResult;
+		$styles.innerHTML = cssResult;
 	}
 	return className;
 };
 
 export const keyframes = parseNSaveRawCss(
-	(r) => sum(r),
+	(r) => 'a' + sum(r),
 	(className, raw) => {
 		//@ts-ignore
 		let cssRaw = String.raw(...raw);

@@ -56,9 +56,7 @@ export type WorkerMessage = LoopWorkerMessage | CanvasRendererMessage;
 
 export const isMessage = <M = WorkerMessage>(data): data is M => true;
 
-export const listenFromWorker = <M = WorkerMessage>(
-	onAction: (msg: M) => void
-) => {
+const listenFromWorker = <M = WorkerMessage>(onAction: (msg: M) => void) => {
 	self.addEventListener('message', ({ data }) => {
 		if (!isMessage<M>(data)) {
 			return;

@@ -111,8 +111,8 @@ const styles = css`
 	grid-auto-flow: column;
 	grid-gap: calc(var(--space-h) * 2);
 	transition: 0.1s ease-in-out;
-	& button:active [data-cssid='emoji'] {
-		transform: scale(1.5);
+	& button:active {
+		transform: scale(1.1);
 	}
 `;
 

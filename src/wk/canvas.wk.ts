@@ -70,9 +70,11 @@ const register = () => {
 				if (!clock) {
 					return;
 				}
-				let afterTick = clock(message.state);
-				fireTock();
-				afterTick();
+				requestAnimationFrame(() => {
+					let afterTick = clock(message.state);
+					fireTock();
+					afterTick();
+				});
 				return;
 			}
 			case MsgActions.SEND_CANVAS: {
