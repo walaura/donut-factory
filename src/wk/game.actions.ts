@@ -3,7 +3,7 @@ import { OrderAction, orderReducer } from '../entity/composables/with-orders';
 import { EntityAction, entityReducer } from '../game/entities';
 import { LedgerAction, ledgerReducer } from '../game/ledger';
 import { DeepPartial, Entity, GameState, ID } from '../helper/defs';
-import { listenFromWorker, MsgActions } from '../helper/message';
+import { listenFromWorker, MsgActions } from '../global/message';
 import { expectWorkerMemory } from '../global/global';
 const deepmerge = require('deepmerge');
 

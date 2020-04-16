@@ -1,4 +1,4 @@
-import { mkChannel, MsgActions } from '../helper/message';
+import { mkChannel, MsgActions } from '../global/message';
 import { GhostTarget, Target } from '../helper/target';
 import { XY } from '../helper/xy';
 import { getMemory } from './../global/memory';

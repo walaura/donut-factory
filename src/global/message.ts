@@ -1,7 +1,7 @@
-import { Scopes } from '../global/global';
-import { getWorker } from '../global/worker';
-import { getMemory } from './../global/memory';
-import { GameState, LastKnownCanvasState } from './defs';
+import { Scopes } from './global';
+import { getWorker } from './worker';
+import { getMemory } from './memory';
+import { GameState, LastKnownCanvasState } from '../helper/defs';
 type CanvasAction = import('../wk/canvas.actions').CanvasAction;
 type GameAction = import('../wk/game.actions').GameAction;
 

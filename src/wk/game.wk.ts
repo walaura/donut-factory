@@ -10,7 +10,7 @@ import {
 	listenFromWorker,
 	MsgActions,
 	postFromWorker,
-} from '../helper/message';
+} from '../global/message';
 import { listen } from './game.actions';
 
 const fireTock = () => {

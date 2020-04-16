@@ -4,7 +4,7 @@ import 'preact/devtools';
 import { getMemory } from '../global/memory';
 import { getWorker } from '../global/worker';
 import { GameState } from '../helper/defs';
-import { LoopWorkerMessage, mkChannel, MsgActions } from '../helper/message';
+import { LoopWorkerMessage, mkChannel, MsgActions } from '../global/message';
 import { register } from './canvas/events';
 import { onReactStateUpdate as onReactStateUpdate_CANVAS } from './hook/use-canvas-state';
 import { onReactStateUpdate as onReactStateUpdate_GAME } from './hook/use-game-state';

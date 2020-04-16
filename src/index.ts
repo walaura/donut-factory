@@ -11,8 +11,8 @@ self.memory = {
 	},
 };
 
-import { listenFromWindow, postFromWindow } from './helper/message';
-import { MsgActions } from './helper/message';
+import { listenFromWindow, postFromWindow } from './global/message';
+import { MsgActions } from './global/message';
 import renderSetup from './ui/ui';
 import { GameState } from './helper/defs';
 import { getWorker } from './global/worker';

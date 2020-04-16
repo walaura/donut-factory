@@ -26,15 +26,18 @@ export type MainThreadMemory = {
 	};
 };
 
+type SweepableStore<T> = {
+	values: Map<string, T>;
+	lastAccess: Map<string, number>;
+};
+
 export type CanvasWorkerMemory = {
 	id: 'CANVAS-WK';
 	lastKnownGameState: LastKnownGameState | null;
 	prevKnownGameState: LastKnownGameState | null;
 	state: CanvasRendererState | null;
 	actionQueue: CanvasAction[];
-	store: {
-		[key in string]: OffscreenCanvas;
-	};
+	store: SweepableStore<OffscreenCanvas>;
 };
 
 export type WorkerMemory = ({ __isSimulated: true } | {}) &

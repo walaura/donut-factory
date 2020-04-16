@@ -1,7 +1,7 @@
 import { renderLayersToCanvas } from '../canvas/canvas';
 import { getMemory, registerGlobal } from '../global/memory';
 import { LastKnownGameState } from '../helper/defs';
-import { mkChannel, MsgActions } from '../helper/message';
+import { mkChannel, MsgActions } from '../global/message';
 import { listen } from './canvas.actions';
 import { CanvasRendererState } from './canvas.defs';
 
@@ -56,7 +56,10 @@ const register = () => {
 		lastKnownGameState: null,
 		prevKnownGameState: null,
 		actionQueue: [],
-		store: {},
+		store: {
+			values: new Map(),
+			lastAccess: new Map(),
+		},
 	});
 	listen();
 	let channel = mkChannel('CANVAS-WK', 'MAIN');

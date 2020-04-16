@@ -17,7 +17,8 @@ import gitlog from '../../../git-log.json';
 
 const AllState = () => {
 	const state = useLastKnownGameState((s) => s);
-	return <Pre>{state}</Pre>;
+	const canvasState = useLastKnownCanvasState((s) => s);
+	return <Pre>{{ state, canvasState }}</Pre>;
 };
 
 export const SystemMenu = () => {

@@ -1,7 +1,7 @@
 import { WithID, ID } from '../../helper/defs';
 
 /*
-SOmetimes things can take a couple frames to 
+Sometimes things can take a couple frames to 
 end just right, for example leaving edit mode will
 still have an ite, on its old position for a bit before
 reflecting the 'right' state – use the dirt store to keep

@@ -1,4 +1,4 @@
-import { mkChannel, MsgActions } from '../helper/message';
+import { mkChannel, MsgActions } from './message';
 import { getMemory } from './memory';
 
 type CanvasAction = import('../wk/canvas.actions').CanvasAction;
