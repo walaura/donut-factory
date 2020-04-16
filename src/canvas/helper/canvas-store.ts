@@ -25,7 +25,7 @@ export const makeCanvas = ({ width, height }: Size, hashable: any) => (
 	let mm = getMemory('CANVAS-WK');
 	let store = mm.memory.store.values;
 	let lastAccess = mm.memory.store.lastAccess;
-	let hash = sum(hashable);
+	let hash = typeof hashable === 'string' ? hashable : sum(hashable);
 	let storedMaybe = store.get(hash);
 
 	debouncedSweep();

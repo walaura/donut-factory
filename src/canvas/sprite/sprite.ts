@@ -49,13 +49,22 @@ const Sprite = (key: SpriteKey) => {
 const drawSprite = (
 	ctx: OffscreenCanvasRenderingContext2D,
 	key: SpriteKey,
-	sp: ScalerProps,
+	sp: Omit<ScalerProps, 'memoId'>,
 	pos: XY
 ) => {
 	if (typeof Sprites[key] === 'string') {
 		return;
 	}
-	drawScaled(ctx, Sprite(key), { ...sp, memoId: ['sp', key, sp] }, pos);
+	let memoId = ['sprite', key].join();
+	drawScaled(
+		ctx,
+		Sprite(key),
+		{
+			...sp,
+			memoId,
+		},
+		pos
+	);
 };
 
 export { Sprite, drawSprite };

@@ -29,7 +29,7 @@ const Scaler = (
 			width: realWidth,
 			height: realHeight,
 		},
-		memoId ? { width, height, scale, rotate, memoId } : null
+		memoId ? [width, height, scale, rotate, offset, memoId].join() : null
 	)((canvas) => {
 		const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
 		ctx.clearRect(0, 0, realWidth, realHeight);

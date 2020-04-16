@@ -17,7 +17,7 @@ export const mkWorldTile = ({
 }) =>
 	makeCanvas(
 		{ width: 600, height: 600 },
-		{ atAbs, world: true }
+		[atAbs.x, atAbs.y, 'world'].join()
 	)((canvas) => {
 		const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
 		ctx.clearRect(0, 0, 600, 600);
