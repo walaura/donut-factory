@@ -8,6 +8,8 @@ import { MkMover } from '../entity/vehicle';
 import { MkRoad } from '../entity/road';
 import { addEntity } from './entities';
 import { addFunds } from './ledger';
+import { clamp } from '../helper/math';
+const perlin = require('perlin-noise');
 
 export const startGame = () => {
 	let products = [
@@ -37,6 +39,24 @@ export const startGame = () => {
 };
 
 export const getInitialState = () => {
+	const size = 200;
+
+	let noise = perlin.generatePerlinNoise(size, size, {
+		octaveCount: 2,
+		persistence: 0,
+	});
+
+	let height = perlin
+		.generatePerlinNoise(size, size, {
+			persistence: 0.8,
+		})
+		.map((value, index) => {
+			if (value > 0.3) {
+				return clamp({ min: 0, max: 1 }, value * 2);
+			}
+			return 0;
+		});
+
 	const initialState: GameState = {
 		ledger: [],
 		paused: false,
@@ -44,7 +64,11 @@ export const getInitialState = () => {
 		height: 40,
 		date: 0,
 		entities: {},
-		roads: {},
+		map: {
+			size,
+			height,
+			noise,
+		},
 	};
 	return initialState;
 };

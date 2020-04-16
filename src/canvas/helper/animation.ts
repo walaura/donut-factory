@@ -1,5 +1,5 @@
 import { WithID, ID } from '../../helper/defs';
-import { clamp } from './math';
+import { clamp } from '../../helper/math';
 
 const ease = (t) =>
 	t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;

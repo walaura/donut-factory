@@ -89,7 +89,11 @@ export interface GameState {
 	date: number;
 	ledger: Ledger;
 	entities: { [key: string]: Entity };
-	roads: { [key: string]: Road };
+	map: {
+		size: number;
+		height: number[];
+		noise: number[];
+	};
 }
 
 export type LastKnownGameState = Readonly<GameState>;

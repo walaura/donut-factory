@@ -10,6 +10,7 @@ import { onReactStateUpdate as onReactStateUpdate_CANVAS } from './hook/use-canv
 import { onReactStateUpdate as onReactStateUpdate_GAME } from './hook/use-game-state';
 //@ts-ignore
 import lol from './sounds/click.wav';
+import { diffState } from '../helper/diff';
 
 var sound = document.createElement('audio');
 sound.id = 'audio-player';
@@ -36,10 +37,12 @@ const renderSetup = () => {
 
 	let readyToRenderWithGame = false;
 	let readyToRenderWithCanvas = false;
+	let hasSentInitialStateToCanvas = false;
 	let rendered = false;
 	let onTick = (state: GameState) => {
 		let readyToRender = readyToRenderWithGame && readyToRenderWithCanvas;
 		if (!rendered && readyToRender) {
+			let channel = mkChannel('MAIN', 'CANVAS-WK');
 			import('./react-root').then((root) => {
 				requestAnimationFrame(() => {
 					render(h(root.UI, {}), (window as any).overlays);
@@ -51,7 +54,11 @@ const renderSetup = () => {
 		readyToRenderWithGame = true;
 		if (readyToRenderWithCanvas) {
 			let channel = mkChannel('MAIN', 'CANVAS-WK');
-			channel.post({ action: 'TOCK', state } as LoopWorkerMessage);
+			channel.post({
+				action: MsgActions.TOCK,
+				state: !hasSentInitialStateToCanvas ? state : diffState({}, state),
+			} as LoopWorkerMessage);
+			hasSentInitialStateToCanvas = true;
 		}
 	};
 

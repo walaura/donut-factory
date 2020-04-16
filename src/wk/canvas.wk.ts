@@ -14,7 +14,10 @@ const registerCanvasClock: Clock<
 	let clock = renderLayersToCanvas(...args);
 	let onTick = (state: LastKnownGameState) => {
 		let mm = getMemory('CANVAS-WK');
-		mm.memory.lastKnownGameState = state;
+		mm.memory.lastKnownGameState = {
+			...mm.memory.lastKnownGameState,
+			...state,
+		};
 		mm.memory.state = clock.onFrame({
 			state: mm.memory.lastKnownGameState,
 			prevState: mm.memory.prevKnownGameState ?? mm.memory.lastKnownGameState,

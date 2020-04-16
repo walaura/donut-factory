@@ -9,15 +9,18 @@ import { gameLoop } from '../game/loop';
 import { MsgActions, mkChannel } from '../global/message';
 import { listen } from './game.actions';
 import { getMemory } from '../global/memory';
+import { GameState } from '../helper/defs';
+import { diffState } from '../helper/diff';
 
-const fireTock = () => {
+const fireTock = (diff = true) => {
 	if (self.memory.id !== 'GAME-WK') {
 		throw 'no';
 	}
 	let channel = mkChannel('GAME-WK', 'MAIN');
+	let state = diff ? diffState({}, self.memory.state) : self.memory.state;
 	channel.post({
 		action: MsgActions.TOCK,
-		state: JSON.parse(JSON.stringify(self.memory.state)),
+		state: JSON.parse(JSON.stringify(state)),
 	});
 };
 
@@ -32,7 +35,7 @@ channel.listen((message) => {
 					throw 'Game is not started yet??';
 				}
 				mm.memory.state = gameLoop(mm.memory.state);
-				fireTock();
+				fireTock(true);
 			});
 			return;
 		}
@@ -44,7 +47,7 @@ channel.listen((message) => {
 				mm.memory.state = getInitialState();
 				startGame();
 			}
-			fireTock();
+			fireTock(false);
 		}
 	}
 });

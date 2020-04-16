@@ -23,7 +23,10 @@ listenFromWindow((data) => {
 			if (self.memory.id !== 'MAIN') {
 				throw 'no';
 			}
-			self.memory.lastKnownGameState = data.state;
+			self.memory.lastKnownGameState = {
+				...self.memory.lastKnownGameState,
+				...data.state,
+			};
 			return;
 	}
 }, getWorker('GAME-WK'));

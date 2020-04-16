@@ -3,33 +3,23 @@ import { OffscreenCanvasRenderer } from '../canvas.df';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 import { mkWorldTile } from './../sprite/world-tile';
 import { xy } from '../../helper/xy';
+import { clamp } from '../../helper/math';
 const perlin = require('perlin-noise');
 
 const grass = '#ccd9bd';
+const water = '#d9fcfc';
 const blueprint = '#4e72b5';
-
-const noiseResolution = 2;
-const noiseWidth = 300;
-
-let noise = perlin.generatePerlinNoise(
-	noiseWidth,
-	Math.round(noiseWidth * 0.75),
-	{
-		octaveCount: 2,
-		persistence: 0,
-	}
-);
 
 const chunkSize = 600;
 
 const bgLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 	const canvas = makeCanvasOrOnScreenCanvas(width, height);
 	const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
-	return ({ rendererState }) => {
+	return ({ state, rendererState }) => {
 		const { zoom, viewport, mode, debugMode } = rendererState;
 		ctx.clearRect(0, 0, width, height);
 		ctx.globalAlpha = 1;
-		ctx.fillStyle = mode ? blueprint : grass;
+		ctx.fillStyle = mode ? blueprint : water;
 		ctx.fillRect(0, 0, width, height);
 		let rows = new Array(Math.ceil(height / chunkSize) + 1).fill(null);
 		let columns = new Array(Math.ceil(width / chunkSize) + 1).fill(null);
@@ -44,7 +34,6 @@ const bgLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 				let atViewport = absToViewport(atAbs);
 				ctx.drawImage(
 					mkWorldTile({
-						noise,
 						zoom,
 						atAbs,
 					}),
@@ -59,6 +48,7 @@ const bgLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 					ctx.fillStyle = 'red';
 					ctx.fillText(`${rows.length}row ${columns.length}col`, 40, 40);
 					ctx.strokeRect(atViewport.x, atViewport.y, chunkSize, chunkSize);
+					ctx.fillText(`${atAbs.x}x ${atAbs.y}y`, atViewport.x, atViewport.y);
 				}
 			});
 		});

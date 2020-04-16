@@ -1,50 +1,125 @@
 import { XY } from '../../helper/xy';
 import { CanvasRendererStateViewport } from '../../wk/canvas.defs';
 import { makeCanvas } from '../helper/canvas-store';
-import { declamp } from '../helper/math';
+import { clamp } from '../../helper/math';
+import { getMemory } from '../../global/memory';
 
 const noiseResolution = 20;
-const noiseWidth = 300;
+const tileSize = 600;
+const grass = '#d8f2c4';
+const dirt = '#b8b3ae';
 
 export const mkWorldTile = ({
 	atAbs,
 	zoom,
-	noise,
 }: {
 	atAbs: XY;
 	zoom: CanvasRendererStateViewport['zoom'];
-	noise: number[];
 }) =>
 	makeCanvas(
-		{ width: 600, height: 600 },
+		{ width: tileSize, height: tileSize },
 		[atAbs.x, atAbs.y, 'world'].join()
 	)((canvas) => {
+		let mm = getMemory('CANVAS-WK');
+		let gameState = mm.memory.lastKnownGameState;
 		const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
-		ctx.clearRect(0, 0, 600, 600);
-		// noise & fake water
-		noise.forEach((el, index) => {
-			const wx = (index % noiseWidth) * noiseResolution;
-			const wy = Math.floor(index / noiseWidth) * noiseResolution;
-			let { x, y } = {
-				x: wx,
-				y: wy,
-			};
+		if (!gameState) {
+			return canvas;
+		}
+		ctx.clearRect(0, 0, tileSize, tileSize);
+		let { noise, height, size } = gameState.map;
 
-			ctx.globalAlpha = 0;
-			ctx.fillStyle = 'black';
-			if (el < 0.1) {
-				ctx.globalAlpha = 0.125;
-				ctx.fillStyle = '#4CEFFF';
+		// rivers
+		let rivers = [...height];
+		let heightMapAtXY = (resolution, { x, y }: XY) => {
+			if (x / resolution > size) {
+				return 0;
 			}
-			if (el > 0.4) {
-				ctx.globalAlpha = 0.1;
-				ctx.fillStyle = '#FFED61';
+			if (x < 0) {
+				return 0;
 			}
-			if (el > 0.8) {
-				ctx.globalAlpha = 0.1;
-				ctx.fillStyle = '#fff';
-			}
-			ctx.fillRect(x - atAbs.x, y - atAbs.y, noiseResolution, noiseResolution);
+			y = Math.floor(y / resolution);
+			x = Math.floor(x / resolution);
+			return height[y * size + x] ?? 0;
+		};
+
+		let noiseMapAtXY = ({ x, y }: XY) => {
+			y = Math.floor(y % size);
+			x = Math.floor(x % size);
+			return noise[y * size + x] ?? 0;
+		};
+
+		new Array(tileSize / 20).fill(null).forEach((_, row) => {
+			new Array(tileSize / 20).fill(null).forEach((_, col) => {
+				let isTopEdge = row % 10 == 0;
+				let isTopInnerEdge = row % 10 == 1;
+				let isBottomEdge = row % 10 == 9;
+				let isBottomInnerEdge = row % 10 == 8;
+				let isLeftEdge = col % 10 == 0;
+				let isLeftInnerEdge = col % 10 == 1;
+				let isRightEdge = col % 10 == 9;
+				let isRightInnerEdge = col % 10 == 8;
+
+				let largeriver = heightMapAtXY(10, {
+					x: col + atAbs.x / 20,
+					y: row + atAbs.y / 20,
+				});
+				let waterOnSides = {
+					top:
+						heightMapAtXY(10, {
+							x: col + atAbs.x / 20,
+							y: row - 10 + atAbs.y / 20,
+						}) < 0.4,
+					bottom:
+						heightMapAtXY(10, {
+							x: col + atAbs.x / 20,
+							y: row + 10 + atAbs.y / 20,
+						}) < 0.4,
+					left:
+						heightMapAtXY(10, {
+							x: col - 10 + atAbs.x / 20,
+							y: row + atAbs.y / 20,
+						}) < 0.4,
+					right:
+						heightMapAtXY(10, {
+							x: col + 10 + atAbs.x / 20,
+							y: row + atAbs.y / 20,
+						}) < 0.4,
+				};
+
+				let smoldetail = noiseMapAtXY({
+					x: col + atAbs.x / 20,
+					y: row + atAbs.y / 20,
+				});
+
+				let drawEdge =
+					(waterOnSides.top && isTopEdge) ||
+					(waterOnSides.bottom && isBottomEdge) ||
+					(waterOnSides.left && isLeftEdge) ||
+					(waterOnSides.right && isRightEdge);
+				let drawInnerEdge =
+					(waterOnSides.top && isTopInnerEdge) ||
+					(waterOnSides.bottom && isBottomInnerEdge) ||
+					(waterOnSides.left && isLeftInnerEdge) ||
+					(waterOnSides.right && isRightInnerEdge);
+
+				if (largeriver > 0.5) {
+					ctx.fillStyle = dirt;
+					ctx.globalAlpha = drawEdge ? 0.5 : 1;
+					ctx.fillRect(col * 20, row * 20, 20, 20);
+				}
+
+				ctx.fillStyle = grass;
+				ctx.globalAlpha = clamp(
+					{ min: 0, max: 1 },
+					drawEdge
+						? largeriver * (smoldetail / 2)
+						: drawInnerEdge
+						? largeriver * smoldetail
+						: largeriver * 9999
+				);
+				ctx.fillRect(col * 20, row * 20, 20, 20);
+			});
 		});
 
 		// gridlines
