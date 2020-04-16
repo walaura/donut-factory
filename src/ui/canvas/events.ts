@@ -3,6 +3,7 @@ import { CanvasExceptionalMode } from '../../wk/canvas.defs';
 import { addEntity, mergeEntity } from '../../game/entities';
 import { Road } from '../../entity/road';
 import { addId } from '../../helper/generate';
+import { requestWindow } from '../events';
 
 export const register = ($canvas: HTMLCanvasElement) => {
 	$canvas.addEventListener('wheel', (ev) => {
@@ -99,7 +100,7 @@ export const register = ($canvas: HTMLCanvasElement) => {
 			'entityId' in self.memory.lastKnownCanvasState.selected
 		) {
 			self.memory.ui.boop();
-			self.memory.ui.pushRoute(ev, [
+			requestWindow(ev, [
 				'entity',
 				{ entityId: self.memory.lastKnownCanvasState.selected.entityId },
 			]);

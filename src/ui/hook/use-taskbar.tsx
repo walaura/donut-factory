@@ -10,6 +10,7 @@ import {
 	Item,
 	TaskbarItemType,
 } from './use-taskbar/item';
+import { windowRequestEvent } from '../events';
 const shortid = require('shortid');
 
 export const Taskbar = () => {
@@ -88,19 +89,21 @@ export const TaskbarProvider = ({
 	};
 
 	useEffect(() => {
-		if (self.memory.id === 'MAIN') {
-			self.memory.ui.pushRoute = ({ x, y }, route) => {
-				push(
-					{ route },
-					{
-						ev: {
-							clientX: x,
-							clientY: y,
-						},
-					}
-				);
-			};
-		}
+		self.addEventListener(windowRequestEvent, (ev) => {
+			let {
+				route,
+				xy: { x, y },
+			} = ev.detail;
+			push(
+				{ route },
+				{
+					ev: {
+						clientX: x,
+						clientY: y,
+					},
+				}
+			);
+		});
 	}, []);
 
 	return (

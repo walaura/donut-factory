@@ -17,6 +17,8 @@ sound.id = 'audio-player';
 sound.src = lol;
 document.body.append(sound);
 
+// Dispatch the event.
+
 const canvasSetup = () => {
 	if (!('OffscreenCanvas' in self)) {
 		let mm = getMemory('MAIN');
