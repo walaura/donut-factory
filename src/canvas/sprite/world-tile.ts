@@ -1,8 +1,9 @@
-import { XY } from '../../helper/xy';
+import { XY, Direction } from '../../helper/xy';
 import { CanvasRendererStateViewport } from '../../wk/canvas.defs';
 import { makeCanvas } from '../helper/canvas-store';
 import { clamp } from '../../helper/math';
 import { getMemory } from '../../global/memory';
+import { Tile, TileProps } from './tile';
 
 const noiseResolution = 20;
 const tileSize = 600;
@@ -16,10 +17,11 @@ export const mkWorldTile = ({
 	atAbs: XY;
 	zoom: CanvasRendererStateViewport['zoom'];
 }) =>
-	makeCanvas(
-		{ width: tileSize, height: tileSize },
-		[atAbs.x, atAbs.y, 'world'].join()
-	)((canvas) => {
+	makeCanvas({ width: tileSize, height: tileSize }, [
+		atAbs.x,
+		atAbs.y,
+		'world',
+	])((canvas) => {
 		let mm = getMemory('CANVAS-WK');
 		let gameState = mm.memory.lastKnownGameState;
 		const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
@@ -51,15 +53,6 @@ export const mkWorldTile = ({
 
 		new Array(tileSize / 20).fill(null).forEach((_, row) => {
 			new Array(tileSize / 20).fill(null).forEach((_, col) => {
-				let isTopEdge = row % 10 == 0;
-				let isTopInnerEdge = row % 10 == 1;
-				let isBottomEdge = row % 10 == 9;
-				let isBottomInnerEdge = row % 10 == 8;
-				let isLeftEdge = col % 10 == 0;
-				let isLeftInnerEdge = col % 10 == 1;
-				let isRightEdge = col % 10 == 9;
-				let isRightInnerEdge = col % 10 == 8;
-
 				let largeriver = heightMapAtXY(10, {
 					x: col + atAbs.x / 20,
 					y: row + atAbs.y / 20,
@@ -68,21 +61,43 @@ export const mkWorldTile = ({
 					top:
 						heightMapAtXY(10, {
 							x: col + atAbs.x / 20,
-							y: row - 10 + atAbs.y / 20,
+							y: row - 1 + atAbs.y / 20,
 						}) < 0.4,
 					bottom:
 						heightMapAtXY(10, {
 							x: col + atAbs.x / 20,
-							y: row + 10 + atAbs.y / 20,
+							y: row + 1 + atAbs.y / 20,
 						}) < 0.4,
 					left:
 						heightMapAtXY(10, {
-							x: col - 10 + atAbs.x / 20,
+							x: col - 1 + atAbs.x / 20,
 							y: row + atAbs.y / 20,
 						}) < 0.4,
 					right:
 						heightMapAtXY(10, {
-							x: col + 10 + atAbs.x / 20,
+							x: col + 1 + atAbs.x / 20,
+							y: row + atAbs.y / 20,
+						}) < 0.4,
+				};
+				let waterOnAfarSides = {
+					top:
+						heightMapAtXY(10, {
+							x: col + atAbs.x / 20,
+							y: row - 2 + atAbs.y / 20,
+						}) < 0.4,
+					bottom:
+						heightMapAtXY(10, {
+							x: col + atAbs.x / 20,
+							y: row + 2 + atAbs.y / 20,
+						}) < 0.4,
+					left:
+						heightMapAtXY(10, {
+							x: col - 2 + atAbs.x / 20,
+							y: row + atAbs.y / 20,
+						}) < 0.4,
+					right:
+						heightMapAtXY(10, {
+							x: col + 2 + atAbs.x / 20,
 							y: row + atAbs.y / 20,
 						}) < 0.4,
 				};
@@ -92,24 +107,61 @@ export const mkWorldTile = ({
 					y: row + atAbs.y / 20,
 				});
 
-				let drawEdge =
-					(waterOnSides.top && isTopEdge) ||
-					(waterOnSides.bottom && isBottomEdge) ||
-					(waterOnSides.left && isLeftEdge) ||
-					(waterOnSides.right && isRightEdge);
-				let drawInnerEdge =
-					(waterOnSides.top && isTopInnerEdge) ||
-					(waterOnSides.bottom && isBottomInnerEdge) ||
-					(waterOnSides.left && isLeftInnerEdge) ||
-					(waterOnSides.right && isRightInnerEdge);
+				let isLand = largeriver > 0.5;
+				let props: TileProps = { type: 'full', color: 'water' };
+				let directions: Direction[] = ['left', 'top', 'right', 'bottom'];
+				if (isLand) {
+					props.color = 'grass';
+					for (let direction of directions) {
+						if (waterOnSides[direction] && isLand) {
+							let otherDirections = directions.filter((d) => d !== direction);
+							props = {
+								type: 'half',
+								colors: ['water', 'dirt'],
+								direction,
+							};
+							for (let otherDirection of otherDirections) {
+								if (waterOnSides[otherDirection]) {
+									props = {
+										type: 'corner',
+										colors: ['water', 'dirt'],
+										direction: otherDirection,
+									};
+								}
+							}
+						}
 
-				if (largeriver > 0.5) {
-					ctx.fillStyle = dirt;
-					ctx.globalAlpha = drawEdge ? 0.5 : 1;
-					ctx.fillRect(col * 20, row * 20, 20, 20);
+						if (
+							!waterOnSides[direction] &&
+							waterOnAfarSides[direction] &&
+							isLand
+						) {
+							let otherDirections = directions.filter((d) => d !== direction);
+							let replaceProps: ?TileProps = {
+								type: 'half',
+								colors: ['dirt', 'grass'],
+								direction,
+							};
+							for (let otherDirection of otherDirections) {
+								if (waterOnSides[otherDirection]) {
+									replaceProps = null;
+								} else if (waterOnAfarSides[otherDirection]) {
+									replaceProps = {
+										type: 'corner',
+										colors: ['dirt', 'grass'],
+										direction: otherDirection,
+									};
+								}
+							}
+							if (replaceProps) {
+								props = replaceProps;
+							}
+						}
+					}
+					//ctx.globalAlpha = drawEdge ? 0.5 : 1;
 				}
 
-				ctx.fillStyle = grass;
+				/*
 				ctx.globalAlpha = clamp(
 					{ min: 0, max: 1 },
 					drawEdge
@@ -118,7 +170,8 @@ export const mkWorldTile = ({
 						? largeriver * smoldetail
 						: largeriver * 9999
 				);
-				ctx.fillRect(col * 20, row * 20, 20, 20);
+				*/
+				ctx.drawImage(Tile(props), col * 20, row * 20, 20, 20);
 			});
 		});
 

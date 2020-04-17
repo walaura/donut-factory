@@ -1,8 +1,7 @@
-import { getMemory } from './../../global/memory';
-import sum from 'hash-sum';
-import { makeCanvasOrOnScreenCanvas } from './offscreen';
+import { debounce } from '../../helper/debounce';
 import { Size } from '../../helper/xy';
-import { debounceLog, debounce } from '../../helper/debounce';
+import { getMemory } from './../../global/memory';
+import { makeCanvasOrOnScreenCanvas } from './offscreen';
 
 const sweep = () => {
 	console.log('sweeping');
@@ -19,13 +18,16 @@ const sweep = () => {
 
 const debouncedSweep = debounce(sweep, 20000);
 
-export const makeCanvas = ({ width, height }: Size, hashable: any) => (
+export const makeCanvas = (
+	{ width, height }: Size,
+	hashable: string[] | []
+) => (
 	memoizedOperation: (cv: OffscreenCanvas) => OffscreenCanvas
 ): OffscreenCanvas => {
 	let mm = getMemory('CANVAS-WK');
 	let store = mm.memory.store.values;
 	let lastAccess = mm.memory.store.lastAccess;
-	let hash = typeof hashable === 'string' ? hashable : sum(hashable);
+	let hash = typeof hashable === 'string' ? hashable : hashable.join();
 	let storedMaybe = store.get(hash);
 
 	debouncedSweep();

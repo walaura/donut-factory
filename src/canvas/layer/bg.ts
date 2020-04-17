@@ -6,8 +6,7 @@ import { xy } from '../../helper/xy';
 import { clamp } from '../../helper/math';
 const perlin = require('perlin-noise');
 
-const grass = '#ccd9bd';
-const water = '#d9fcfc';
+const water = 'hotpink';
 const blueprint = '#4e72b5';
 
 const chunkSize = 600;

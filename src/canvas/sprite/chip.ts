@@ -21,10 +21,7 @@ const mkChip = ({
 	text: string;
 	style: keyof typeof styles;
 }) =>
-	makeCanvas(
-		{ width, height },
-		{ text, style, is: 'chip' }
-	)((canvas) => {
+	makeCanvas({ width, height }, ['chip', text, style])((canvas) => {
 		const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
 		ctx.font = '16px sans-serif bold';
 		let metrics = ctx.measureText(text.toLocaleLowerCase());

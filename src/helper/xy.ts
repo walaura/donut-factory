@@ -7,6 +7,8 @@ export interface Size {
 	height: number;
 }
 
+export type Direction = 'left' | 'top' | 'right' | 'bottom';
+
 const xy2arr = ({ x, y }: XY): [number, number] => [x, y];
 const xy = ([x, y]): XY => ({ x, y });
 

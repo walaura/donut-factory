@@ -6,6 +6,8 @@ import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 import { worldToViewport } from './../helper/latlong';
 import road from './img/road.png';
 import cap from './img/cap.png';
+import maskSplit from './img/mask-split.png';
+import maskCorner from './img/mask-corner.png';
 
 export const SIZE = 40;
 const IMAGE_SIZE = 40;
@@ -16,6 +18,8 @@ const EMPTY = makeCanvasOrOnScreenCanvas(SIZE, SIZE);
 const Sprites = {
 	road,
 	cap,
+	maskCorner,
+	maskSplit,
 };
 
 export type SpriteKey = keyof typeof Sprites;
@@ -36,14 +40,13 @@ const Sprite = (key: SpriteKey) => {
 	if (typeof Sprites[key] === 'string') {
 		return EMPTY;
 	}
-	return makeCanvas(
-		{ width: SIZE, height: SIZE },
-		{ key }
-	)((canvas) => {
-		const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
-		ctx.drawImage(Sprites[key], 0, 0, SIZE, SIZE);
-		return canvas;
-	});
+	return makeCanvas({ width: SIZE, height: SIZE }, ['sprite', key])(
+		(canvas) => {
+			const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
+			ctx.drawImage(Sprites[key], 0, 0, SIZE, SIZE);
+			return canvas;
+		}
+	);
 };
 
 const drawSprite = (
@@ -55,7 +58,7 @@ const drawSprite = (
 	if (typeof Sprites[key] === 'string') {
 		return;
 	}
-	let memoId = ['sprite', key].join();
+	let memoId = ['scaled-sprite', key];
 	drawScaled(
 		ctx,
 		Sprite(key),
