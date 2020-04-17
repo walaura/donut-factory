@@ -14,6 +14,12 @@ let mkXYInFlatMap = <T>(map: T[], size: number) => ({ x, y }: XY) => {
 	return map[y * size + x] ?? 0;
 };
 
+const mkXYfromFlatMap = (size: number) => (index: number) => {
+	const x = index % size;
+	const y = Math.floor(index / size);
+	return { x, y };
+};
+
 export const mkWorldTile = ({
 	atAbs,
 	zoom,
@@ -38,95 +44,92 @@ export const mkWorldTile = ({
 		// rivers
 		let rivers = [...height];
 		let heightMapAtXY = (resolution, { x, y }: XY) => {
-			if (x / resolution > size) {
+			if (x + atAbs.x / 20 > size) {
 				return 0;
 			}
-			if (x < 0) {
+			if (x + atAbs.x / 20 < 0) {
 				return 0;
 			}
-			y = Math.floor(y / resolution);
-			x = Math.floor(x / resolution);
-			return height[y * size + x] ?? 0;
+			return mkXYInFlatMap(
+				height,
+				size
+			)({
+				x: Math.floor((x + atAbs.x / 20) / resolution),
+				y: Math.floor((y + atAbs.y / 20) / resolution),
+			});
 		};
 
-		let noiseMapAtXY = ({ x, y }: XY) => {
-			y = Math.floor(y % size);
-			x = Math.floor(x % size);
-			return noise[y * size + x] ?? 0;
-		};
-
+		let tiles: TileProps[] = [];
 		new Array(tileSize / 20).fill(null).forEach((_, row) => {
 			new Array(tileSize / 20).fill(null).forEach((_, col) => {
 				let largeriver = heightMapAtXY(10, {
-					x: col + atAbs.x / 20,
-					y: row + atAbs.y / 20,
+					x: col,
+					y: row,
 				});
 				let waterOnSides = {
 					top:
 						heightMapAtXY(10, {
-							x: col + atAbs.x / 20,
-							y: row - 1 + atAbs.y / 20,
+							x: col,
+							y: row - 1,
 						}) < 0.4,
 					bottom:
 						heightMapAtXY(10, {
-							x: col + atAbs.x / 20,
-							y: row + 1 + atAbs.y / 20,
+							x: col,
+							y: row + 1,
 						}) < 0.4,
 					left:
 						heightMapAtXY(10, {
-							x: col - 1 + atAbs.x / 20,
-							y: row + atAbs.y / 20,
+							x: col - 1,
+							y: row,
 						}) < 0.4,
 					right:
 						heightMapAtXY(10, {
-							x: col + 1 + atAbs.x / 20,
-							y: row + atAbs.y / 20,
+							x: col + 1,
+							y: row,
 						}) < 0.4,
 				};
-
 				let waterOnCorners = {
 					top:
 						heightMapAtXY(10, {
-							x: col + 1 + atAbs.x / 20,
-							y: row + 1 + atAbs.y / 20,
+							x: col + 1,
+							y: row + 1,
 						}) < 0.4,
 					right:
 						heightMapAtXY(10, {
-							x: col + 1 + atAbs.x / 20,
-							y: row - 1 + atAbs.y / 20,
+							x: col + 1,
+							y: row - 1,
 						}) < 0.4,
 					bottom:
 						heightMapAtXY(10, {
-							x: col - 1 + atAbs.x / 20,
-							y: row - 1 + atAbs.y / 20,
+							x: col - 1,
+							y: row - 1,
 						}) < 0.4,
 					left:
 						heightMapAtXY(10, {
-							x: col - 1 + atAbs.x / 20,
-							y: row + 1 + atAbs.y / 20,
+							x: col - 1,
+							y: row + 1,
 						}) < 0.4,
 				};
-
 				let landOnSides = {
 					top:
 						heightMapAtXY(10, {
-							x: col + atAbs.x / 20,
-							y: row - 1 + atAbs.y / 20,
+							x: col,
+							y: row - 1,
 						}) > 0.5,
 					bottom:
 						heightMapAtXY(10, {
-							x: col + atAbs.x / 20,
-							y: row + 1 + atAbs.y / 20,
+							x: col,
+							y: row + 1,
 						}) > 0.5,
 					left:
 						heightMapAtXY(10, {
-							x: col - 1 + atAbs.x / 20,
-							y: row + atAbs.y / 20,
+							x: col - 1,
+							y: row,
 						}) > 0.5,
 					right:
 						heightMapAtXY(10, {
-							x: col + 1 + atAbs.x / 20,
-							y: row + atAbs.y / 20,
+							x: col + 1,
+							y: row,
 						}) > 0.5,
 				};
 				let color = 'water';
@@ -144,7 +147,6 @@ export const mkWorldTile = ({
 							props.color = 'dirt';
 						}
 					}
-					//ctx.globalAlpha = drawEdge ? 0.5 : 1;
 				}
 				if (!isLand) {
 					for (let direction of directions) {
@@ -153,19 +155,14 @@ export const mkWorldTile = ({
 						}
 					}
 				}
-
-				/*
-				ctx.globalAlpha = clamp(
-					{ min: 0, max: 1 },
-					drawEdge
-						? largeriver * (smoldetail / 2)
-						: drawInnerEdge
-						? largeriver * smoldetail
-						: largeriver * 9999
-				);
-				*/
-				ctx.drawImage(Tile(props), col * 20, row * 20, 20, 20);
+				tiles.push(props);
 			});
+		});
+
+		let mapXY = mkXYfromFlatMap(tileSize / 20);
+		tiles.forEach((props, index) => {
+			let { x, y } = mapXY(index);
+			ctx.drawImage(Tile(props), x * 20, y * 20, 20, 20);
 		});
 
 		// gridlines
