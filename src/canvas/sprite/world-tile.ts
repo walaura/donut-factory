@@ -7,8 +7,12 @@ import { Tile, TileProps } from './tile';
 
 const noiseResolution = 20;
 const tileSize = 600;
-const grass = '#d8f2c4';
-const dirt = '#b8b3ae';
+
+let mkXYInFlatMap = <T>(map: T[], size: number) => ({ x, y }: XY) => {
+	y = Math.floor(y % size);
+	x = Math.floor(x % size);
+	return map[y * size + x] ?? 0;
+};
 
 export const mkWorldTile = ({
 	atAbs,
