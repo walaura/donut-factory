@@ -5,14 +5,14 @@ import {
 	cornerDirectionList,
 	AnyDirection,
 } from '../../helper/direction';
-import { XY, xyAdd, xyMultiply } from '../../helper/xy';
+import { XY, xyAdd, xyMultiply, xyMap } from '../../helper/xy';
 import { CanvasRendererStateViewport } from '../../wk/canvas.defs';
 import { makeCanvas } from '../helper/canvas-store';
 import { Tile, TileColor } from './tile';
 
 const tileSize = 600;
 
-let mkXYInFlatMap = <T>(map: T[], size: number) => (xy: XY) => {
+let mkFindXYInFlatMap = <T>(map: T[], size: number) => (xy: XY) => {
 	return map[mkFlatmapIndexFromXY(size)(xy)];
 };
 
@@ -54,21 +54,20 @@ export const mkWorldTile = ({
 		let { noise, height, size } = gameState.map;
 
 		// rivers
-		let rivers = [...height];
-		let heightMapAtXY = (resolution, { x, y }: XY) => {
-			if (x + atAbs.x / TILE_PX_SIZE > size) {
+		let randomMapAtXY = mkFindXYInFlatMap(noise, size);
+		let heightMapAtXY = (resolution, xy: XY) => {
+			let pos = xyMap(xy, (xy, k) => xy[k] + atAbs[k] / TILE_PX_SIZE);
+			if (pos.x > size || pos.x < 0) {
 				return 0;
 			}
-			if (x + atAbs.x / TILE_PX_SIZE < 0) {
-				return 0;
-			}
-			return mkXYInFlatMap(
-				height,
-				size
-			)({
-				x: Math.floor((x + atAbs.x / TILE_PX_SIZE) / resolution),
-				y: Math.floor((y + atAbs.y / TILE_PX_SIZE) / resolution),
-			});
+			let finder = mkFindXYInFlatMap(height, size);
+			let xyResolution = xyMap(pos, (pos, k) =>
+				Math.floor(pos[k] / resolution)
+			);
+			let xyBlur = xyMap(pos, (pos, k) => (pos[k] % resolution) / resolution);
+			let current = finder(xyResolution);
+			let next = finder(xyAdd(xyResolution, { x: 1, y: 1 }));
+			return current;
 		};
 
 		let tiles: TileColor[] = [];
@@ -90,7 +89,7 @@ export const mkWorldTile = ({
 					for (let direction of anyDirectionList) {
 						let tileAround = tilesAround.get(direction);
 						if (tileAround != null && isLand(tileAround)) {
-							color = 'dirt';
+							color = isLand(randomMapAtXY(xy)) ? 'grass' : 'water';
 						}
 					}
 				}
@@ -146,12 +145,12 @@ export const mkWorldTile = ({
 
 			let tile = Tile({ type: 'full', color });
 			if (color === 'water') {
-				let tileMaybe = smoothTile('water', 'dirt', neighbors);
+				let tileMaybe = smoothTile('water', 'grass', neighbors);
 				if (tileMaybe) tile = tileMaybe;
 			}
 			if (color === 'dirt') {
-				let tileMaybe = smoothTile('dirt', 'grass', neighbors);
-				if (tileMaybe) tile = tileMaybe;
+				//	let tileMaybe = smoothTile('dirt', 'grass', neighbors);
+				//	if (tileMaybe) tile = tileMaybe;
 			}
 
 			/* a full tile? wonderful */
