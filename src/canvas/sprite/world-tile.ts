@@ -3,12 +3,13 @@ import {
 	addDirectionsToXY,
 	anyDirectionList,
 	cornerDirectionList,
-	AnyDirection,
+	Direction,
 } from '../../helper/direction';
 import { XY, xyAdd, xyMultiply, xyMap } from '../../helper/xy';
 import { CanvasRendererStateViewport } from '../../wk/canvas.defs';
 import { makeCanvas } from '../helper/canvas-store';
-import { Tile, TileColor } from './tile';
+import { Tile, TileColor, smoothTile } from './tile';
+import { Print } from './print';
 
 const tileSize = 600;
 
@@ -89,7 +90,15 @@ export const mkWorldTile = ({
 					for (let direction of anyDirectionList) {
 						let tileAround = tilesAround.get(direction);
 						if (tileAround != null && isLand(tileAround)) {
-							color = isLand(randomMapAtXY(xy)) ? 'grass' : 'water';
+							color = isLand(
+								randomMapAtXY(
+									xyMap(xy, (xy, k) =>
+										Math.floor((xy[k] + atAbs[k] / TILE_PX_SIZE) / 2)
+									)
+								)
+							)
+								? 'grass'
+								: 'water';
 						}
 					}
 				}
@@ -104,44 +113,9 @@ export const mkWorldTile = ({
 		tiles gets a 32x32 board and needs 
 		to offset it by 1 to draw it
 		*/
-		const smoothTile = (
-			color: TileColor,
-			toColor: TileColor,
-			neighbors: Map<AnyDirection, TileColor>
-		): ReturnType<typeof Tile> => {
-			let diffs = cornerDirectionList.filter(
-				(d) => neighbors.get(d) === toColor
-			);
-			let samesies = cornerDirectionList.filter(
-				(d) => neighbors.get(d) !== toColor
-			);
-			/* inner cornerz */
-			if (diffs.length >= 3) {
-				return Tile({
-					type: 'corner',
-					colors: [color, toColor],
-					direction: samesies[0],
-				});
-			}
-			/* everything else */
-			for (let direction of anyDirectionList) {
-				let neighbor = neighbors.get(direction);
-				if (neighbor && neighbor === toColor) {
-					return Tile({
-						type: cornerDirectionList.includes(direction) ? 'corner' : 'half',
-						colors: [neighbor, color],
-						direction,
-					});
-				}
-			}
-		};
 		tiles.forEach((color, index) => {
 			let { x, y } = toXY(index);
 			let neighbors = addDirectionsToXY({ x, y }, (xy) => tiles[toIndex(xy)]);
-			let drawAt = xyMultiply(xyAdd({ x, y }, { x: -OFFSET, y: -OFFSET }), {
-				x: TILE_PX_SIZE,
-				y: TILE_PX_SIZE,
-			});
 
 			let tile = Tile({ type: 'full', color });
 			if (color === 'water') {
@@ -152,6 +126,11 @@ export const mkWorldTile = ({
 				//	let tileMaybe = smoothTile('dirt', 'grass', neighbors);
 				//	if (tileMaybe) tile = tileMaybe;
 			}
+
+			let drawAt = xyMultiply(xyAdd({ x, y }, { x: -1, y: -1 }), {
+				x: TILE_PX_SIZE,
+				y: TILE_PX_SIZE,
+			});
 
 			/* a full tile? wonderful */
 			ctx.drawImage(tile, drawAt.x, drawAt.y, TILE_PX_SIZE, TILE_PX_SIZE);

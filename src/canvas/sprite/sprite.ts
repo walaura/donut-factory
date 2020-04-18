@@ -1,13 +1,14 @@
-import { drawScaled, ScalerProps } from './scaler';
 import { XY } from '../../helper/xy';
-import { CanvasRendererStateViewport } from '../../wk/canvas.defs';
 import { makeCanvas } from '../helper/canvas-store';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
-import { worldToViewport } from './../helper/latlong';
-import road from './img/road.png';
 import cap from './img/cap.png';
-import maskSplit from './img/mask-split.png';
 import maskCorner from './img/mask-corner.png';
+import maskSplit from './img/mask-split.png';
+import road from './img/road.png';
+import waterOverlay from './img/water-overlay.png';
+import waterCornerOverlay from './img/water-corner-overlay.png';
+import waterCornerOverlayOut from './img/water-corner-overlay-out.png';
+import { drawScaled, ScalerProps } from './scaler';
 
 export const SIZE = 40;
 const IMAGE_SIZE = 40;
@@ -19,7 +20,10 @@ const Sprites = {
 	road,
 	cap,
 	maskCorner,
+	waterCornerOverlay,
+	waterCornerOverlayOut,
 	maskSplit,
+	waterOverlay,
 };
 
 export type SpriteKey = keyof typeof Sprites;

@@ -1,6 +1,6 @@
 import { XY, xyAdd } from './xy';
 
-export enum Direction {
+export enum StraightDirection {
 	Top = 1,
 	Right = 2,
 	Bottom = 4,
@@ -8,107 +8,111 @@ export enum Direction {
 }
 
 export enum AngleDirection {
-	TopLeft = Direction.Top | Direction.Left,
-	TopRight = Direction.Top | Direction.Right,
-	BottomRight = Direction.Bottom | Direction.Right,
-	BottomLeft = Direction.Bottom | Direction.Left,
+	TopLeft = StraightDirection.Top | StraightDirection.Left,
+	TopRight = StraightDirection.Top | StraightDirection.Right,
+	BottomRight = StraightDirection.Bottom | StraightDirection.Right,
+	BottomLeft = StraightDirection.Bottom | StraightDirection.Left,
 }
 
-export enum AnyDirection {
-	Top = Direction.Top,
-	Right = Direction.Right,
-	Bottom = Direction.Bottom,
-	Left = Direction.Left,
+export enum Direction {
+	Top = StraightDirection.Top,
+	Right = StraightDirection.Right,
+	Bottom = StraightDirection.Bottom,
+	Left = StraightDirection.Left,
 	TopLeft = AngleDirection.TopLeft,
 	TopRight = AngleDirection.TopRight,
 	BottomRight = AngleDirection.BottomRight,
 	BottomLeft = AngleDirection.BottomLeft,
 }
 
-export const cornerDirectionList: AnyDirection[] = [
-	AnyDirection.TopLeft,
-	AnyDirection.TopRight,
-	AnyDirection.BottomLeft,
-	AnyDirection.BottomRight,
+export const cornerDirectionList: Direction[] = [
+	Direction.TopLeft,
+	Direction.TopRight,
+	Direction.BottomLeft,
+	Direction.BottomRight,
 ];
 
-export const anyDirectionList: AnyDirection[] = [
-	AnyDirection.Top,
-	AnyDirection.Right,
-	AnyDirection.Bottom,
-	AnyDirection.Left,
+export const straightDirectionList: Direction[] = [
+	Direction.Top,
+	Direction.Right,
+	Direction.Bottom,
+	Direction.Left,
+];
+
+export const anyDirectionList: Direction[] = [
+	...straightDirectionList,
 	...cornerDirectionList,
 ];
 
-export const oppositeDirection = (d: AnyDirection): AnyDirection => {
+export const oppositeDirection = (d: Direction): Direction => {
 	let oppositemap = {
-		[AnyDirection.Top]: AnyDirection.Bottom,
-		[AnyDirection.Right]: AnyDirection.Left,
-		[AnyDirection.Bottom]: AnyDirection.Top,
-		[AnyDirection.Left]: AnyDirection.Right,
-		[AnyDirection.TopLeft]: AnyDirection.BottomRight,
-		[AnyDirection.TopRight]: AnyDirection.BottomLeft,
-		[AnyDirection.BottomLeft]: AnyDirection.TopRight,
-		[AnyDirection.BottomRight]: AnyDirection.TopLeft,
+		[Direction.Top]: Direction.Bottom,
+		[Direction.Right]: Direction.Left,
+		[Direction.Bottom]: Direction.Top,
+		[Direction.Left]: Direction.Right,
+		[Direction.TopLeft]: Direction.BottomRight,
+		[Direction.TopRight]: Direction.BottomLeft,
+		[Direction.BottomLeft]: Direction.TopRight,
+		[Direction.BottomRight]: Direction.TopLeft,
 	};
 	return oppositemap[d];
 };
 
-export const directionDiffs: Map<AnyDirection, XY> = new Map([
+export const directionDiffs: Map<Direction, XY> = new Map([
 	[
-		AnyDirection.Top,
+		Direction.Top,
 		{
 			x: 0,
 			y: -1,
 		},
 	],
 	[
-		AnyDirection.Right,
+		Direction.Right,
 		{
 			x: 1,
 			y: 0,
 		},
 	],
 	[
-		AnyDirection.Bottom,
+		Direction.Bottom,
 		{
 			x: 0,
 			y: 1,
 		},
 	],
 	[
-		AnyDirection.Left,
+		Direction.Left,
 		{
 			x: -1,
 			y: 0,
 		},
 	],
 	[
-		AnyDirection.TopLeft,
-		{
-			x: -1,
-			y: 1,
-		},
-	],
-	[
-		AnyDirection.TopRight,
-		{
-			x: 1,
-			y: 1,
-		},
-	],
-	[
-		AnyDirection.BottomLeft,
+		Direction.TopLeft,
 		{
 			x: -1,
 			y: -1,
 		},
 	],
 	[
-		AnyDirection.BottomRight,
+		Direction.TopRight,
 		{
 			x: 1,
 			y: -1,
+		},
+	],
+	[
+		Direction.BottomLeft,
+		{
+			x: -1,
+			y: 1,
+		},
+	],
+	[
+		Direction.BottomRight,
+		{
+			x: 1,
+			y: 1,
 		},
 	],
 ]);
@@ -116,7 +120,7 @@ export const directionDiffs: Map<AnyDirection, XY> = new Map([
 export const addDirectionsToXY = <Return = XY>(
 	xy: XY,
 	transformer: (xy: XY) => Return = (_) => _
-): Map<AnyDirection, Return> => {
+): Map<Direction, Return> => {
 	let returnable = new Map();
 	for (let [direction, delta] of directionDiffs.entries()) {
 		returnable.set(direction, transformer(xyAdd(xy, delta)));
