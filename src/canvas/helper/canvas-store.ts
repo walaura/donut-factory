@@ -20,7 +20,7 @@ const debouncedSweep = debounce(sweep, 20000);
 
 export const makeCanvas = (
 	{ width, height }: Size,
-	hashable: string[] | []
+	hashable: (string | number)[] | []
 ) => (
 	memoizedOperation: (cv: OffscreenCanvas) => OffscreenCanvas
 ): OffscreenCanvas => {

@@ -7,7 +7,7 @@ export interface Size {
 	height: number;
 }
 
-export type Direction = 'left' | 'top' | 'right' | 'bottom';
+//export type Direction = 'left' | 'top' | 'right' | 'bottom';
 
 const xy2arr = ({ x, y }: XY): [number, number] => [x, y];
 const xy = ([x, y]): XY => ({ x, y });
@@ -31,6 +31,8 @@ const xyMap = (xy: XY, fn: (xy: XY, k: MapKey) => XY['x'] | XY['y']): XY => ({
 
 const xyRound = (xy: XY) => xyMap(xy, (xy, k) => Math.floor(xy[k]));
 const xyAdd = (from: XY, to: XY) => xyMap(from, (xy, k) => xy[k] + to[k]);
+export const xyMultiply = (from: XY, to: XY) =>
+	xyMap(from, (xy, k) => xy[k] * to[k]);
 
 export {
 	xy,

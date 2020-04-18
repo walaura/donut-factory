@@ -1,24 +1,36 @@
-import { XY, Direction } from '../../helper/xy';
+import { getMemory } from '../../global/memory';
+import {
+	addDirectionsToXY,
+	anyDirectionList,
+	cornerDirectionList,
+	AnyDirection,
+} from '../../helper/direction';
+import { XY, xyAdd, xyMultiply } from '../../helper/xy';
 import { CanvasRendererStateViewport } from '../../wk/canvas.defs';
 import { makeCanvas } from '../helper/canvas-store';
-import { clamp } from '../../helper/math';
-import { getMemory } from '../../global/memory';
-import { Tile, TileProps } from './tile';
+import { Tile, TileColor } from './tile';
 
-const noiseResolution = 20;
 const tileSize = 600;
 
-let mkXYInFlatMap = <T>(map: T[], size: number) => ({ x, y }: XY) => {
-	y = Math.floor(y % size);
-	x = Math.floor(x % size);
-	return map[y * size + x] ?? 0;
+let mkXYInFlatMap = <T>(map: T[], size: number) => (xy: XY) => {
+	return map[mkFlatmapIndexFromXY(size)(xy)];
 };
 
-const mkXYfromFlatMap = (size: number) => (index: number) => {
+const mkXYFromFlatmapIndex = (size: number) => (index: number): XY => {
 	const x = index % size;
 	const y = Math.floor(index / size);
 	return { x, y };
 };
+
+const mkFlatmapIndexFromXY = (size: number) => ({ x, y }: XY): number => {
+	return (y % size) * size + (x % size);
+};
+
+const isLand = (number: number) => number > 0.5;
+
+const TILE_PX_SIZE = 20;
+const OFFSET = 1;
+const TILE_COUNT = tileSize / TILE_PX_SIZE + OFFSET * 2;
 
 export const mkWorldTile = ({
 	atAbs,
@@ -44,125 +56,106 @@ export const mkWorldTile = ({
 		// rivers
 		let rivers = [...height];
 		let heightMapAtXY = (resolution, { x, y }: XY) => {
-			if (x + atAbs.x / 20 > size) {
+			if (x + atAbs.x / TILE_PX_SIZE > size) {
 				return 0;
 			}
-			if (x + atAbs.x / 20 < 0) {
+			if (x + atAbs.x / TILE_PX_SIZE < 0) {
 				return 0;
 			}
 			return mkXYInFlatMap(
 				height,
 				size
 			)({
-				x: Math.floor((x + atAbs.x / 20) / resolution),
-				y: Math.floor((y + atAbs.y / 20) / resolution),
+				x: Math.floor((x + atAbs.x / TILE_PX_SIZE) / resolution),
+				y: Math.floor((y + atAbs.y / TILE_PX_SIZE) / resolution),
 			});
 		};
 
-		let tiles: TileProps[] = [];
-		new Array(tileSize / 20).fill(null).forEach((_, row) => {
-			new Array(tileSize / 20).fill(null).forEach((_, col) => {
-				let largeriver = heightMapAtXY(10, {
-					x: col,
-					y: row,
-				});
-				let waterOnSides = {
-					top:
-						heightMapAtXY(10, {
-							x: col,
-							y: row - 1,
-						}) < 0.4,
-					bottom:
-						heightMapAtXY(10, {
-							x: col,
-							y: row + 1,
-						}) < 0.4,
-					left:
-						heightMapAtXY(10, {
-							x: col - 1,
-							y: row,
-						}) < 0.4,
-					right:
-						heightMapAtXY(10, {
-							x: col + 1,
-							y: row,
-						}) < 0.4,
+		let tiles: TileColor[] = [];
+		new Array(TILE_COUNT).fill(null).forEach((_, row) => {
+			new Array(TILE_COUNT).fill(null).forEach((_, col) => {
+				let xy = {
+					x: col - OFFSET,
+					y: row - OFFSET,
 				};
-				let waterOnCorners = {
-					top:
-						heightMapAtXY(10, {
-							x: col + 1,
-							y: row + 1,
-						}) < 0.4,
-					right:
-						heightMapAtXY(10, {
-							x: col + 1,
-							y: row - 1,
-						}) < 0.4,
-					bottom:
-						heightMapAtXY(10, {
-							x: col - 1,
-							y: row - 1,
-						}) < 0.4,
-					left:
-						heightMapAtXY(10, {
-							x: col - 1,
-							y: row + 1,
-						}) < 0.4,
-				};
-				let landOnSides = {
-					top:
-						heightMapAtXY(10, {
-							x: col,
-							y: row - 1,
-						}) > 0.5,
-					bottom:
-						heightMapAtXY(10, {
-							x: col,
-							y: row + 1,
-						}) > 0.5,
-					left:
-						heightMapAtXY(10, {
-							x: col - 1,
-							y: row,
-						}) > 0.5,
-					right:
-						heightMapAtXY(10, {
-							x: col + 1,
-							y: row,
-						}) > 0.5,
-				};
-				let color = 'water';
 
-				let isLand = largeriver > 0.5;
-				let props: TileProps = { type: 'full', color: 'water' };
-				let directions: Direction[] = ['left', 'top', 'right', 'bottom'];
-				if (isLand) {
-					props.color = 'grass';
-					for (let direction of directions) {
-						if (waterOnSides[direction]) {
-							props.color = 'dirt';
-						}
-						if (waterOnCorners[direction]) {
-							props.color = 'dirt';
+				let largeriver = heightMapAtXY(10, xy);
+				let tilesAround = addDirectionsToXY(xy, (xy) => heightMapAtXY(10, xy));
+
+				let color: TileColor = 'water';
+				if (isLand(largeriver)) {
+					color = 'grass';
+				}
+				if (!isLand(largeriver)) {
+					for (let direction of anyDirectionList) {
+						let tileAround = tilesAround.get(direction);
+						if (tileAround != null && isLand(tileAround)) {
+							color = 'dirt';
 						}
 					}
 				}
-				if (!isLand) {
-					for (let direction of directions) {
-						if (landOnSides[direction]) {
-							props.color = 'HOTPINK4DEBUG';
-						}
-					}
-				}
-				tiles.push(props);
+				tiles.push(color);
 			});
 		});
 
-		let mapXY = mkXYfromFlatMap(tileSize / 20);
-		tiles.forEach((props, index) => {
-			let { x, y } = mapXY(index);
-			ctx.drawImage(Tile(props), x * 20, y * 20, 20, 20);
+		let toXY = mkXYFromFlatmapIndex(TILE_COUNT);
+		let toIndex = mkFlatmapIndexFromXY(TILE_COUNT);
+
+		/*
+		tiles gets a 32x32 board and needs 
+		to offset it by 1 to draw it
+		*/
+		const smoothTile = (
+			color: TileColor,
+			toColor: TileColor,
+			neighbors: Map<AnyDirection, TileColor>
+		): ReturnType<typeof Tile> => {
+			let diffs = cornerDirectionList.filter(
+				(d) => neighbors.get(d) === toColor
+			);
+			let samesies = cornerDirectionList.filter(
+				(d) => neighbors.get(d) !== toColor
+			);
+			/* inner cornerz */
+			if (diffs.length >= 3) {
+				return Tile({
+					type: 'corner',
+					colors: [color, toColor],
+					direction: samesies[0],
+				});
+			}
+			/* everything else */
+			for (let direction of anyDirectionList) {
+				let neighbor = neighbors.get(direction);
+				if (neighbor && neighbor === toColor) {
+					return Tile({
+						type: cornerDirectionList.includes(direction) ? 'corner' : 'half',
+						colors: [neighbor, color],
+						direction,
+					});
+				}
+			}
+		};
+		tiles.forEach((color, index) => {
+			let { x, y } = toXY(index);
+			let neighbors = addDirectionsToXY({ x, y }, (xy) => tiles[toIndex(xy)]);
+			let drawAt = xyMultiply(xyAdd({ x, y }, { x: -OFFSET, y: -OFFSET }), {
+				x: TILE_PX_SIZE,
+				y: TILE_PX_SIZE,
+			});
+
+			let tile = Tile({ type: 'full', color });
+			if (color === 'water') {
+				let tileMaybe = smoothTile('water', 'dirt', neighbors);
+				if (tileMaybe) tile = tileMaybe;
+			}
+			if (color === 'dirt') {
+				let tileMaybe = smoothTile('dirt', 'grass', neighbors);
+				if (tileMaybe) tile = tileMaybe;
+			}
+
+			/* a full tile? wonderful */
+			ctx.drawImage(tile, drawAt.x, drawAt.y, TILE_PX_SIZE, TILE_PX_SIZE);
 		});
 
 		// gridlines

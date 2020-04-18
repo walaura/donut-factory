@@ -1,26 +1,35 @@
+import { AnyDirection } from '../../helper/direction';
 import { makeCanvas } from '../helper/canvas-store';
-import { Sprite } from './sprite';
-import { Direction } from '../../helper/xy';
 import { Scaler } from './scaler';
+import { Sprite } from './sprite';
 
 export const SIZE = 40;
 const rotateDirectionMap = {
-	right: Math.PI / 2,
-	left: Math.PI / -2,
-	bottom: Math.PI,
+	[AnyDirection.Top]: 0,
+	[AnyDirection.Right]: Math.PI / 2,
+	[AnyDirection.Bottom]: Math.PI,
+	[AnyDirection.Left]: Math.PI / -2,
+	[AnyDirection.TopLeft]: 0,
+	[AnyDirection.TopRight]: Math.PI / -2,
+	[AnyDirection.BottomLeft]: Math.PI / 2,
+	[AnyDirection.BottomRight]: Math.PI,
 };
 const colors = {
 	grass: '#d8f2c4',
 	water: '#d9fcfc',
-	dirt: '#b8b3ae',
+	dirt: '#DDD0D0',
 	HOTPINK4DEBUG: 'hotpink',
 };
-type TileColor = keyof typeof colors;
+export type TileColor = keyof typeof colors;
 
 export type TileProps =
 	| { type: 'full'; color: TileColor }
-	| { type: 'half'; colors: [TileColor, TileColor]; direction: Direction }
-	| { type: 'corner'; colors: [TileColor, TileColor]; direction: Direction };
+	| { type: 'half'; colors: [TileColor, TileColor]; direction: AnyDirection }
+	| {
+			type: 'corner';
+			colors: [TileColor, TileColor];
+			direction: AnyDirection;
+	  };
 
 const Tile = (props: TileProps) => {
 	let memoId = [
@@ -42,8 +51,8 @@ const Tile = (props: TileProps) => {
 			return canvas;
 		}
 
-		if (props.direction !== 'top') {
-			return Scaler(Tile({ ...props, direction: 'top' }), {
+		if (props.direction !== AnyDirection.Top) {
+			return Scaler(Tile({ ...props, direction: AnyDirection.Top }), {
 				width: SIZE,
 				height: SIZE,
 				offset: 0,
@@ -62,11 +71,11 @@ const Tile = (props: TileProps) => {
 			SIZE
 		);
 		ctx.globalCompositeOperation = 'source-in';
-		ctx.fillStyle = colors[innerColor];
+		ctx.fillStyle = colors[props.type === 'half' ? innerColor : outerColor];
 		ctx.fillRect(0, 0, SIZE, SIZE);
 
 		ctx.globalCompositeOperation = 'destination-over';
-		ctx.fillStyle = colors[outerColor];
+		ctx.fillStyle = colors[props.type === 'half' ? outerColor : innerColor];
 		ctx.fillRect(0, 0, SIZE, SIZE);
 
 		return canvas;
