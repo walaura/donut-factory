@@ -25,9 +25,12 @@ export const makeCanvas = (
 	memoizedOperation: (cv: OffscreenCanvas) => OffscreenCanvas
 ): OffscreenCanvas => {
 	let mm = getMemory('CANVAS-WK');
+	let devmode = mm.memory.state?.debugMode;
 	let store = mm.memory.store.values;
 	let lastAccess = mm.memory.store.lastAccess;
-	let hash = typeof hashable === 'string' ? hashable : hashable.join();
+	let hash =
+		(typeof hashable === 'string' ? hashable : hashable.join()) +
+		(devmode ? '-dev' : '');
 	let storedMaybe = store.get(hash);
 
 	debouncedSweep();

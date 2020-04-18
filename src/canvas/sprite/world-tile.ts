@@ -1,15 +1,10 @@
 import { getMemory } from '../../global/memory';
-import {
-	addDirectionsToXY,
-	anyDirectionList,
-	cornerDirectionList,
-	Direction,
-} from '../../helper/direction';
-import { XY, xyAdd, xyMultiply, xyMap } from '../../helper/xy';
+import { addDirectionsToXY, anyDirectionList } from '../../helper/direction';
+import { XY, xyAdd, xyMap, xyMultiply } from '../../helper/xy';
 import { CanvasRendererStateViewport } from '../../wk/canvas.defs';
 import { makeCanvas } from '../helper/canvas-store';
-import { Tile, TileColor, smoothTile } from './tile';
-import { Print } from './print';
+import { smoothTile, Tile, TileColor } from './tile';
+import { xyIsLand } from '../../game/world';
 
 const tileSize = 600;
 
@@ -116,18 +111,33 @@ export const mkWorldTile = ({
 		tiles gets a 32x32 board and needs 
 		to offset it by 1 to draw it
 		*/
-		tiles.forEach((color, index) => {
+		tiles = new Array(TILE_COUNT * TILE_COUNT).fill(null);
+		tiles.forEach((_, index) => {
+			if (!gameState) {
+				return;
+			}
 			let { x, y } = toXY(index);
-			let neighbors = addDirectionsToXY({ x, y }, (xy) => tiles[toIndex(xy)]);
+			let color: TileColor = xyIsLand(
+				gameState,
+				xyMap({ x, y }, (xy, k) => xy[k] + atAbs[k] / TILE_PX_SIZE)
+			)
+				? 'grass'
+				: 'water';
+			let neighbors = addDirectionsToXY({ x, y }, (xy) =>
+				xyIsLand(
+					gameState,
+					xyMap(xy, (xy, k) => xy[k] + atAbs[k] / TILE_PX_SIZE)
+				)
+					? 'grass'
+					: 'water'
+			);
 
 			let tile = Tile({ type: 'full', color });
 			if (color === 'water') {
 				let tileMaybe = smoothTile('water', 'grass', neighbors);
-				if (tileMaybe) tile = tileMaybe;
-			}
-			if (color === 'dirt') {
-				//	let tileMaybe = smoothTile('dirt', 'grass', neighbors);
-				//	if (tileMaybe) tile = tileMaybe;
+				if (tileMaybe) {
+					tile = tileMaybe;
+				}
 			}
 
 			let drawAt = xyMultiply(xyAdd({ x, y }, { x: -1, y: -1 }), {
