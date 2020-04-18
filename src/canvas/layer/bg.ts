@@ -1,10 +1,8 @@
-import { absToViewport } from './../helper/latlong';
+import { xy } from '../../helper/xy';
 import { OffscreenCanvasRenderer } from '../canvas.df';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
-import { mkWorldTile } from './../sprite/world-tile';
-import { xy } from '../../helper/xy';
-import { clamp } from '../../helper/math';
-const perlin = require('perlin-noise');
+import { mkWorldChunk } from '../sprite/chunk';
+import { absToViewport } from './../helper/latlong';
 
 const water = 'hotpink';
 const blueprint = '#4e72b5';
@@ -32,7 +30,7 @@ const bgLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 				let atAbs = xy([chunkSize * offset.x, chunkSize * offset.y]);
 				let atViewport = absToViewport(atAbs);
 				ctx.drawImage(
-					mkWorldTile({
+					mkWorldChunk({
 						zoom,
 						atAbs,
 					}),
