@@ -1,8 +1,7 @@
-import { XY, xyMap, xyAdd } from '../helper/xy';
-import { mkFindXYInFlatMap } from '../helper/flatmap';
-import { height } from '../canvas/sprite/chip';
 import { GameState } from '../helper/defs';
 import { addDirectionsToXY, anyDirectionList } from '../helper/direction';
+import { mkFindXYInFlatMap } from '../helper/flatmap';
+import { XY, xyMap } from '../helper/xy';
 
 const HEIGHT_MAP_RESOLUTION = 10;
 
