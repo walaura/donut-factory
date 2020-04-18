@@ -90,13 +90,16 @@ export const mkWorldTile = ({
 					for (let direction of anyDirectionList) {
 						let tileAround = tilesAround.get(direction);
 						if (tileAround != null && isLand(tileAround)) {
+							let landAround = [...tilesAround.values()].filter(isLand).length;
 							color = isLand(
 								randomMapAtXY(
 									xyMap(xy, (xy, k) =>
-										Math.floor((xy[k] + atAbs[k] / TILE_PX_SIZE) / 2)
+										Math.floor((xy[k] + atAbs[k] / TILE_PX_SIZE) / 2.5)
 									)
 								)
 							)
+								? 'grass'
+								: landAround < 3
 								? 'grass'
 								: 'water';
 						}
