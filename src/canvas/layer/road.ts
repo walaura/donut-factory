@@ -1,17 +1,19 @@
-import { entityIsRoad, Road, RoadEnd } from '../../entity/road';
+import {
+	entityIsPreRoad,
+	entityIsRoad,
+	PreRoad,
+	Road,
+	RoadEnd,
+} from '../../entity/road';
 import { getDistanceToPoint } from '../../helper/pathfinding';
-import { Target, GhostTarget } from '../../helper/target';
 import { XY } from '../../helper/xy';
 import { OffscreenCanvasRenderer } from '../canvas.df';
+import { mkDirtyStore } from '../helper/dirty-store';
+import { getGhostTargetIfAny } from '../helper/ghost';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 import { getCanvasViewportState } from '../helper/viewport';
 import { drawSprite } from '../sprite/sprite';
 import { worldToViewport } from './../helper/latlong';
-import { findEntity } from '../../game/entities';
-import { mkDirtyStore } from '../helper/dirty-store';
-import { CanvasExceptionalMode } from '../../wk/canvas.defs';
-import { Entity } from '../../helper/defs';
-import { getGhostTargetIfAny } from '../helper/ghost';
 
 const angle = (p1: XY, p2: XY) => Math.atan2(p2.y - p1.y, p2.x - p1.x);
 
@@ -75,6 +77,7 @@ const roadLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 		/*create layers*/
 		let roads: Road[] = [];
 		let ghosts: Road[] = [];
+		let caps: PreRoad[] = [];
 
 		let thisGhost = getGhostTargetIfAny();
 		for (let entity of Object.values(state.entities)) {
@@ -95,17 +98,22 @@ const roadLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 				roads.push(futureRoad);
 			}
 		}
-		if (thisGhost && entityIsRoad(thisGhost.ghost) && 'roadEnd' in thisGhost) {
-			roads.push({
-				...thisGhost.ghost,
-				[thisGhost.roadEnd]: rendererState.gameCursor,
-			} as Road);
-			futureRoads.add({
-				...thisGhost.ghost,
-				[thisGhost.roadEnd]: rendererState.gameCursor,
-			});
+		if (thisGhost) {
+			if (entityIsPreRoad(thisGhost.ghost)) {
+				caps.push({
+					...thisGhost.ghost,
+					start: rendererState.gameCursor,
+				});
+			}
+			if (entityIsRoad(thisGhost.ghost) && 'roadEnd' in thisGhost) {
+				let rd = {
+					...thisGhost.ghost,
+					[thisGhost.roadEnd]: rendererState.gameCursor,
+				} as Road;
+				roads.push(rd);
+				futureRoads.add(rd);
+			}
 		}
-
 		/*and draw em!*/
 		for (let ghostRoad of ghosts) {
 			ctx.globalAlpha = 0.25;
@@ -119,6 +127,9 @@ const roadLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 		}
 
 		/* now the caps */
+		for (let cap of caps) {
+			drawCap(cap.start, 1.75);
+		}
 		for (let road of roads) {
 			[RoadEnd.end, RoadEnd.start].forEach((thisEnd) => {
 				let scale = 1;
@@ -135,6 +146,7 @@ const roadLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 		}
 
 		dirtyRoads.onTick();
+		futureRoads.onTick();
 		return canvas;
 	};
 };

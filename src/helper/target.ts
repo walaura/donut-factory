@@ -1,6 +1,6 @@
 import { ID, Entity, DistributiveOmit } from './defs';
 import { XY } from './xy';
-import { RoadEnd, Road } from '../entity/road';
+import { RoadEnd, Road, PreRoad } from '../entity/road';
 
 type SharedTargets =
 	| {
@@ -23,7 +23,7 @@ export type Target = SharedTargets &
 
 //@ts-ignore
 export type GhostTarget = DistributiveOmit<SharedTargets, 'entityId'> & {
-	ghost: Entity | (Road & { start: undefined; end: undefined });
+	ghost: Entity | PreRoad;
 };
 
 export type StatefulTarget = Target & {

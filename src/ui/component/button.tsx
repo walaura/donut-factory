@@ -49,11 +49,10 @@ const styles = {
 		}
 	`,
 	animation: css`
-		transition: all 0.05s ease-out;
 		transform: scale(1.000001);
 		&:hover {
 			box-shadow: var(--shadow-2);
-			filter: brightness(1.05);
+			filter: brightness(1.025);
 		}
 		&:active {
 			transform: scale(1.025);

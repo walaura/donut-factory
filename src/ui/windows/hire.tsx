@@ -51,7 +51,7 @@ const List = ({ entities }: { entities: Entity[] }) => (
 						dispatchToCanvas({
 							type: 'set-create-mode-target',
 							to: {
-								ghost: { ...MkRoad() },
+								ghost: { ...MkRoad(), pre: true },
 								roadEnd: RoadEnd.start,
 							},
 						});

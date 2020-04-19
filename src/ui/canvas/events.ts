@@ -1,7 +1,12 @@
 import { dispatchToCanvas } from '../../global/dispatch';
 import { CanvasExceptionalMode } from '../../wk/canvas.defs';
 import { addEntity, mergeEntity } from '../../game/entities';
-import { Road } from '../../entity/road';
+import {
+	Road,
+	entityIsPreRoad,
+	RoadEnd,
+	entityIsRoad,
+} from '../../entity/road';
 import { addId } from '../../helper/generate';
 import { requestWindow } from '../events';
 
@@ -47,11 +52,47 @@ export const register = ($canvas: HTMLCanvasElement) => {
 
 		let { gameCursor, editModeTarget } = self.memory.lastKnownCanvasState;
 
-		if (self.memory.lastKnownCanvasState.mode === CanvasExceptionalMode.Add) {
+		if (
+			self.memory.lastKnownCanvasState.mode === CanvasExceptionalMode.Add &&
+			self.memory.lastKnownCanvasState.createModeTarget
+		) {
 			if (
-				self.memory.lastKnownCanvasState.createModeTarget &&
-				'x' in self.memory.lastKnownCanvasState.createModeTarget.ghost
+				entityIsPreRoad(self.memory.lastKnownCanvasState.createModeTarget.ghost)
 			) {
+				dispatchToCanvas({
+					type: 'set-create-mode-target',
+					to: {
+						ghost: {
+							...self.memory.lastKnownCanvasState.createModeTarget.ghost,
+							pre: undefined,
+							start: {
+								x: gameCursor.x,
+								y: gameCursor.y,
+							},
+						},
+						roadEnd: RoadEnd.end,
+					},
+				});
+				return;
+			}
+			if (
+				entityIsRoad(self.memory.lastKnownCanvasState.createModeTarget.ghost)
+			) {
+				dispatchToCanvas({
+					type: 'set-mode',
+					to: null,
+				});
+				addEntity({
+					...self.memory.lastKnownCanvasState.createModeTarget.ghost,
+					...addId(),
+					end: {
+						x: gameCursor.x,
+						y: gameCursor.y,
+					},
+				});
+				return;
+			}
+			if ('x' in self.memory.lastKnownCanvasState.createModeTarget.ghost) {
 				dispatchToCanvas({
 					type: 'set-mode',
 					to: null,

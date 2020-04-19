@@ -7,12 +7,24 @@ export enum RoadEnd {
 }
 
 export interface Road extends BaseEntity {
+	type: EntityType.Road;
 	[RoadEnd.start]: XY;
 	[RoadEnd.end]: XY;
-	type: EntityType.Road;
 }
-export const entityIsRoad = (entity: Entity): entity is Road => {
-	return entity.type === EntityType.Road;
+export interface PreRoad extends Road {
+	pre: true;
+}
+
+export const entityIsRoad = (entity: Entity | PreRoad): entity is Road => {
+	return entity.type === EntityType.Road && !entityIsPreRoad(entity);
+};
+
+export const entityIsPreRoad = (
+	entity: Entity | PreRoad
+): entity is PreRoad => {
+	return (
+		entity.type === EntityType.Road && 'pre' in entity && entity.pre === true
+	);
 };
 
 const MkRoad = (

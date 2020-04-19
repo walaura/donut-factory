@@ -1,4 +1,4 @@
-import { entityIsRoad } from '../../entity/road';
+import { entityIsRoad, entityIsPreRoad } from '../../entity/road';
 import { findEntity } from '../../game/entities';
 import { EntityType, WithCargo, WithID } from '../../helper/defs';
 import { appendWithId } from '../../helper/generate';
@@ -13,10 +13,7 @@ import { numberAsCurrency } from './../../ui/helper/format';
 import { worldToViewport } from './../helper/latlong';
 import { height as chipH, width as chipW } from './../sprite/chip';
 import { drawScaled } from './../sprite/scaler';
-
-const lerp = (start, end, t) => {
-	return start * (1 - t) + end * t;
-};
+import { lerp } from '../../helper/math';
 
 interface Feedback extends WithID {
 	text: string;
@@ -49,7 +46,7 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 			drawables.push({ ...dragging.ghost, ...rendererState.gameCursor });
 		}
 		for (let entity of drawables) {
-			if (entityIsRoad(entity)) {
+			if (entityIsRoad(entity) || entityIsPreRoad(entity)) {
 				continue;
 			}
 
