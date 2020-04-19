@@ -16,7 +16,7 @@ interface Animation extends WithID {
 
 interface AnimatedValue {
 	addForce: (to: Force['to'], strength: Force['strength']) => void;
-	up: () => void;
+	up: (scale?: number) => void;
 	discard: () => void;
 	value: number;
 }
@@ -42,8 +42,8 @@ export const mkAnimations = () => {
 		return {
 			value: ease(animations[id]._value),
 			addForce,
-			up: () => {
-				addForce(1, 0.1);
+			up: (scale = 0.1) => {
+				addForce(1, scale);
 			},
 			discard: () => {
 				delete animations[id];

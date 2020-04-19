@@ -65,8 +65,8 @@ const entityLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 			let { x, y } = worldToViewport(entity);
 			let prevAgent = prevState.entities[entity.id];
 			if (entity.type === EntityType.Vehicle && prevAgent && 'x' in prevAgent) {
-				if (entity.x - prevAgent.x >= -0.01) {
-					flipper.up();
+				if (entity.x > prevAgent.x) {
+					flipper.up(0.5);
 				}
 			}
 			if (dragging && dragging.ghost.id === entity.id) {
