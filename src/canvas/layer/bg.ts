@@ -3,6 +3,7 @@ import { OffscreenCanvasRenderer } from '../canvas.df';
 import { makeCanvasOrOnScreenCanvas } from '../helper/offscreen';
 import { mkWorldChunk } from '../sprite/chunk';
 import { absToViewport } from './../helper/latlong';
+import { CanvasExceptionalMode } from '../../wk/canvas.defs';
 
 const water = 'hotpink';
 const blueprint = '#4e72b5';
@@ -14,6 +15,7 @@ const bgLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 	const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
 	return ({ state, rendererState }) => {
 		const { zoom, viewport, mode, debugMode } = rendererState;
+
 		ctx.clearRect(0, 0, width, height);
 		ctx.globalAlpha = 1;
 		ctx.fillStyle = mode ? blueprint : water;
@@ -40,6 +42,9 @@ const bgLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 					chunkSize
 				);
 				if (debugMode) {
+					if (mode) {
+						ctx.fillText(mode, 40, 80);
+					}
 					ctx.strokeStyle = '4px solid red';
 					ctx.font = '20px sans-serif';
 					ctx.fillStyle = 'red';

@@ -16,6 +16,7 @@ import { getGhostTargetIfAny } from '../helper/ghost';
 const angle = (p1: XY, p2: XY) => Math.atan2(p2.y - p1.y, p2.x - p1.x);
 
 let dirtyRoads = mkDirtyStore<Road>();
+let futureRoads = mkDirtyStore<Road>();
 
 const roadLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 	const canvas = makeCanvasOrOnScreenCanvas(width, height);
@@ -89,19 +90,20 @@ const roadLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 				}
 			}
 		}
-		if (
-			'editModeTarget' in rendererState &&
-			rendererState.editModeTarget &&
-			'entityId' in rendererState.editModeTarget &&
-			'roadEnd' in rendererState.editModeTarget
-		) {
-			let rd = findEntity(rendererState.editModeTarget.entityId, state);
-			if (rd) {
-				roads.push({
-					...rd,
-					[rendererState.editModeTarget.roadEnd]: rendererState.gameCursor,
-				} as Road);
+		if (!thisGhost) {
+			for (let futureRoad of futureRoads.getAll()) {
+				roads.push(futureRoad);
 			}
+		}
+		if (thisGhost && entityIsRoad(thisGhost.ghost) && 'roadEnd' in thisGhost) {
+			roads.push({
+				...thisGhost.ghost,
+				[thisGhost.roadEnd]: rendererState.gameCursor,
+			} as Road);
+			futureRoads.add({
+				...thisGhost.ghost,
+				[thisGhost.roadEnd]: rendererState.gameCursor,
+			});
 		}
 
 		/*and draw em!*/
@@ -121,7 +123,7 @@ const roadLayerRenderer: OffscreenCanvasRenderer = ({ width, height }) => {
 			[RoadEnd.end, RoadEnd.start].forEach((thisEnd) => {
 				let scale = 1;
 				if (
-					thisGhost?.ghost.id !== road.id &&
+					thisGhost?.ghost.id === road.id &&
 					thisGhost &&
 					'roadEnd' in thisGhost &&
 					thisEnd === thisGhost.roadEnd

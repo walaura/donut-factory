@@ -4,16 +4,16 @@ import { getMemory } from './../../global/memory';
 import { makeCanvasOrOnScreenCanvas } from './offscreen';
 
 const sweep = () => {
-	console.log('sweeping');
 	let mm = getMemory('CANVAS-WK');
-	let store = mm.memory.store.lastAccess;
+	let store = mm.memory.store;
 	let now = Date.now();
-	for (let [key, time] of store.entries()) {
-		if (now - time > 5000) {
-			mm.memory.store.values.delete(key);
-			mm.memory.store.lastAccess.delete(key);
+	for (let [id, item] of store.values.entries()) {
+		let lastAccess = store.lastAccess.get(item) ?? 9999;
+		if (now - lastAccess > 5000) {
+			store.values.delete(id);
 		}
 	}
+	console.log(store.values.size);
 };
 
 const debouncedSweep = debounce(sweep, 20000);
@@ -36,13 +36,14 @@ export const makeCanvas = (
 	debouncedSweep();
 
 	if (storedMaybe) {
-		lastAccess.set(hash, Date.now());
+		lastAccess.set(storedMaybe, Date.now());
 		return storedMaybe;
 	}
 	if (!hashable) {
 		return memoizedOperation(makeCanvasOrOnScreenCanvas(width, height));
 	}
-	lastAccess.set(hash, Date.now());
-	store.set(hash, memoizedOperation(makeCanvasOrOnScreenCanvas(width, height)));
+	const result = memoizedOperation(makeCanvasOrOnScreenCanvas(width, height));
+	lastAccess.set(result, Date.now());
+	store.set(hash, result);
 	return store.get(hash) as OffscreenCanvas;
 };

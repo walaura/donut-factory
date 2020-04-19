@@ -26,9 +26,9 @@ export type MainThreadMemory = {
 	};
 };
 
-type SweepableStore<T> = {
+type SweepableStore<T extends {}> = {
 	values: Map<string, T>;
-	lastAccess: Map<string, number>;
+	lastAccess: WeakMap<T, number>;
 };
 
 export type CanvasWorkerMemory = {

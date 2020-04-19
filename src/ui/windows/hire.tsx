@@ -1,8 +1,10 @@
 import { h } from 'preact';
 import { useState } from 'preact/hooks';
+import { MkConsumer } from '../../entity/consumer';
 import { MkMover } from '../../entity/vehicle';
+import { dispatchToCanvas } from '../../global/dispatch';
 import { Entity } from '../../helper/defs';
-import { RevealButton } from '../component/button';
+import { RevealButton, VisibleButton } from '../component/button';
 import { RowList } from '../component/list/row-list';
 import { Padding } from '../component/primitives/padding';
 import { Scroll } from '../component/primitives/scroll';
@@ -12,14 +14,10 @@ import { Wash } from '../component/wash';
 import { getAgentStatus } from '../helper/status';
 import { useLastKnownGameState } from '../hook/use-game-state';
 import { UIStatePriority } from '../hook/use-global-state';
-import { useTaskbar } from '../hook/use-taskbar/context';
-import { Pre } from '../component/primitives/pre';
-import { dispatchToCanvas } from '../../global/dispatch';
-import { MkConsumer } from '../../entity/consumer';
+import { MkRoad, RoadEnd } from '../../entity/road';
 
 const Row = ({ entity }: { entity: Entity }) => {
 	const allOfIt = useLastKnownGameState((s) => s, UIStatePriority.Snail);
-	const { push } = useTaskbar();
 	return (
 		<Padding>
 			<RevealButton
@@ -48,6 +46,18 @@ const List = ({ entities }: { entities: Entity[] }) => (
 	<Padding>
 		<Wash>
 			<Scroll>
+				<VisibleButton
+					onClick={() => {
+						dispatchToCanvas({
+							type: 'set-create-mode-target',
+							to: {
+								ghost: { ...MkRoad() },
+								roadEnd: RoadEnd.start,
+							},
+						});
+					}}>
+					add road lol
+				</VisibleButton>
 				<RowList grid>
 					{entities.map((entity) => (
 						<Row entity={entity} />
