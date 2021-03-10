@@ -31,7 +31,7 @@
 		"hash-sum": "^2.0.0",
 		"html-webpack-plugin": "^4.2.0",
 		"line-replace": "^1.0.3",
-		"madge": "^3.8.0",
+		"madge": "^4.0.1",
 		"nanoid": "^3.0.2",
 		"perlin-noise": "0.0.1",
 		"postcss": "^7.0.27",
