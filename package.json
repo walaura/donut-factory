@@ -29,7 +29,7 @@
 		"file-loader": "^6.0.0",
 		"git2json": "0.0.1",
 		"hash-sum": "^2.0.0",
-		"html-webpack-plugin": "^4.2.0",
+		"html-webpack-plugin": "^5.0.0",
 		"line-replace": "^1.0.3",
 		"madge": "^3.8.0",
 		"nanoid": "^3.0.2",
@@ -38,14 +38,14 @@
 		"postcss-nested": "^4.2.1",
 		"preact": "^10.4.0",
 		"shortid": "^2.2.15",
-		"ts-loader": "^7.0.0",
+		"ts-loader": "^8.0.14",
 		"typescript": "^3.8.3",
 		"uniqid": "^5.2.0",
-		"webpack": "^4.42.1",
+		"webpack": "^5.0.0",
 		"webpack-bundle-analyzer": "^3.7.0",
-		"webpack-cli": "^3.3.11",
+		"webpack-cli": "^4.0.0",
 		"webpack-dev-server": "^3.10.3",
-		"worker-loader": "^2.0.0"
+		"worker-loader": "^3.0.0"
 	},
 	"browserslist": [
 		"last 1 Chrome versions"
